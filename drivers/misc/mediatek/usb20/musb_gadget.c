@@ -300,6 +300,8 @@ void musb_g_giveback(struct musb_ep *ep,
 		DBG(1, "%s request %p, %d/%d fault %d\n",
 		    ep->end_point.name, request,
 		    req->request.actual, req->request.length, request->status);
+	if (req->ep->end_point.address == 0)
+		usb_gadget_control_complete(&musb->g, &req->request);
 	usb_gadget_giveback_request(&req->ep->end_point, &req->request);
 lock:
 	spin_lock(&musb->lock);
