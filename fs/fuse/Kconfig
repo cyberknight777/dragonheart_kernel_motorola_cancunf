@@ -58,3 +58,11 @@ config MTK_FUSE_PASSTHROUGH_MTIME_UPDATE
 	help
 	  This is a temporary config used for mtk userdebug and eng load to fix
 	  the file time issue when passthrough is used.
+
+config FUSE_BPF
+	bool "Adds BPF to fuse"
+	depends on FUSE_FS
+	depends on BPF
+	help
+	  Extends FUSE by adding BPF to prefilter calls and potentially pass to a
+	  backing file system
