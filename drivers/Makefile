@@ -194,3 +194,4 @@ obj-$(CONFIG_MOST)		+= most/
 obj-y				+= backlight/
 obj-$(CONFIG_MMI_INFO)		+= mmi_info/
 obj-$(CONFIG_MMI_RELAY)		+= mmi_relay/
+obj-$(CONFIG_SENSORS_CLASS)	+= sensors/
