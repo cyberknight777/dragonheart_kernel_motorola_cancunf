@@ -255,4 +255,6 @@ source "drivers/moto_f_mass_storage/Kconfig"
 
 source "drivers/moto_f_usbnet/Kconfig"
 
+source "drivers/sensors/Kconfig"
+
 endmenu
