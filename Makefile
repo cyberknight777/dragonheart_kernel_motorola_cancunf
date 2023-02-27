@@ -5,6 +5,10 @@ SUBLEVEL = 240
 EXTRAVERSION =
 NAME = Dare mighty things
 
+ifeq ($(MAKECMDGOALS),)
+MAKECMDGOALS := Image.gz mediatek/mt6855.dtb
+endif
+
 # *DOCUMENTATION*
 # To see a list of typical targets execute "make help"
 # More info can be located in ./README
