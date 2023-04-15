@@ -1,0 +1,11 @@
+config LEDS_SM5350
+	tristate "SM5350 LED driver"
+	default n
+	help
+	  Say Y here if you have SM5350 LED in
+	  your system.
+
+	  If unsure, say N.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called sm5350_bl.
