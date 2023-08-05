@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0
 
 config NANOHUB
-	bool "Nanohub"
+	tristate "Nanohub"
 	help
 	  Enable support for the nanohub sensorhub driver.
 	  This driver supports the android nanohub sensorhub.
