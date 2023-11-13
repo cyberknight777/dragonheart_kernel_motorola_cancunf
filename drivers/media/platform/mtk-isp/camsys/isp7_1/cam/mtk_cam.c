@@ -8084,11 +8084,12 @@ static void mtk_cam_ctx_watchdog_worker(struct work_struct *work)
 	u64 watchdog_cnt;
 #if IS_ENABLED(CONFIG_MTK_AEE_FEATURE)
 	u64 watchdog_dump_cnt, watchdog_timeout_cnt;
+	unsigned int int_en = 0;
 #endif
 	int timeout;
 	static u64 last_vsync_count;
 	bool is_abnormal_vsync = false;
-	unsigned int int_en = 0, dequeued_frame_seq_no = 0;
+	unsigned int dequeued_frame_seq_no = 0;
 	int vf_en = -1, sof_count = 0;
 	int pipe_id;
 	int idx;
