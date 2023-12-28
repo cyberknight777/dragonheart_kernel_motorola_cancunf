@@ -9599,6 +9599,23 @@ static int mtk_dsi_io_cmd(struct mtk_ddp_comp *comp, struct cmdq_pkt *handle,
 	return 0;
 }
 
+static struct attribute *mtk_dsi_attrs[] = {
+	NULL,
+};
+
+static struct attribute_group mtk_dsi_attrs_group = {
+	.attrs = mtk_dsi_attrs,
+};
+
+static int mtk_dsi_sysfs_init(struct mtk_dsi *dsi)
+{
+	int ret = 0;
+	ret = sysfs_create_group(&dsi->dev->kobj, &mtk_dsi_attrs_group);
+	if (ret)
+		DDPPR_ERR("%s: failed to create sysfs group\n", __func__);
+	return ret;
+}
+
 static const struct mtk_ddp_comp_funcs mtk_dsi_funcs = {
 	.prepare = mtk_dsi_ddp_prepare,
 	.unprepare = mtk_dsi_ddp_unprepare,
@@ -10173,6 +10190,10 @@ static int mtk_dsi_probe(struct platform_device *pdev)
 	}
 
 	platform_set_drvdata(pdev, dsi);
+
+	ret = mtk_dsi_sysfs_init(dsi);
+	if (ret)
+		dev_err(dev, "Failed to initialize sysfs: %d\n", ret);
 
 	ret = component_add(&pdev->dev, &mtk_dsi_component_ops);
 	if (ret != 0) {
