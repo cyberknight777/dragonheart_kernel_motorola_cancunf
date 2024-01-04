@@ -1,6 +1,6 @@
 
 config CUSTOM_KERNEL_SENSORHUB
-	bool "CUSTOM KERNEL SENSORHUB support"
+	tristate "CUSTOM KERNEL SENSORHUB support"
 	help
 	  Kernel space sensor hub driver.
 	  Define project used all sensor hub
