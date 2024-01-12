@@ -656,6 +656,9 @@ const uint32_t mtk_cipher_suites[] = {
 	WLAN_CIPHER_SUITE_WEP104,
 	WLAN_CIPHER_SUITE_TKIP,
 	WLAN_CIPHER_SUITE_CCMP,
+#if CFG_SUPPORT_WAPI
+	WLAN_CIPHER_SUITE_SMS4,
+#endif
 
 	/* keep last -- depends on hw flags! */
 	WLAN_CIPHER_SUITE_AES_CMAC,
