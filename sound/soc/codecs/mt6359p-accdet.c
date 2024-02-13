@@ -652,7 +652,7 @@ static int accdet_create_attr(struct device_driver *driver)
 }
 
 /* get plug-in Resister for audio call */
-int accdet_read_audio_res(unsigned int res_value)
+int mt6359p_accdet_read_audio_res(unsigned int res_value)
 {
 	pr_info("%s() resister value: R=%u(ohm)\n", __func__, res_value);
 
@@ -671,7 +671,7 @@ int accdet_read_audio_res(unsigned int res_value)
 
 	return RET_GT_5K;
 }
-EXPORT_SYMBOL(accdet_read_audio_res);
+EXPORT_SYMBOL(mt6359p_accdet_read_audio_res);
 
 static u64 accdet_get_current_time(void)
 {
