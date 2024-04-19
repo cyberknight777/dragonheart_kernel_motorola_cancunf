@@ -1,0 +1,115 @@
+KERNEL_DIR=kernel-5.10
+
+. ${ROOT_DIR}/${KERNEL_DIR}/build.config.common
+. ${ROOT_DIR}/${KERNEL_DIR}/build.config.aarch64
+
+DEFCONFIG=cancunf_defconfig
+PRE_DEFCONFIG_CMDS="KCONFIG_CONFIG=${ROOT_DIR}/${KERNEL_DIR}/arch/arm64/configs/${DEFCONFIG} ${ROOT_DIR}/${KERNEL_DIR}/scripts/kconfig/merge_config.sh -m -r ${ROOT_DIR}/${KERNEL_DIR}/arch/arm64/configs/gki_defconfig ${ROOT_DIR}/${KERNEL_DIR}/arch/arm64/configs/mgk_64_k510_defconfig ${ROOT_DIR}/${KERNEL_DIR}/arch/arm64/configs/cancunf.config"
+POST_DEFCONFIG_CMDS="rm ${ROOT_DIR}/${KERNEL_DIR}/arch/arm64/configs/${DEFCONFIG}"
+
+MAKE_GOALS="
+Image.gz
+modules
+"
+
+FILES="
+arch/arm64/boot/Image.gz
+vmlinux
+System.map
+vmlinux.symvers
+modules.builtin
+modules.builtin.modinfo
+"
+
+ABI_OUT_TAG="mtk"
+KMI_SYMBOL_LIST=android/abi_gki_aarch64_mtk
+GKI_MODULES_LIST=android/gki_aarch64_modules
+ABI_DEFINITION=android/abi_gki_aarch64.xml
+
+# Build variant
+TARGET_BUILD_VARIANT=user
+
+# BT
+BT_PLATFORM=connac1x
+LOG_TAG=[BT_Drv][wmt]
+
+# WLAN
+CONFIG_MTK_COMBO_WIFI_HIF=axi
+MTK_ANDROID_EMI=y
+MTK_ANDROID_WMT=y
+MTK_COMBO_CHIP=SOC2_1X1
+MTK_WLAN_SERVICE=yes
+WIFI_IP_SET=1
+WLAN_CHIP_ID=6855
+
+# Touchscreen
+CONFIG_MTK_PANEL_NOTIFICATIONS=y
+CONFIG_INPUT_FOCALTECH_MULTI_IC_EN=y
+BOARD_USES_DOUBLE_TAP=y
+CONFIG_FOCALTECH_MTK_SPI=y
+CONFIG_FTS_MTK_CHECK_PANEL=y
+CONFIG_INPUT_FOCALTECH_IC_NAME=ft8725
+CONFIG_FTS_LAST_TIME=y
+CONFIG_INPUT_HIGH_RESOLUTION_4=y
+CONFIG_FOCAL_SPI_DRIVE=y
+CONFIG_FT_FHD_MMI_GET_PANEL=y
+CONFIG_FTS_IRQ_DIS_FOR_RESET=y
+CONFIG_FOCALTECH_MTK_SPI=y
+CONFIG_BOARD_USES_DOUBLE_TAP_CTRL=y
+CONFIG_BOARD_USES_MTK_CHECK_PANEL=y
+CONFIG_BOARD_USES_MTK_GET_PANEL=y
+CONFIG_NOVATEK_MTK_SPI=y
+CONFIG_INPUT_ENABLE_MULTI_SUPPLIER=y
+CONFIG_TOUCHSCREEN_ILITEK_CHIPSET=y
+CONFIG_INPUT_ILI_ENABLE_DOUBLE_TAP=y
+CONFIG_INPUT_ILI_PANEL_NOTIFICATIONS=y
+CONFIG_ILITEK_RESUME_BY_DDI=y
+CONFIG_ILITEK_CHARGER=y
+CONFIG_ILITEK_ESD=y
+CONFIG_ILI_TOUCH_LAST_TIME=y
+CONFIG_TOUCHSCREEN_NT36xxx_HOSTDL_SPI=y
+CONFIG_NOVATEK_MTK_SPI=y
+CONFIG_NOVA_TOUCH_LAST_TIME=y
+
+# MOTO SWAP
+CONFIG_HYBRIDSWAP=y
+CONFIG_HYBRIDSWAP_SWAPD=y
+CONFIG_HYBRIDSWAP_CORE=y
+
+# SX937X
+SX937X_MTK_KERNEL5XX_CHARGER_TYPE=y
+CONFIG_CAPSENSE_USB_CAL=y
+
+EXT_MODULES+="
+vendor/mediatek/kernel_modules/connectivity/common
+vendor/mediatek/kernel_modules/connectivity/connfem
+vendor/mediatek/kernel_modules/connectivity/bt/mt66xx/wmt
+vendor/mediatek/kernel_modules/connectivity/gps/gps_pwr
+vendor/mediatek/kernel_modules/connectivity/gps/gps_stp
+vendor/mediatek/kernel_modules/connectivity/wlan/adaptor
+vendor/mediatek/kernel_modules/connectivity/wlan/core/gen4m
+vendor/mediatek/kernel_modules/gpu
+vendor/motorola/drivers/backlight/aw99703
+vendor/motorola/drivers/backlight/sm5350
+vendor/motorola/drivers/sensors
+vendor/motorola/drivers/input/misc/chipone_fps
+vendor/motorola/drivers/input/misc/goodix_fps_mmi
+vendor/motorola/drivers/input/touchscreen/focaltech_0flash_mmi_v2
+vendor/motorola/drivers/input/touchscreen/ilitek_v3_mmi
+vendor/motorola/drivers/input/touchscreen/nova_0flash_mmi_v2
+vendor/motorola/drivers/leds/leds-gpio
+vendor/motorola/drivers/misc/sx937x
+vendor/motorola/drivers/misc/utag
+vendor/motorola/drivers/mmi_info
+vendor/motorola/drivers/mmi_relay
+vendor/motorola/drivers/moto_f_mass_storage
+vendor/motorola/drivers/moto_f_usbnet
+vendor/motorola/drivers/moto_mm
+vendor/motorola/drivers/moto_mmap_fault
+vendor/motorola/drivers/moto_swap
+vendor/motorola/drivers/power/bq25980_mmi
+vendor/motorola/drivers/power/mmi_decrete_charger_cp_qc3p
+vendor/motorola/drivers/power/qpnp_adaptive_charge
+vendor/motorola/drivers/power/sc8551_mmi
+vendor/motorola/drivers/regulator/sm5109c
+"
