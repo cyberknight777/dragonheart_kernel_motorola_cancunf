@@ -488,8 +488,7 @@ static int ep0_send_ack(struct musb *musb)
         void __iomem *regs = musb->control_ep->regs;
         u16 csr;
 
-        if (musb->ep0_state != MUSB_EP0_STAGE_RX &&
-            musb->ep0_state != MUSB_EP0_STAGE_STATUSIN)
+        if (musb->ep0_state != MUSB_EP0_STAGE_STATUSIN)
                 return -EINVAL;
 
         csr = MUSB_CSR0_P_DATAEND | MUSB_CSR0_P_SVDRXPKTRDY;
@@ -497,7 +496,8 @@ static int ep0_send_ack(struct musb *musb)
         musb_ep_select(musb->mregs, 0);
         musb_writew(regs, MUSB_CSR0, csr);
 
-        musb->ep0_state = MUSB_EP0_STAGE_STATUSIN;
+        // No stall happened, get rid of pending ACK flags because we just sent those out.
+        musb->ackpend = 0;
 
         return 0;
 }
@@ -546,11 +546,6 @@ static void ep0_rxstate(struct musb *musb)
 	if (req) {
 		musb->ackpend = csr;
 		musb_g_ep0_giveback(musb, req);
-		if (req->explicit_status)
-			return;
-		if (!musb->ackpend)
-			return;
-		musb->ackpend = 0;
 	} else {
 		musb_ep_select(musb->mregs, 0);
 		musb_writew(regs, MUSB_CSR0, csr);
@@ -1069,15 +1064,6 @@ musb_g_ep0_queue(struct usb_ep *e, struct usb_request *r, gfp_t gfp_flags)
 			musb_g_ep0_giveback(ep->musb, r);
 		}
 
-	/* else for sequence #2 (OUT), caller provides a buffer
-	 * before the next packet arrives.  deferred responses
-	 * (after SETUP is acked) are racey.
-	 */
-	} else if (musb->ackpend) {
-		musb_writew(regs, MUSB_CSR0, musb->ackpend);
-		musb->ackpend = 0;
-
-
         /* status stage of OUT with data, issue IN status, then giveback */
         } else if (musb->ep0_state == MUSB_EP0_STAGE_STATUSIN) {
                 if (req->request.length)
@@ -1086,6 +1072,14 @@ musb_g_ep0_queue(struct usb_ep *e, struct usb_request *r, gfp_t gfp_flags)
                         status = ep0_send_ack(musb);
                         musb_g_ep0_giveback(ep->musb, r);
                 }
+
+	/* else for sequence #2 (OUT), caller provides a buffer
+	 * before the next packet arrives.  deferred responses
+	 * (after SETUP is acked) are racey.
+	 */
+	} else if (musb->ackpend) {
+		musb_writew(regs, MUSB_CSR0, musb->ackpend);
+		musb->ackpend = 0;
 	}
 
 cleanup:
