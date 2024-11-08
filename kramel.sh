@@ -101,17 +101,14 @@ if [[ ${COMPILER} == gcc ]]; then
 	)
 
 elif [[ ${COMPILER} == clang ]]; then
-	if [ ! -f "${KDIR}/neutron-clang/bin/clang" ]; then
-		rm -rf "${KDIR}"/neutron-clang
-		mkdir "${KDIR}"/neutron-clang
-		cd "${KDIR}"/neutron-clang || exit 1
-		bash <(curl -s "https://raw.githubusercontent.com/Neutron-Toolchains/antman/main/antman") -S
-		cd "${KDIR}" || exit 1
+	if [ ! -f "${KDIR}/clang/bin/clang" ]; then
+		curl -sL https://github.com/LineageOS/android_prebuilts_clang_kernel_linux-x86_clang-r416183b/archive/refs/heads/lineage-20.0.tar.gz | tar -xzf -
+		mv "${KDIR}"/android_prebuilts_clang_kernel_linux-x86_clang-r416183b-lineage-20.0 clang
 	fi
 
-	KBUILD_COMPILER_STRING=$("${KDIR}"/neutron-clang/bin/clang -v 2>&1 | head -n 1 | sed 's/(https..*//' | sed 's/ version//')
+	KBUILD_COMPILER_STRING=$("${KDIR}"/clang/bin/clang -v 2>&1 | head -n 1 | sed 's/(https..*//' | sed 's/ version//')
 	export KBUILD_COMPILER_STRING
-	export PATH=$KDIR/neutron-clang/bin/:/usr/bin/:${PATH}
+	export PATH=$KDIR/clang/bin/:/usr/bin/:${PATH}
 	MAKE+=(
 		O=out
 		LLVM=1
@@ -197,7 +194,7 @@ img() {
 *Date*: \`$(date)\`
 *Zip Name*: \`${zipn}\`
 *Compiler*: \`${KBUILD_COMPILER_STRING}\`
-*Linker*: \`$("${KDIR}"/neutron-clang/bin/${LINKER} -v | head -n1 | sed 's/(compatible with [^)]*)//' |
+*Linker*: \`$("${KDIR}"/clang/bin/${LINKER} -v | head -n1 | sed 's/(compatible with [^)]*)//' |
 			head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')\`
 *Branch*: \`$(git rev-parse --abbrev-ref HEAD)\`
 *Last Commit*: [${COMMIT_HASH}](${REPO_URL}/commit/${COMMIT_HASH})
