@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0-only
+
 config DRM_MEDIATEK
 	tristate "DRM Support for Mediatek SoCs"
 	depends on DRM
