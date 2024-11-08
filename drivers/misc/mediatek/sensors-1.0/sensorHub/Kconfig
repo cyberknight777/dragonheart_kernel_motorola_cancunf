@@ -1,4 +1,3 @@
-
 config CUSTOM_KERNEL_SENSORHUB
 	tristate "CUSTOM KERNEL SENSORHUB support"
 	help
