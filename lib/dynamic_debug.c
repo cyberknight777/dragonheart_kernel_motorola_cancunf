@@ -593,6 +593,14 @@ static char *dynamic_emit_prefix(const struct _ddebug *desc, char *buf)
 	return buf;
 }
 
+#if defined(CONFIG_MTK_PRINTK_DEBUG)
+void __dynamic_no_printk(struct _ddebug *descriptor, const char *fmt, ...)
+{
+
+}
+EXPORT_SYMBOL(__dynamic_no_printk);
+#endif
+
 void __dynamic_pr_debug(struct _ddebug *descriptor, const char *fmt, ...)
 {
 	va_list args;
