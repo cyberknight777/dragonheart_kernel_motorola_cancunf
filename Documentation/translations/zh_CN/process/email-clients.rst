@@ -1,4 +1,4 @@
-﻿.. _cn_email_clients:
+.. _cn_email_clients:
 
 .. include:: ../disclaimer-zh_CN.rst
 
