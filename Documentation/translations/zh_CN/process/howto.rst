@@ -1,4 +1,4 @@
-﻿.. _cn_process_howto:
+.. _cn_process_howto:
 
 .. include:: ../disclaimer-zh_CN.rst
 
