@@ -4,6 +4,13 @@ KERNEL_DIR=kernel-5.10
 . ${ROOT_DIR}/${KERNEL_DIR}/build.config.aarch64
 
 DEFCONFIG=cancunf_defconfig
+PRE_DEFCONFIG_CMDS="update_localversion"
+function update_localversion() {
+    # Set localversion by reading version file
+    VERSION=$(grep ver= ${KERNEL_DIR}/version | cut -d= -f2)
+    ${KERNEL_DIR}/scripts/config --file ${KERNEL_DIR}/arch/arm64/configs/dragonheart_defconfig \
+    --set-str CONFIG_LOCALVERSION "-DragonHeart-${VERSION}"
+}
 
 MAKE_GOALS="
 Image.gz
