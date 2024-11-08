@@ -1650,7 +1650,7 @@ static int mtk_iommu_attach_device(struct iommu_domain *domain,
 
 	if (!dom->data) {
 		/* Data is in the frstdata in sharing pgtable case. */
-		frstdata = mtk_iommu_get_m4u_data();
+		frstdata = (struct mtk_iommu_data *)mtk_iommu_get_m4u_data();
 
 		if (mtk_iommu_domain_finalise(dom, frstdata, domid)) {
 			ret = -ENODEV;
