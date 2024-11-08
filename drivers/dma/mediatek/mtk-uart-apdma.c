@@ -219,10 +219,6 @@ static void mtk_uart_apdma_start_rx(struct mtk_chan *c)
 static void mtk_uart_apdma_tx_handler(struct mtk_chan *c)
 {
 	mtk_uart_apdma_write(c, VFF_INT_FLAG, VFF_TX_INT_CLR_B);
-	if (unlikely(d == NULL)) {
-		dev_info(c->vc.chan.device->dev, "TX[%d] FIX ME!", c->irq);
-		return;
-	}
 	mtk_uart_apdma_write(c, VFF_INT_EN, VFF_INT_EN_CLR_B);
 	mtk_uart_apdma_write(c, VFF_EN, VFF_EN_CLR_B);
 }
