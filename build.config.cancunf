@@ -3,7 +3,7 @@ KERNEL_DIR=kernel-5.10
 . ${ROOT_DIR}/${KERNEL_DIR}/build.config.common
 . ${ROOT_DIR}/${KERNEL_DIR}/build.config.aarch64
 
-DEFCONFIG=cancunf_defconfig
+DEFCONFIG=dragonheart_defconfig
 PRE_DEFCONFIG_CMDS="update_localversion"
 function update_localversion() {
     # Set localversion by reading version file
