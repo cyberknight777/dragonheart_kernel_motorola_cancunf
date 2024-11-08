@@ -494,7 +494,6 @@ static long subdev_do_ioctl(struct file *file, unsigned int cmd, void *arg)
 
 		if (format->which != V4L2_SUBDEV_FORMAT_TRY && ro_subdev)
 			return -EPERM;
-
 		trace_android_vh_v4l2subdev_set_fmt(sd, subdev_fh->pad,
 					format, &ret);
 		trace_android_rvh_v4l2subdev_set_fmt(sd, subdev_fh->pad,
@@ -576,7 +575,6 @@ static long subdev_do_ioctl(struct file *file, unsigned int cmd, void *arg)
 
 		if (ro_subdev)
 			return -EPERM;
-
 		trace_android_vh_v4l2subdev_set_frame_interval(sd, fi, &ret);
 		trace_android_rvh_v4l2subdev_set_frame_interval(sd, fi, &ret);
 		if (ret)
@@ -608,7 +606,6 @@ static long subdev_do_ioctl(struct file *file, unsigned int cmd, void *arg)
 
 		if (sel->which != V4L2_SUBDEV_FORMAT_TRY && ro_subdev)
 			return -EPERM;
-
 		trace_android_vh_v4l2subdev_set_selection(sd, subdev_fh->pad,
 					sel, &ret);
 		trace_android_rvh_v4l2subdev_set_selection(sd, subdev_fh->pad,

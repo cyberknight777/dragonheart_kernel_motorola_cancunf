@@ -1,0 +1,39 @@
+// SPDX-License-Identifier: (GPL-2.0 OR MIT)
+/*
+ * Copyright (C) 2021 MediaTek Inc.
+ * Author: Owen Chen <owen.chen@mediatek.com>
+ */
+
+&clkitg {
+	status = "okay";
+	bring-up {
+		compatible = "mediatek,clk-bring-up";
+		clocks =
+			<&infracfg_ao_clk CLK_IFRAO_PMIC_TMR>,
+			<&infracfg_ao_clk CLK_IFRAO_PMIC_AP>,
+			<&infracfg_ao_clk CLK_IFRAO_THERM>,
+			<&infracfg_ao_clk CLK_IFRAO_BTIF>,
+			<&infracfg_ao_clk CLK_IFRAO_AUXADC>,
+			<&infracfg_ao_clk CLK_IFRAO_CCIF1_AP>,
+			<&infracfg_ao_clk CLK_IFRAO_CCIF1_MD>,
+			<&infracfg_ao_clk CLK_IFRAO_AUXADC_MD>,
+			<&infracfg_ao_clk CLK_IFRAO_CCIF_AP>,
+			<&infracfg_ao_clk CLK_IFRAO_DEBUGSYS>,
+			<&infracfg_ao_clk CLK_IFRAO_CCIF_MD>,
+			<&infracfg_ao_clk CLK_IFRAO_CLDMA_BCLK>,
+			<&infracfg_ao_clk CLK_IFRAO_UFS_SAP_BCLK>,
+			<&infracfg_ao_clk CLK_IFRAO_CQ_DMA>,
+			<&infracfg_ao_clk CLK_IFRAO_CCIF5_MD>,
+			<&infracfg_ao_clk CLK_IFRAO_CCIF2_AP>,
+			<&infracfg_ao_clk CLK_IFRAO_CCIF2_MD>,
+			<&infracfg_ao_clk CLK_IFRAO_CCIF4_MD>,
+			<&infracfg_ao_clk CLK_IFRAO_66MP_BUS_MCLK_CK_P>,
+			<&infracfg_ao_clk CLK_IFRAO_INFRA_FREE_DCM_133M>,
+			<&infracfg_ao_clk CLK_IFRAO_INFRA_FREE_DCM_66M>,
+			<&infracfg_ao_clk CLK_IFRAO_PERU_BUS_DCM_133M>,
+			<&infracfg_ao_clk CLK_IFRAO_PERU_BUS_DCM_66M>,
+			<&infracfg_ao_clk CLK_IFRAO_RG_FLASHIF_SFLASH_CK>;
+	};
+
+
+};
