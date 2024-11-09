@@ -11,6 +11,12 @@ function update_localversion() {
     ${KERNEL_DIR}/scripts/config --file ${KERNEL_DIR}/arch/arm64/configs/dragonheart_defconfig \
     --set-str CONFIG_LOCALVERSION "-DragonHeart-${VERSION}"
 }
+POST_KERNEL_BUILD_CMDS="reset_localversion"
+function reset_localversion() {
+    # Reset localversion with scripts/config
+    ${KERNEL_DIR}/scripts/config --file ${KERNEL_DIR}/arch/arm64/configs/dragonheart_defconfig \
+    --set-str CONFIG_LOCALVERSION "-DragonHeart"
+}
 
 MAKE_GOALS="
 Image.gz
