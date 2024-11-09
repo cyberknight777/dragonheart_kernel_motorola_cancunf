@@ -272,7 +272,7 @@ static const struct regulator_ops mt6360_pmic_regulator_ops = {
 	.get_mode = mt6360_regulator_get_mode,
 };
 
-#define MT6360_PMIC_DESC(_name, _min, _stp, _cnt, _vreg, _vmask, \
+#define MT6360_PMIC_DESC(match, _name, _min, _stp, _cnt, _vreg, _vmask,	\
 			 _enreg, _enmask, _ctrlreg, _modesmask, _modegmask) \
 {									\
 	.desc = {							\
@@ -280,7 +280,7 @@ static const struct regulator_ops mt6360_pmic_regulator_ops = {
 		.id =  MT6360_PMIC_##_name,				\
 		.owner = THIS_MODULE,					\
 		.ops = &mt6360_pmic_regulator_ops,			\
-		.of_match = of_match_ptr(#_name),			\
+		.of_match = of_match_ptr(match),			\
 		.min_uV = _min,						\
 		.uV_step = _stp,					\
 		.n_voltages = _cnt,					\
@@ -477,16 +477,16 @@ static const struct mt6360_regulator_desc mt6360_pmic_descs[] =  {
 };
 
 static const struct mt6360_regulator_desc mt6360_ldo_descs[] =  {
-	MT6360_LDO_DESC(LDO1, MT6360_LDO_LDO1, ldo_volt_ranges1, 256,
+	MT6360_LDO_DESC("ldo1", LDO1, MT6360_LDO_LDO1, ldo_volt_ranges1, 256,
 			MT6360_LDO_LDO1_CTRL3, 0xff, MT6360_LDO_LDO1_EN_CTRL2,
 			0x40, MT6360_LDO_LDO1_EN_CTRL2, 0x30, 0x03, 0),
-	MT6360_LDO_DESC(LDO2, MT6360_LDO_LDO2, ldo_volt_ranges1, 256,
+	MT6360_LDO_DESC("ldo2", LDO2, MT6360_LDO_LDO2, ldo_volt_ranges1, 256,
 			MT6360_LDO_LDO2_CTRL3, 0xff, MT6360_LDO_LDO2_EN_CTRL2,
 			0x40, MT6360_LDO_LDO2_EN_CTRL2, 0x30, 0x03, 0),
-	MT6360_LDO_DESC(LDO3, MT6360_LDO_LDO3, ldo_volt_ranges1, 256,
+	MT6360_LDO_DESC("ldo3", LDO3, MT6360_LDO_LDO3, ldo_volt_ranges1, 256,
 			MT6360_LDO_LDO3_CTRL3, 0xff, MT6360_LDO_LDO3_EN_CTRL2,
 			0x40, MT6360_LDO_LDO3_EN_CTRL2, 0x30, 0x03, 100),
-	MT6360_LDO_DESC(LDO5, MT6360_LDO_LDO5, ldo_volt_ranges2, 128,
+	MT6360_LDO_DESC("ldo5", LDO5, MT6360_LDO_LDO5, ldo_volt_ranges2, 128,
 			MT6360_LDO_LDO5_CTRL3, 0xff, MT6360_LDO_LDO5_EN_CTRL2,
 			0x40, MT6360_LDO_LDO5_EN_CTRL2, 0x30, 0x03, 100),
 };
