@@ -37,3 +37,22 @@
     ifeq ($(CONFIG_MTK_COMBO), y)
         ccflags-y += -D CFG_CONNADP_BUILD_IN
     endif
+
+    # for gen4m options
+    export CONFIG_MTK_COMBO_WIFI_HIF=axi
+    export MTK_COMBO_CHIP=SOC2_1X1
+    export BT_PLATFORM=connac1x
+    export WLAN_CHIP_ID=6855
+    export MTK_ANDROID_WMT=y
+    export MTK_ANDROID_EMI=y
+    export WIFI_IP_SET=1
+    export MTK_WLAN_SERVICE=yes
+
+    obj-$(CONFIG_MTK_COMBO) += common/
+    obj-$(CONFIG_MTK_COMBO_WIFI) += wlan/adaptor/
+    obj-$(CONFIG_MTK_COMBO_CHIP_CONSYS_6855) += wlan/core/gen4m/
+    obj-$(CONFIG_MTK_BTIF) += bt/mt66xx/wmt/
+    obj-$(CONFIG_MTK_COMBO_GPS) += gps/gps_pwr/
+    obj-$(CONFIG_MTK_COMBO_GPS) += gps/gps_stp/
+    obj-$(CONFIG_MTK_FMRADIO) += fmradio/
+    obj-$(CONFIG_MTK_COMBO) += connfem/
