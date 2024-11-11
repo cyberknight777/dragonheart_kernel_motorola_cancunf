@@ -87,6 +87,7 @@ obj-$(CONFIG_MTK_PTPOD_GPU) += eemgpu/
 obj-$(CONFIG_MTK_PTPOD_LEGACY) += eem_v2/
 obj-$(CONFIG_MTK_MKP) += mkp/
 obj-$(CONFIG_MTK_MKP_TEST) += mkp_test/
+obj-$(CONFIG_MTK_MET) += met_drv_v3/
 obj-$(CONFIG_MTK_STATIC_POWER) += leakage_table/
 obj-$(CONFIG_EXTCON_MTK_USB) += extcon/
 obj-$(CONFIG_MTK_VOW_SUPPORT) += vow/
