@@ -1,12 +1,8 @@
 OPTIM = -Os
 
-ifeq ($(MTK_PLATFORM),mt6855)
-	PVR_ARCH := volcanic
-	CONFIG_MACH_MT6855 := y
-else ifeq ($(MTK_PLATFORM),mt6761)
-	PVR_ARCH := rogue
-	CONFIG_MACH_MT6761 := y
-endif
+PVR_ARCH := volcanic
+CONFIG_MACH_MT6855 := y
+LOCAL_MTK_GPU_PROTECTED_SUPPORT := y
 
 ccflags-$(CONFIG_MTK_TINYSYS_SSPM_SUPPORT) += -DSSPM_DEBUG
 ccflags-$(LOCAL_MTK_GPU_PROTECTED_SUPPORT) += -DSUPPORT_TRUSTED_DEVICE
@@ -265,10 +261,5 @@ ccflags-y += \
 	-I$(srctree)/drivers/misc/mediatek/include/mt-plat \
 	-I$(srctree)/drivers/gpu/mediatek/gpueb/include
 
-ifeq ($(LOCAL_MTK_GPU_PROTECTED_SUPPORT),y)
- obj-$(CONFIG_MTK_GPU_SUPPORT) += pvrsrvkm_$(MTK_PLATFORM)_sec.o
- pvrsrvkm_$(MTK_PLATFORM)_sec-y := pvrsrvkm.o
-else
- obj-$(CONFIG_MTK_GPU_SUPPORT) += pvrsrvkm_$(MTK_PLATFORM).o
- pvrsrvkm_$(MTK_PLATFORM)-y := pvrsrvkm.o
-endif
+obj-$(CONFIG_MTK_GPU_SUPPORT) += pvrsrvkm_$(MTK_PLATFORM)_sec.o
+pvrsrvkm_$(MTK_PLATFORM)_sec-y := pvrsrvkm.o
