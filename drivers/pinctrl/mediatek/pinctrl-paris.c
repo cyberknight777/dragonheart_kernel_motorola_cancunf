@@ -160,7 +160,10 @@ static int mtk_pinconf_get(struct pinctrl_dev *pctldev,
 		if (hw->soc->capability_flags & FLAG_DRIVE_SET_RAW)
 			err = mtk_hw_get_value(hw, desc, PINCTRL_PIN_REG_DRV,
 				       &ret);
-		else if (!hw->soc->drive_get)
+		else if (hw->soc->drive_get)
+			err = hw->soc->drive_get(hw, desc, &ret);
+		else
+			err = -ENOTSUPP;
 		break;
 	case MTK_PIN_CONFIG_TDSEL:
 	case MTK_PIN_CONFIG_RDSEL:
@@ -249,7 +252,10 @@ static int mtk_pinconf_set(struct pinctrl_dev *pctldev, unsigned int pin,
 		if (hw->soc->capability_flags & FLAG_DRIVE_SET_RAW)
 			err = mtk_hw_set_value(hw, desc, PINCTRL_PIN_REG_DRV,
 				       arg);
-		else if (!hw->soc->drive_set)
+		else if (hw->soc->drive_set)
+			err = hw->soc->drive_set(hw, desc, arg);
+		else
+			err = -ENOTSUPP;
 		break;
 	case MTK_PIN_CONFIG_TDSEL:
 	case MTK_PIN_CONFIG_RDSEL:
