@@ -47,7 +47,7 @@
 #include <linux/regulator/consumer.h>
 #include <linux/err.h>
 #include "p73.h"
-#include "common_ese.h"
+#include "../nxpI2C/common_ese.h"
 
 #define DRAGON_P61 1
 
