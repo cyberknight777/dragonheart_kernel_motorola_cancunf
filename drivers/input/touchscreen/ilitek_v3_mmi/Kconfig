@@ -1,0 +1,44 @@
+config TOUCHSCREEN_ILITEK_CHIPSET
+	tristate "IliTek Touchscreen Driver"
+	default n
+	help
+	  Say Y here if you wish to include support for IliTek touch panel.
+
+	  If unsure, say N.
+
+	  To compile this driver as a module, choose M here: the module will be called ilitek_v3_mmi.
+
+if TOUCHSCREEN_ILITEK_CHIPSET
+
+config INPUT_ILI_ENABLE_DOUBLE_TAP
+	bool "Support double tap on IliTek touch panel"
+	depends on BOARD_USES_DOUBLE_TAP_CTRL
+	default n
+	help
+	  Say Y here if you wish to include support for double tap on IliTek touch panel.
+
+config ILITEK_RESUME_BY_DDI
+	bool "Enable resume_by_ddi for IliTek touch panel"
+	default n
+	help
+	  Say Y here if you wish to enable resume_by_ddi for IliTek touch panel.
+
+config ILITEK_CHARGER
+	bool "Enable Mediatek charging detection for IliTek touch panel"
+	default n
+	help
+	  Say Y here if you wish to enable mediatek charging detection for IliTek touch panel.
+
+config ILITEK_MTK_CHECK_PANEL
+	bool "Enable Mediatek panel check for IliTek touch panel"
+	default n
+	help
+	  Say Y here if you wish to enable mediatek panel check for IliTek touch panel.
+
+config ILI_TOUCH_LAST_TIME
+        bool "Get last touch timestamp on IliTek touch panel"
+        default n
+        help
+          Say Y here if you wish to include support to get last touch timestamp on IliTek touch panel.
+
+endif

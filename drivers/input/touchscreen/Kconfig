@@ -1396,5 +1396,29 @@ config TOUCHSCREEN_HIMAX_CHIPSET
 source "drivers/input/touchscreen/hxchipset/Kconfig"
 source "drivers/input/touchscreen/GT9966/Kconfig"
 
+comment "Motorola Touchscreen Drivers"
+
+config BOARD_USES_DOUBLE_TAP_CTRL
+	bool "Support Double Tap Control"
+	default n
+	help
+	  Say Y here if you wish to include support for double tap control on Motorola Touchscreen Drivers.
+
+config INPUT_HIGH_RESOLUTION_4
+	bool "Support High Resolution 4X"
+	default n
+	help
+	  Say Y here if you wish to include support for High Resolution 4X on Motorola Touchscreen Drivers.
+
+config MTK_PANEL_NOTIFICATIONS
+	bool "Support Mediatek Panel Notifier"
+	default n
+	help
+	  Say Y here if you wish to include support for Mediatek's Panel Notifier on Motorola Touchscreen Drivers.
+
+source "drivers/input/touchscreen/ilitek_v3_mmi/Kconfig"
+
+source "drivers/input/touchscreen/nova_0flash_mmi_v2/Kconfig"
+
 endif
 

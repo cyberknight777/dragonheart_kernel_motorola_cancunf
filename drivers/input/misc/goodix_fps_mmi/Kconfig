@@ -1,0 +1,9 @@
+config GOODIX_FPS_MMI
+	tristate "Goodix MMI Fingerprint Driver"
+	default n
+	help
+	  Say Y here if you wish to include support for Goodix MMI fingerprint sensor.
+
+	  If unsure, say N.
+
+	  To compile this driver as a module, choose M here: the module will be called goodix_fps_tee.

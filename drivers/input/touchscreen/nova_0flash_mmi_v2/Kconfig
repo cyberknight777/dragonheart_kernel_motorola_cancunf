@@ -1,0 +1,55 @@
+config TOUCHSCREEN_NVT_CHIPSET
+	tristate "NovaTek Touchscreen Driver"
+	default n
+	help
+	  Say Y here if you wish to include support for NovaTek touch panel.
+
+	  If unsure, say N.
+
+	  To compile this driver as a module, choose M here: the module will be called nova_0flash_mmi_v2.
+
+if TOUCHSCREEN_NVT_CHIPSET
+
+config NOVA_MTK_CHECK_PANEL
+	bool "Enable Mediatek panel check for NovaTek touch panel"
+	default n
+	help
+	  Say Y here if you wish to enable mediatek panel check for NovaTek touch panel.
+
+config NVT_MTK_SPI
+	bool "Update SPI timing on NovaTek touch panel"
+	default n
+	help
+	  Say Y here if you wish to include support to update SPI timing on NovaTek touch panel.
+
+config NOVA_TOUCH_LAST_TIME
+	bool "Get last touch timestamp on NovaTek touch panel"
+	default n
+	help
+	  Say Y here if you wish to include support to get last touch timestamp on NovaTek touch panel.
+
+config NVT_LCM_ESD_NOTIFIER
+	bool "Support LCM ESD Notifier on NovaTek touch panel"
+	default n
+	help
+	  Say Y here if you wish to include support for LCM ESD notifier on NovaTek touch panel.
+
+config NVT_ESD_RST_SUPPORT
+	bool "Support ESD trigger to reset IC"
+	default n
+	help
+	  Say Y here if you wish to include support for ESD trigger to reset IC on NovaTek touch panel.
+
+config NVT_ESD_RECOVERY_SUPPORT
+	bool "Support ESD recovery mechanism"
+	default n
+	help
+	  Say Y here if you wish to include support for ESD recovery mechanism on NovaTek touch panel.
+
+config NOVA_CHECK_DEVICE_BOOTMODE
+	bool "Support charger bootmode check"
+	default n
+	help
+	  Say Y here if you wish to include support for charger bootmode check on NovaTek touch panel.
+
+endif
