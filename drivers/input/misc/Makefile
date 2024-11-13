@@ -85,3 +85,6 @@ obj-$(CONFIG_INPUT_XEN_KBDDEV_FRONTEND)	+= xen-kbdfront.o
 obj-$(CONFIG_INPUT_YEALINK)		+= yealink.o
 obj-$(CONFIG_INPUT_IDEAPAD_SLIDEBAR)	+= ideapad_slidebar.o
 
+# Motorola fingerprint drivers
+obj-$(CONFIG_CHIPONE_FPS)		+= chipone_fps/
+obj-$(CONFIG_GOODIX_FPS_MMI)		+= goodix_fps_mmi/
