@@ -1,0 +1,27 @@
+config CHIPONE_FPS
+	tristate "Chipone Fingerprint Driver"
+	default n
+	help
+	  Say Y here if you wish to include support for Chipone fingerprint sensor.
+
+	  If unsure, say N.
+
+	  To compile this driver as a module, choose M here: the module will be called fpsensor_mtk_spi.
+
+config CHIPONE_GPIO_CTRL_VDD
+	bool "Chipone GPIO control"
+	default n
+	help
+	  Say Y here if you wish to use GPIO control for Chipone fingerprint sensor.
+
+config CHIPONE_PMIC_CTRL_VDD
+	bool "Chipone PMIC control"
+	default n
+	help
+	  Say Y here if you wish to use GPIO control for Chipone fingerprint sensor.
+
+config CHIPONE_MTK_KERNEL5XX_WAKE_TYPE
+	bool "Chipone Kernel 5.x wakelock type"
+	default n
+	help
+	  Say Y here if you wish to use Kernel 5.x wakelock types for Chipone fingerprint sensor.
