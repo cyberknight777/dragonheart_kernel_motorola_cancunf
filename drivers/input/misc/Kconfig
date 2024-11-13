@@ -869,4 +869,16 @@ config INPUT_STPMIC1_ONKEY
 	  To compile this driver as a module, choose M here: the
 	  module will be called stpmic1_onkey.
 
+comment "Motorola Fingerprint Drivers"
+
+config MOTO_FPS_PRECISE_POWERON
+        bool "Motorola fingerprint power-on detection"
+        default n
+        help
+          Say Y here if you wish to enable fingerprint power-on detection.
+
+source "drivers/input/misc/chipone_fps/Kconfig"
+
+source "drivers/input/misc/goodix_fps_mmi/Kconfig"
+
 endif
