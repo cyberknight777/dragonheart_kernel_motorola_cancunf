@@ -1,21 +1,3 @@
-EXTRA_CFLAGS += -I$(TOP)/motorola/kernel/modules/include
-
-ifneq ($(filter m y,$(CONFIG_CHIPONE_GPIO_CTRL_VDD)),)
-	EXTRA_CFLAGS += -DCONFIG_CHIPONE_GPIO_CTRL_VDD
-endif
-
-ifneq ($(filter m y,$(CONFIG_CHIPONE_PMIC_CTRL_VDD)),)
-        EXTRA_CFLAGS += -DCONFIG_CHIPONE_PMIC_CTRL_VDD
-endif
-
-ifneq ($(filter m y,$(CONFIG_CHIPONE_MTK_KERNEL5XX_WAKE_TYPE)),)
-	EXTRA_CFLAGS += -DCONFIG_CHIPONE_MTK_KERNEL5XX_WAKE_TYPE
-endif
-
-ifneq ($(filter m y,$(CONFIG_MOTO_FPS_PRECISE_POWERON)),)
-	EXTRA_CFLAGS += -DCONFIG_MOTO_FPS_PRECISE_POWERON
-endif
-
 fpsensor_mtk_spi-y += fpsensor_spi_tee.o
 
-obj-m += fpsensor_mtk_spi.o
+obj-$(CONFIG_CHIPONE_FPS) += fpsensor_mtk_spi.o
