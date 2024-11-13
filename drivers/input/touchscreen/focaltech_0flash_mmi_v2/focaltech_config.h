@@ -208,11 +208,7 @@
  * show debug log info
  * enable it for debug, disable it for release
  */
-#ifdef FOCALTECH_DEBUG_EN
-#define FTS_DEBUG_EN                            1
-#else
 #define FTS_DEBUG_EN                            0
-#endif
 
 /*
  * Linux MultiTouch Protocol
@@ -224,11 +220,7 @@
  * Report Pressure in multitouch
  * 1:enable(default),0:disable
 */
-#ifdef CONFIG_FTS_REPORT_PRESSURE_DISABLE
 #define FTS_REPORT_PRESSURE_EN                  0
-#else
-#define FTS_REPORT_PRESSURE_EN                  1
-#endif
 
 /*
  * Stylus PEN enable
@@ -258,15 +250,15 @@
 
 
 /*
+ * SPI drive strength
+ * default: disable
+ */
+#define FTS_SPI_SET_DRIVE_STRENGTH		1
+
+/*
  * Pinctrl enable
  * default: disable
  */
-#ifdef CONFIG_FOCAL_SPI_DRIVE
-#define FTS_SPI_SET_DRIVE_STRENGTH		1
-#else
-#define FTS_SPI_SET_DRIVE_STRENGTH              0
-#endif
-
 #define FTS_PINCTRL_EN                          0
 
 /*
