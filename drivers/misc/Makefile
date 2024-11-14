@@ -59,3 +59,7 @@ obj-$(CONFIG_XILINX_SDFEC)	+= xilinx_sdfec.o
 obj-$(CONFIG_HISI_HIKEY_USB)	+= hisi_hikey_usb.o
 obj-$(CONFIG_UID_SYS_STATS)	+= uid_sys_stats.o
 obj-y				+= mediatek/
+
+# Motorola miscellaneous drivers
+obj-$(CONFIG_SARSENSOR_SX937X)	+= sx937x/
+obj-$(CONFIG_MOTO_UTAGS)	+= utag/
