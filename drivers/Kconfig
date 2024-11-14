@@ -259,4 +259,12 @@ comment "Motorola Drivers"
 
 source "drivers/backlight/Kconfig"
 
+source "drivers/mmi_info/Kconfig"
+
+source "drivers/mmi_relay/Kconfig"
+
+source "drivers/moto_f_mass_storage/Kconfig"
+
+source "drivers/moto_f_usbnet/Kconfig"
+
 endmenu
