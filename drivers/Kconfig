@@ -259,4 +259,8 @@ comment "Motorola Drivers"
 
 source "drivers/backlight/Kconfig"
 
+source "drivers/mmi_info/Kconfig"
+
+source "drivers/mmi_relay/Kconfig"
+
 endmenu
