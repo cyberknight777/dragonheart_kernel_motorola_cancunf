@@ -1,3 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-only
+source "drivers/power/bq25980_mmi/Kconfig"
+source "drivers/power/mmi_decrete_charger_cp_qc3p/Kconfig"
+source "drivers/power/qpnp_adaptive_charge/Kconfig"
+source "drivers/power/sc8551_mmi/Kconfig"
 source "drivers/power/reset/Kconfig"
 source "drivers/power/supply/Kconfig"
