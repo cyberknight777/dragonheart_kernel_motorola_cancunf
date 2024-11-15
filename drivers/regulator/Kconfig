@@ -1349,5 +1349,7 @@ config REGULATOR_QCOM_LABIBB
 	  boost regulator and IBB can be used as a negative boost regulator
 	  for LCD display panel.
 
+source "drivers/regulator/sm5109c/Kconfig"
+
 endif
 
