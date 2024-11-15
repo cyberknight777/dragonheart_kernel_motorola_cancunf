@@ -1500,4 +1500,6 @@ config REGULATOR_FAN53870
 	  Set Y or M to select this feature for specific fan53870,
 	  and set N to disable.
 
+source "drivers/regulator/sm5109c/Kconfig"
+
 endif
