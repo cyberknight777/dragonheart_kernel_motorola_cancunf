@@ -21,10 +21,12 @@ function reset_localversion() {
 MAKE_GOALS="
 Image.gz
 modules
+mediatek/mt6855.dtb
 "
 
 FILES="
 arch/arm64/boot/Image.gz
+arch/arm64/boot/dts/mediatek/mt6855.dtb
 vmlinux
 System.map
 vmlinux.symvers
