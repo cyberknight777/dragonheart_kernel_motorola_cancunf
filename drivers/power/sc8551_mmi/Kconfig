@@ -1,0 +1,9 @@
+config SC8551_MMI
+	tristate "SC8551 MMI"
+	default n
+	help
+	  Say Y here if you have a sc8551 compatible
+	  device connected.
+
+	  This driver can also be built as a module.  If so, the module
+	  will be called sc8551_mmi.
