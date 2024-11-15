@@ -27,7 +27,7 @@
 #include <linux/math64.h>
 
 #include "sc8551_reg.h"
-#include <charger_class.h>
+#include "../supply/charger_class.h"
 
 typedef enum {
     ADC_IBUS,

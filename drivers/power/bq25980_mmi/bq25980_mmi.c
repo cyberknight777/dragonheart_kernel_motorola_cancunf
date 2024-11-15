@@ -21,7 +21,7 @@
 #include <linux/of_gpio.h>
 
 #include "bq25980_charger.h"
-#include <charger_class.h>
+#include "../supply/charger_class.h"
 
 struct bq25980_state {
 	bool dischg;
