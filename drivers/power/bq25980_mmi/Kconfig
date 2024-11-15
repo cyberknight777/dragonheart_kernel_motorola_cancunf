@@ -1,0 +1,9 @@
+config BQ25980_MMI
+	tristate "BQ25980 MMI"
+	default n
+	help
+	  Say Y here if you have a bq25980 compatible
+	  device connected.
+
+	  This driver can also be built as a module.  If so, the module
+	  will be called bq25980_mmi.
