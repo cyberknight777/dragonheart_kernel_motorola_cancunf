@@ -116,7 +116,7 @@ elif [[ ${COMPILER} == clang ]]; then
 fi
 
 if [ ! -d "${KDIR}/anykernel3-dragonheart/" ]; then
-	git clone --depth=1 https://github.com/cyberknight777/anykernel3 -b cancunf anykernel3-dragonheart
+	git clone --depth=1 https://github.com/cyberknight777/anykernel3 -b "${CODENAME}" anykernel3-dragonheart
 fi
 
 if [ ! -f "${KDIR}/version" ]; then
@@ -130,7 +130,7 @@ export KBUILD_BUILD_USER="cyberknight777"
 export KBUILD_BUILD_HOST="builder"
 VERSION=$(grep ver= version | cut -d= -f2)
 kver="${KBUILD_BUILD_VERSION}"
-zipn=DragonHeart-cancunf-"${VERSION}"
+zipn=DragonHeart-"${CODENAME}"-"${VERSION}"
 
 # A function to exit on SIGINT.
 exit_on_signal_SIGINT() {
@@ -236,11 +236,24 @@ mod() {
 	rgn
 	echo -e "\n\e[1;93m[*] Building Modules! \e[0m"
 	mkdir -p "${KDIR}"/out/modules
-	make "${MAKE[@]}" modules_prepare
-	make -j"$PROCS" "${MAKE[@]}" modules INSTALL_MOD_PATH="${KDIR}"/out/modules
-	make "${MAKE[@]}" modules_install INSTALL_MOD_PATH="${KDIR}"/out/modules
+	make -j"$PROCS" "${MAKE[@]}" modules
+	make "${MAKE[@]}" INSTALL_MOD_PATH="${KDIR}"/out/modules modules_install
 	find "${KDIR}"/out/modules -type f -iname '*.ko' -exec cp {} "${KDIR}"/anykernel3-dragonheart/modules/system/lib/modules/ \;
 	echo -e "\n\e[1;32m[✓] Built Modules! \e[0m"
+}
+
+# A function to build kernel UAPI headers.
+hdr() {
+	if [[ ${TGI} == "1" ]]; then
+		tg "*Building UAPI Headers!*"
+	fi
+	rgn
+	echo -e "\n\e[1;93m[*] Building UAPI Headers! \e[0m"
+	mkdir -p "${KDIR}"/out/kernel_uapi_headers/usr
+	make -j"$PROCS" "${MAKE[@]}" INSTALL_HDR_PATH="${KDIR}"/out/kernel_uapi_headers/usr headers_install
+	find "${KDIR}"/out/kernel_uapi_headers '(' -name ..install.cmd -o -name .install ')' -exec rm '{}' +
+	tar -czf "${KDIR}"/out/kernel-uapi-headers.tar.gz --directory="${KDIR}"/out/kernel_uapi_headers usr/
+	echo -e "\n\e[1;32m[✓] Built UAPI Headers! \e[0m"
 }
 
 # A function to build an AnyKernel3 zip.
@@ -358,6 +371,7 @@ example: bash $0 --upr=r16
 	 img    Builds Kernel
 	 dtb    Builds dtb(o).img
 	 mod    Builds out-of-tree modules
+	 hdr	Builds kernel UAPI headers
 	 mkzip  Builds anykernel3 zip
 	 --obj  Builds specific driver/subsystem
 	 rgn    Regenerates defconfig
@@ -376,13 +390,14 @@ ndialog() {
 	OPTIONS=(1 "Build kernel"
 		2 "Build DTBs"
 		3 "Build modules"
-		4 "Open menuconfig"
-		5 "Regenerate defconfig"
-		6 "Uprev localversion"
-		7 "Build AnyKernel3 zip"
-		8 "Build a specific object"
-		9 "Clean"
-		10 "Exit"
+		4 "Build kernel UAPI headers"
+		5 "Open menuconfig"
+		6 "Regenerate defconfig"
+		7 "Uprev localversion"
+		8 "Build AnyKernel3 zip"
+		9 "Build a specific object"
+		10 "Clean"
+		11 "Exit"
 	)
 	CHOICE=$(dialog --clear \
 		--backtitle "$BACKTITLE" \
@@ -431,7 +446,7 @@ ndialog() {
 		;;
 	4)
 		clear
-		mcfg
+		hdr
 		echo -ne "\e[1mPress enter to continue or 0 to exit! \e[0m"
 		read -r a1
 		if [ "$a1" == "0" ]; then
@@ -443,7 +458,7 @@ ndialog() {
 		;;
 	5)
 		clear
-		rgn
+		mcfg
 		echo -ne "\e[1mPress enter to continue or 0 to exit! \e[0m"
 		read -r a1
 		if [ "$a1" == "0" ]; then
@@ -454,6 +469,18 @@ ndialog() {
 		fi
 		;;
 	6)
+		clear
+		rgn
+		echo -ne "\e[1mPress enter to continue or 0 to exit! \e[0m"
+		read -r a1
+		if [ "$a1" == "0" ]; then
+			exit 0
+		else
+			clear
+			ndialog
+		fi
+		;;
+	7)
 		dialog --inputbox --stdout "Enter version number: " 15 50 | tee .t
 		ver=$(cat .t)
 		clear
@@ -468,7 +495,7 @@ ndialog() {
 			ndialog
 		fi
 		;;
-	7)
+	8)
 		mkzip
 		echo -ne "\e[1mPress enter to continue or 0 to exit! \e[0m"
 		read -r a1
@@ -479,7 +506,7 @@ ndialog() {
 			ndialog
 		fi
 		;;
-	8)
+	9)
 		dialog --inputbox --stdout "Enter object path: " 15 50 | tee .f
 		ob=$(cat .f)
 		if [ -z "$ob" ]; then
@@ -497,7 +524,7 @@ ndialog() {
 			ndialog
 		fi
 		;;
-	9)
+	10)
 		clear
 		clean
 		img
@@ -510,7 +537,7 @@ ndialog() {
 			ndialog
 		fi
 		;;
-	10)
+	11)
 		echo -e "\n\e[1m Exiting YAKB...\e[0m"
 		sleep 3
 		exit 0
@@ -539,6 +566,9 @@ for arg in "$@"; do
 		;;
 	"mod")
 		mod
+		;;
+	"hdr")
+		hdr
 		;;
 	"mkzip")
 		mkzip
