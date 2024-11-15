@@ -38,7 +38,7 @@
 #include <linux/kernel.h>
 #include <linux/types.h>
 #include <linux/mutex.h>
-#include <charger_class.h>
+#include "../supply/charger_class.h"
 
 #define chrg_dev_info(chip, fmt, ...)		\
 	pr_info("%s: %s: " fmt, chip->name,	\
