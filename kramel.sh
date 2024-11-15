@@ -203,7 +203,7 @@ img() {
 	rgn
 	echo -e "\n\e[1;93m[*] Building Kernel! \e[0m"
 	BUILD_START=$(date +"%s")
-	time make -j"$PROCS" "${MAKE[@]}" Image.gz 2>&1 | tee log.txt
+	time make -j"$PROCS" "${MAKE[@]}" Image.gz mediatek/mt6855.dtb 2>&1 | tee log.txt
 	BUILD_END=$(date +"%s")
 	DIFF=$((BUILD_END - BUILD_START))
 	if [ -f "${KDIR}/out/arch/arm64/boot/Image.gz" ]; then
@@ -262,7 +262,7 @@ mkzip() {
 		tg "*Building zip!*"
 	fi
 	echo -e "\n\e[1;93m[*] Building zip! \e[0m"
-	cat "${KDIR}"/out/arch/arm64/boot/mediatek/mt6855.dtb > "${KDIR}"/anykernel3-dragonheart/dtb
+	cat "${KDIR}"/out/arch/arm64/boot/dts/mediatek/mt6855.dtb > "${KDIR}"/anykernel3-dragonheart/dtb
 	mv "${KDIR}"/out/arch/arm64/boot/Image.gz "${KDIR}"/anykernel3-dragonheart
 	cd "${KDIR}"/anykernel3-dragonheart || exit 1
 	zip -r9 "$zipn".zip . -x ".git*" -x "README.md" -x "LICENSE" -x "*.zip"
