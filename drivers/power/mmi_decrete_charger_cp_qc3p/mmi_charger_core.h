@@ -48,7 +48,7 @@
 #include <linux/notifier.h>
 #include "mmi_charger_class.h"
 #include <linux/../../drivers/misc/mediatek/typec/tcpc/inc/tcpm.h>
-#include <charger_class.h>
+#include "../supply/charger_class.h"
 
 #define mmi_chrg_err(chip, fmt, ...)		\
 	pr_err("%s: %s: " fmt, chip->name,	\
