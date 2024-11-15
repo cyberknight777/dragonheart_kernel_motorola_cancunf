@@ -1,0 +1,12 @@
+config MOTO_SM5109C
+	tristate "WingTech SM5109C Power regulator"
+	default n
+	help
+	  Say Y here if you wish to include support for SM5109C voltage regulator chips.
+
+	  If unsure, say N.
+
+	  To compile this as a module, choose M here: the module will
+	  be called sm5109c.
+
+	  
