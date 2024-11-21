@@ -300,7 +300,7 @@ pre() {
 
 	done
 	git add Image.gz dtb kernel-headers modules
-	git commit -s -m "kernel: Update prebuilts $(date -u '+%d%m%Y%I%M')" -m "- This is an auto-generated commit."
+	git commit -s -m "cancunf-kernel: Update prebuilts $(date -u '+%d%m%Y%I%M')" -m "- This is an auto-generated commit."
 	git commit --amend --reset-author --no-edit
 	git push
 	cd ../ || exit 1
