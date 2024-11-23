@@ -357,8 +357,7 @@ static int sm5350_get_dt_data(struct device *dev, struct sm5350_data *drvdata)
 		pr_debug("%s : boost_ctl=0x%x\n",__func__, drvdata->boost_ctl);
 	}
 
-	rc = of_property_read_u32(of_node, "map-mode", &tmp);
-	drvdata->map_mode= (!rc ? tmp : 1); /* 1: linear, 0: expo, linear as default*/
+	drvdata->map_mode = 1; /* 1: linear, 0: expo, linear as default*/
 	pr_debug("%s : map_mode=0x%x\n",__func__, drvdata->map_mode);
 
 	if (of_property_read_u32(of_node, "current-align-type", &drvdata->led_current_align))
