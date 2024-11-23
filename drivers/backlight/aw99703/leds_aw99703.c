@@ -508,13 +508,8 @@ aw99703_get_dt_data(struct device *dev, struct aw99703_data *drvdata)
 	else
 		pr_info("%s pwm_mode=%d\n", __func__, drvdata->pwm_mode);
 
-	rc = of_property_read_u32(np, "aw99703,map-type", &drvdata->map_type);
-	if (rc != 0) {
-		drvdata->map_type = AW99703_MODE_MAP_LINEAR;
-		pr_err("%s map-type not found\n", __func__);
-	}
-	else
-		pr_info("%s map-type=%d\n", __func__, drvdata->map_type);
+	drvdata->map_type = AW99703_MODE_MAP_LINEAR;
+	pr_info("%s map-type=%d\n", __func__, drvdata->map_type);
 
 	rc = of_property_read_u32(np, "aw99703,current-align-type", &drvdata->led_current_align);
 	if (rc != 0) {
