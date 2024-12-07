@@ -293,7 +293,7 @@ struct nvt_ts_data {
 	uint32_t build_id;
 	uint32_t config_id;
 	int double_tap_pressed;
-
+	int single_tap_pressed;
 };
 
 #if NVT_TOUCH_PROC
