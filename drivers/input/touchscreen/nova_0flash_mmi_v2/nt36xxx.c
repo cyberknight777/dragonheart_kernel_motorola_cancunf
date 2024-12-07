@@ -1232,13 +1232,17 @@ static int32_t nvt_parse_dt(struct device *dev)
 	uint32_t value;
 
 	if (!of_property_read_u32(np, "novatek,supported_gesture_type", &value)) {
+		printk("cyber: support gesture\n");
 		ts->supported_gesture_type = (uint8_t)value;
 		NVT_LOG("novatek,supported_gesture_type=%d\n", ts->supported_gesture_type);
-	}
-	else
+	} else {
+		printk("cyber: no support gesture\n");
 		NVT_LOG("novatek,supported_gesture_type not set\n");
+	}
 
 #endif
+
+	printk("cyber: nvt gesture type is:%d\n", ts->supported_gesture_type);
 
 #if NVT_TOUCH_SUPPORT_HW_RST
 	ts->reset_gpio = of_get_named_gpio_flags(np, "novatek,reset-gpio", 0, &ts->reset_flags);
