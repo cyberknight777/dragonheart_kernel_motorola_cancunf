@@ -3181,7 +3181,9 @@ static int32_t nvt_ts_suspend(struct device *dev)
 	}
 
 #ifdef NVT_DOUBLE_TAP_CTRL
+	ts->sys_gesture_type = 06;
 	nvt_gesture_type_store(ts->sys_gesture_type);
+	printk("cyber: I am doing dt2w and st2w");
 #endif
 
 #ifdef NVT_SENSOR_EN
