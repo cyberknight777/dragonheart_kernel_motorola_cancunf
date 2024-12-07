@@ -292,6 +292,7 @@ struct nvt_ts_data {
 	uint8_t fw_type;
 	uint32_t build_id;
 	uint32_t config_id;
+	int double_tap_pressed;
 
 };
 

@@ -985,6 +985,9 @@ void nvt_ts_wakeup_gesture_report(uint8_t gesture_id, uint8_t *data)
 
 	NVT_LOG("gesture_id = %d\n", gesture_id);
 
+	ts->double_tap_pressed = (gesture_id == GESTURE_DOUBLE_CLICK) ? 1 : 0;
+	sysfs_notify(&ts->client->dev.kobj, NULL, "double_tap_pressed");
+
 	switch (gesture_id) {
 		case GESTURE_WORD_C:
 			NVT_DBG("Gesture : Word-C.\n");
@@ -2278,6 +2281,13 @@ static ssize_t gesture_type_dbg_store(struct device *dev,
 }
 #endif
 
+static inline ssize_t double_tap_pressed_show(struct device *dev,
+                               struct device_attribute *attr, char *buf)
+{
+       struct nvt_ts_data *touch = dev_get_drvdata(dev);
+       return scnprintf(buf, PAGE_SIZE, "%i\n", touch->double_tap_pressed);
+}
+
 static struct device_attribute touchscreen_attributes[] = {
 	__ATTR_RO(path),
 	__ATTR_RO(vendor),
@@ -2291,6 +2301,7 @@ static struct device_attribute touchscreen_attributes[] = {
 #ifdef NVT_DOUBLE_TAP_CTRL
 	__ATTR(gesture, S_IRUGO | S_IWUSR | S_IWGRP, gesture_show, gesture_store),
 	__ATTR(gesture_type_dbg, S_IRUGO | S_IWUSR | S_IWGRP, gesture_type_dbg_show, gesture_type_dbg_store),
+	__ATTR_RO(double_tap_pressed),
 #endif
 	__ATTR_NULL
 };
