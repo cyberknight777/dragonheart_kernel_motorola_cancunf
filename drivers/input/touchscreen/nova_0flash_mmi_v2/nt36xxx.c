@@ -2250,50 +2250,6 @@ static ssize_t gesture_store(struct device *dev,
 	return err;
 }
 
-/*
- * gesture type debug value used for nvt driver to check current gesture mode
- */
-static ssize_t gesture_type_dbg_show(struct device *dev,
-	struct device_attribute *attr, char *buf)
-{
-	return scnprintf(buf, PAGE_SIZE, "%02x\n", ts->sys_gesture_type);
-}
-
-static ssize_t gesture_type_dbg_store(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t count)
-{
-	int value;
-	int err = 0;
-
-	NVT_LOG("enter\n");
-	err = sscanf(buf, "%d", &value);
-	if (err < 0) {
-		NVT_LOG("Failed to convert value\n");
-		return -EINVAL;
-	}
-
-	err = count;
-	value &= SYS_GESTURE_TYPE_MASK;
-	NVT_LOG("value=%d\n", value);
-	switch (value) {
-		case SYS_GESTURE_TYPE_SINGLE_ONLY:
-		case SYS_GESTURE_TYPE_DOUBLE_ONLY:
-		case SYS_GESTURE_TYPE_SINGLE_DOUBLE:
-			ts->sys_gesture_type = value;
-			NVT_LOG("sys_gesture_type: %d\n", ts->sys_gesture_type);
-			break;
-		default:
-			//disable gesture
-			ts->sys_gesture_type = SYS_GESTURE_TYPE_DISABLE;
-			NVT_LOG("unsupport gesture mode type\n");
-			break;
-	}
-
-	nvt_gesture_state_switch();
-	NVT_LOG("sys_gesture_type=%d, should_enable_gesture=%d\n", ts->sys_gesture_type, ts->should_enable_gesture);
-
-	return err;
-}
 #endif
 
 static struct device_attribute touchscreen_attributes[] = {
@@ -2308,7 +2264,6 @@ static struct device_attribute touchscreen_attributes[] = {
 #endif
 #ifdef NVT_DOUBLE_TAP_CTRL
 	__ATTR(gesture, S_IRUGO | S_IWUSR | S_IWGRP, gesture_show, gesture_store),
-	__ATTR(gesture_type_dbg, S_IRUGO | S_IWUSR | S_IWGRP, gesture_type_dbg_show, gesture_type_dbg_store),
 #endif
 	__ATTR_NULL
 };
