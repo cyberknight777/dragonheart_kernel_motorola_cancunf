@@ -974,6 +974,7 @@ void nvt_ts_wakeup_gesture_report(uint8_t gesture_id, uint8_t *data)
 #ifdef NVT_SENSOR_EN
 	static int report_cnt = 0;
 #endif
+	uint8_t mode_type = ts->sys_gesture_type;
 
 	/* support fw specifal data protocol */
 	if ((gesture_id == DATA_PROTOCOL) && (func_type == FUNCPAGE_GESTURE)) {
@@ -1000,10 +1001,14 @@ void nvt_ts_wakeup_gesture_report(uint8_t gesture_id, uint8_t *data)
 			break;
 #ifdef NVT_DOUBLE_TAP_CTRL
 		case GESTURE_SINGLE_CLICK:
+			if (!(mode_type & NVT_TS_GESTURE_SINGLE))
+				return;
 			keycode = KEY_F1;
 			NVT_LOG("Gesture : Single Click, keycode KEY_F1:%d\n", keycode);
 			break;
 		case GESTURE_DOUBLE_CLICK:
+			if (!(mode_type & NVT_TS_GESTURE_DOUBLE))
+				return;
 			keycode = KEY_F4;
 			NVT_LOG("Gesture : Double Click. keycode KEY_F4:%d\n", keycode);
 			break;
@@ -2172,6 +2177,40 @@ static ssize_t gesture_show(struct device *dev,
 	return scnprintf(buf, PAGE_SIZE, "%02x\n", ts->supported_gesture_type);
 }
 
+static bool _nvt_gesture_set(struct nvt_ts_data *touch_cdev,
+			 unsigned long bit, bool val)
+{
+	bool current_val = touch_cdev->sys_gesture_type & bit;
+
+	if (current_val == val)
+		return false;
+
+	if (val)
+		touch_cdev->sys_gesture_type |= bit;
+	else
+		touch_cdev->sys_gesture_type &= ~bit;
+
+	return val;
+}
+
+static void nvt_gesture_sync(struct nvt_ts_data *touch_cdev)
+{
+	nvt_gesture_state_switch();
+}
+
+static void nvt_gesture_set(struct nvt_ts_data *touch_cdev,
+			unsigned long bit, bool enable)
+{
+	bool sync;
+
+	mutex_lock(&touch_cdev->lock);
+	sync = _nvt_gesture_set(touch_cdev, bit, enable);
+	mutex_unlock(&touch_cdev->lock);
+
+	if (sync)
+	  nvt_gesture_sync(touch_cdev);
+}
+
 /*
  * gesture value used to indicate which gesture mode type is supported.
  * the gesture node will be stored when gesture mode updated from system
@@ -2179,7 +2218,9 @@ static ssize_t gesture_show(struct device *dev,
 static ssize_t gesture_store(struct device *dev,
 	struct device_attribute *attr, const char *buf, size_t count)
 {
+	struct nvt_ts_data *touch_cdev = dev_get_drvdata(dev);
 	int value;
+	unsigned long bit;
 	int err = 0;
 
 	err = sscanf(buf, "%d", &value);
@@ -2189,41 +2230,22 @@ static ssize_t gesture_store(struct device *dev,
 	}
 
 	err = count;
-	switch (value) {
-/*
-//zero tap, not support yet
-		case 0x10:
-			NVT_LOG("zero tap disable\n");
-			ts->sys_gesture_type &= 0xFE;
-			break;
-		case 0x11:
-			NVT_LOG("zero tap enable\n");
-			ts->sys_gesture_type |= 0x01;
-			break;
-*/
-		case 0x20:
-			NVT_LOG("single tap disable\n");
-			ts->sys_gesture_type &= 0xFD;
-			break;
-		case 0x21:
+	switch (value >> 4) {
+		case 0x2:
 			NVT_LOG("single tap enable\n");
-			ts->sys_gesture_type |= 0x02;
+			bit = NVT_TS_GESTURE_SINGLE;
 			break;
-		case 0x30:
-			NVT_LOG("double tap disable\n");
-			ts->sys_gesture_type &= 0xFB;
-			break;
-		case 0x31:
+		case 0x3:
 			NVT_LOG("double tap enable\n");
-			ts->sys_gesture_type |= 0x04;
+			bit = NVT_TS_GESTURE_DOUBLE;
 			break;
 		default:
 			NVT_LOG("unsupport gesture mode type\n");
-			break;
+			return err;
 	}
 
-	nvt_gesture_state_switch();
-	NVT_LOG("sys_gesture_type=%d, should_enable_gesture=%d\n", ts->sys_gesture_type, ts->should_enable_gesture);
+	NVT_LOG("sys_gesture_type=%d, should_enable_gesture=%d\n", touch_cdev->sys_gesture_type, touch_cdev->should_enable_gesture);
+	nvt_gesture_set(touch_cdev, bit, value & 0x1);
 
 	return err;
 }

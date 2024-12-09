@@ -329,6 +329,12 @@ enum touch_state {
 };
 #endif
 
+enum nvt_ts_gesture_bit {
+	NVT_TS_GESTURE_SINGLE = BIT(1),
+	NVT_TS_GESTURE_DOUBLE = BIT(2),
+};
+
+
 //---SPI READ/WRITE---
 #define SPI_WRITE_MASK(a)	(a | 0x80)
 #define SPI_READ_MASK(a)	(a & 0x7F)
