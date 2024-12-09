@@ -1010,6 +1010,8 @@ void nvt_ts_wakeup_gesture_report(uint8_t gesture_id, uint8_t *data)
 			if (!(mode_type & NVT_TS_GESTURE_DOUBLE))
 				return;
 			keycode = KEY_F4;
+			ts->double_tap_pressed = true;
+			sysfs_notify(&ts->client->dev.kobj, NULL, "double_tap_pressed");
 			NVT_LOG("Gesture : Double Click. keycode KEY_F4:%d\n", keycode);
 			break;
 #else
@@ -2250,6 +2252,34 @@ static ssize_t gesture_store(struct device *dev,
 	return err;
 }
 
+static ssize_t double_tap_enabled_show(struct device *dev,
+				       struct device_attribute *attr, char *buf)
+{
+	struct nvt_ts_data *touch_cdev = dev_get_drvdata(dev);
+
+	return snprintf(buf, PAGE_SIZE, "%u\n",
+			!!(touch_cdev->sys_gesture_type & NVT_TS_GESTURE_DOUBLE));
+}
+static ssize_t double_tap_enabled_store(struct device *dev,
+					struct device_attribute *attr,
+					const char *buf, size_t count)
+{
+	struct nvt_ts_data *touch_cdev = dev_get_drvdata(dev);
+
+	nvt_gesture_set(touch_cdev, NVT_TS_GESTURE_DOUBLE, buf[0] != '0');
+
+	return count;
+}
+
+static ssize_t double_tap_pressed_show(struct device *dev,
+					 struct device_attribute *attr,
+					 char *buf)
+{
+	struct nvt_ts_data *touch_cdev = dev_get_drvdata(dev);
+
+	return snprintf(buf, PAGE_SIZE, "%u\n", touch_cdev->double_tap_pressed);
+}
+
 #endif
 
 static struct device_attribute touchscreen_attributes[] = {
@@ -2265,6 +2295,8 @@ static struct device_attribute touchscreen_attributes[] = {
 #ifdef NVT_DOUBLE_TAP_CTRL
 	__ATTR(gesture, S_IRUGO | S_IWUSR | S_IWGRP, gesture_show, gesture_store),
 #endif
+	__ATTR(double_tap_enabled, S_IRUGO | S_IWUSR | S_IWGRP, double_tap_enabled_show, double_tap_enabled_store),
+	__ATTR_RO(double_tap_pressed),
 	__ATTR_NULL
 };
 
@@ -3324,6 +3356,7 @@ static int32_t nvt_ts_resume(struct device *dev)
 
 #ifdef NVT_SENSOR_EN
 	ts->screen_state = SCREEN_ON;
+	ts->double_tap_pressed = false;
 	mutex_unlock(&ts->state_mutex);
 #endif
 	return 0;
