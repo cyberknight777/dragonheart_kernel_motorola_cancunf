@@ -975,6 +975,7 @@ void nvt_ts_wakeup_gesture_report(uint8_t gesture_id, uint8_t *data)
 	static int report_cnt = 0;
 #endif
 	uint8_t mode_type = ts->sys_gesture_type;
+	NVT_LOG("sys_gesture_type in nvt_ts_wakeup_gesture_report is: %d", ts->sys_gesture_type);
 
 	/* support fw specifal data protocol */
 	if ((gesture_id == DATA_PROTOCOL) && (func_type == FUNCPAGE_GESTURE)) {
@@ -1010,7 +1011,9 @@ void nvt_ts_wakeup_gesture_report(uint8_t gesture_id, uint8_t *data)
 			if (!(mode_type & NVT_TS_GESTURE_DOUBLE))
 				return;
 			keycode = KEY_F4;
+			NVT_LOG("Cyber: DoubleTap detected, original double_tap_pressed value is: %d", ts->double_tap_pressed);
 			ts->double_tap_pressed = true;
+			NVT_LOG("Cyber: double_tap_pressed is set to true, now doing sysfs_notify()");
 			sysfs_notify(&ts->client->dev.kobj, NULL, "double_tap_pressed");
 			NVT_LOG("Gesture : Double Click. keycode KEY_F4:%d\n", keycode);
 			break;
@@ -2184,19 +2187,27 @@ static bool _nvt_gesture_set(struct nvt_ts_data *touch_cdev,
 {
 	bool current_val = touch_cdev->sys_gesture_type & bit;
 
-	if (current_val == val)
-		return false;
+	NVT_LOG("current_val: %d, val: %d, bit: %lu", current_val, val, bit);
 
-	if (val)
+	if (current_val == val) {
+		NVT_LOG("current_val is equal to val so returning false");
+		return false;
+	}
+
+	if (val) {
 		touch_cdev->sys_gesture_type |= bit;
-	else
+		NVT_LOG("val is true so sys_gesture_type is set to: %d", touch_cdev->sys_gesture_type);
+	} else {
 		touch_cdev->sys_gesture_type &= ~bit;
+		NVT_LOG("val is false so sys_gesture_type is set to: %d", touch_cdev->sys_gesture_type);
+	}
 
 	return val;
 }
 
 static void nvt_gesture_sync(struct nvt_ts_data *touch_cdev)
 {
+	NVT_LOG("Calling nvt_gesture_state_switch()");
 	nvt_gesture_state_switch();
 }
 
@@ -2205,12 +2216,22 @@ static void nvt_gesture_set(struct nvt_ts_data *touch_cdev,
 {
 	bool sync;
 
+	NVT_LOG("Doing a mutex_lock");
+
 	mutex_lock(&touch_cdev->lock);
+
 	sync = _nvt_gesture_set(touch_cdev, bit, enable);
+
+	NVT_LOG("bit is: %lu, enable is: %d, sync is: %d", bit, enable, sync);
+
+	NVT_LOG("Doing a mutex_unlock");
+
 	mutex_unlock(&touch_cdev->lock);
 
-	if (sync)
+	if (sync) {
+	  NVT_LOG("Calling nvt_gesture_sync()");
 	  nvt_gesture_sync(touch_cdev);
+	}
 }
 
 /*
@@ -2257,6 +2278,8 @@ static ssize_t double_tap_enabled_show(struct device *dev,
 {
 	struct nvt_ts_data *touch_cdev = dev_get_drvdata(dev);
 
+	NVT_LOG("sys_gesture_type: %d", touch_cdev->sys_gesture_type);
+
 	return snprintf(buf, PAGE_SIZE, "%u\n",
 			!!(touch_cdev->sys_gesture_type & NVT_TS_GESTURE_DOUBLE));
 }
@@ -2265,6 +2288,8 @@ static ssize_t double_tap_enabled_store(struct device *dev,
 					const char *buf, size_t count)
 {
 	struct nvt_ts_data *touch_cdev = dev_get_drvdata(dev);
+
+	NVT_LOG("NVT_TS_GESTURE_DOUBLE: %lu, buf: %", NVT_TS_GESTURE_DOUBLE, buf);
 
 	nvt_gesture_set(touch_cdev, NVT_TS_GESTURE_DOUBLE, buf[0] != '0');
 
@@ -2276,6 +2301,8 @@ static ssize_t double_tap_pressed_show(struct device *dev,
 					 char *buf)
 {
 	struct nvt_ts_data *touch_cdev = dev_get_drvdata(dev);
+
+	NVT_LOG("double_tap_pressed: %d", touch_cdev->double_tap_pressed);
 
 	return snprintf(buf, PAGE_SIZE, "%u\n", touch_cdev->double_tap_pressed);
 }
@@ -3186,6 +3213,7 @@ static int32_t nvt_ts_suspend(struct device *dev)
 	}
 
 #ifdef NVT_DOUBLE_TAP_CTRL
+	NVT_LOG("sys_gesture_type in nvt_ts_suspend is: %d", ts->sys_gesture_type);
 	nvt_gesture_type_store(ts->sys_gesture_type);
 #endif
 
