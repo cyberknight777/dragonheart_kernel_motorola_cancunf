@@ -3271,6 +3271,7 @@ static int32_t nvt_ts_suspend(struct device *dev)
 	}
 
 #ifdef NVT_DOUBLE_TAP_CTRL
+	ts->sys_gesture_type = 06; // double tap & single tap enable
 	nvt_gesture_type_store();
 #endif
 
