@@ -293,6 +293,7 @@ struct nvt_ts_data {
 	uint32_t build_id;
 	uint32_t config_id;
 	bool double_tap_pressed;
+	bool double_tap_enabled;
 
 };
 

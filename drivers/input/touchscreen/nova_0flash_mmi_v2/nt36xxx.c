@@ -2280,8 +2280,9 @@ static ssize_t double_tap_enabled_show(struct device *dev,
 
 	NVT_LOG("sys_gesture_type: %d", touch_cdev->sys_gesture_type);
 
-	return snprintf(buf, PAGE_SIZE, "%u\n",
-			!!(touch_cdev->sys_gesture_type & NVT_TS_GESTURE_DOUBLE));
+	touch_cdev->double_tap_enabled = !!(touch_cdev->sys_gesture_type & NVT_TS_GESTURE_DOUBLE);
+
+	return snprintf(buf, PAGE_SIZE, "%u\n", touch_cdev->double_tap_enabled);
 }
 static ssize_t double_tap_enabled_store(struct device *dev,
 					struct device_attribute *attr,
@@ -2289,9 +2290,11 @@ static ssize_t double_tap_enabled_store(struct device *dev,
 {
 	struct nvt_ts_data *touch_cdev = dev_get_drvdata(dev);
 
-	NVT_LOG("NVT_TS_GESTURE_DOUBLE: %lu, buf: %", NVT_TS_GESTURE_DOUBLE, buf);
+	touch_cdev->double_tap_enabled = (buf[0] != '0');
 
-	nvt_gesture_set(touch_cdev, NVT_TS_GESTURE_DOUBLE, buf[0] != '0');
+	NVT_LOG("NVT_TS_GESTURE_DOUBLE: %lu, double_tap_enabled: %d", NVT_TS_GESTURE_DOUBLE, touch_cdev->double_tap_enabled);
+
+	nvt_gesture_set(touch_cdev, NVT_TS_GESTURE_DOUBLE, touch_cdev->double_tap_enabled);
 
 	return count;
 }
@@ -3214,6 +3217,7 @@ static int32_t nvt_ts_suspend(struct device *dev)
 
 #ifdef NVT_DOUBLE_TAP_CTRL
 	NVT_LOG("sys_gesture_type in nvt_ts_suspend is: %d", ts->sys_gesture_type);
+	ts->sys_gesture_type = ts->double_tap_enabled;
 	nvt_gesture_type_store(ts->sys_gesture_type);
 #endif
 
