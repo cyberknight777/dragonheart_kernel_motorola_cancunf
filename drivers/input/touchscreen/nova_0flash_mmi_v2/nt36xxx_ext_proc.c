@@ -717,40 +717,14 @@ int nvt_palm_set(bool enabled) {
 #endif
 
 #ifdef NVT_DOUBLE_TAP_CTRL
-int nvt_gesture_type_store(uint8_t g_type)
+void nvt_gesture_type_store(void)
 {
-	uint8_t fw_gst_type;
+	uint8_t fw_gst_type = FW_GESTURE_MODE_SINGLE_DOUBLE;
+	NVT_LOG("Forcing Single & Double Tap to be enabled, fw_gst_type: %d", fw_gst_type);
 
-	g_type &= SYS_GESTURE_TYPE_MASK;
-	switch (g_type) {
-		case SYS_GESTURE_TYPE_SINGLE_DOUBLE:
-			NVT_LOG("single & double tap enabled\n");
-			fw_gst_type = FW_GESTURE_MODE_SINGLE_DOUBLE;
-			break;
-		case SYS_GESTURE_TYPE_DOUBLE_ONLY:
-			NVT_LOG("double tap only\n");
-			fw_gst_type = FW_GESTURE_MODE_DOUBLE_ONLY;
-			break;
-		case SYS_GESTURE_TYPE_SINGLE_ONLY:
-			NVT_LOG("single tap only\n");
-			fw_gst_type = FW_GESTURE_MODE_SINGLE_ONLY;
-			break;
-		case SYS_GESTURE_TYPE_DISABLE:
-			NVT_LOG("tap idle\n");
-			fw_gst_type = FW_GESTURE_MODE_IDLE;
-			break;
-		default:
-			NVT_LOG("invalid gesture_type:%d, disable tap\n", g_type);
-			fw_gst_type = FW_GESTURE_MODE_IDLE;
-			break;
-	}
-
-	NVT_LOG("set fw gesture_type:%d", fw_gst_type);
 	mutex_lock(&ts->state_mutex);
 	nvt_cmd_ext_store(DOUBLE_TAP_GESTURE_MODE_CMD, fw_gst_type);
 	mutex_unlock(&ts->state_mutex);
-
-	return 0;
 }
 #endif
 
