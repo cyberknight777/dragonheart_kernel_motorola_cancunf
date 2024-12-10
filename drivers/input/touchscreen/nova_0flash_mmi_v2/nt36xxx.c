@@ -3228,7 +3228,7 @@ static int32_t nvt_ts_suspend(struct device *dev)
 	}
 
 #ifdef NVT_DOUBLE_TAP_CTRL
-	nvt_gesture_type_store(ts->sys_gesture_type);
+	nvt_gesture_type_store();
 #endif
 
 #ifdef NVT_SENSOR_EN
