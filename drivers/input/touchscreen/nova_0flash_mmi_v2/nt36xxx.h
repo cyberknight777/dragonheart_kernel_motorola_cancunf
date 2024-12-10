@@ -299,6 +299,7 @@ struct nvt_ts_data {
 	uint32_t build_id;
 	uint32_t config_id;
 	bool double_tap_enabled;
+	bool single_tap_enabled;
 
 #ifdef NVT_STOWED_MODE_SUPPORT
 	int set_stowed;

@@ -1000,8 +1000,10 @@ void nvt_ts_wakeup_gesture_report(uint8_t gesture_id, uint8_t *data)
 			break;
 #ifdef NVT_DOUBLE_TAP_CTRL
 		case GESTURE_SINGLE_CLICK:
-			keycode = KEY_F1;
-			NVT_LOG("Gesture : Single Click, keycode KEY_F1:%d\n", keycode);
+			if (ts->single_tap_enabled) {
+				keycode = KEY_F1;
+				NVT_LOG("Gesture : Single Click, keycode KEY_F1:%d\n", keycode);
+			}
 			break;
 		case GESTURE_DOUBLE_CLICK:
 			if (ts->double_tap_enabled) {
@@ -2293,6 +2295,24 @@ static ssize_t double_tap_enabled_store(struct device *dev,
        return count;
 }
 
+static ssize_t single_tap_enabled_show(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	struct nvt_ts_data *ts = dev_get_drvdata(dev);
+
+	return snprintf(buf, PAGE_SIZE, "%u\n", ts->single_tap_enabled);
+}
+
+static ssize_t single_tap_enabled_store(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t count)
+{
+       struct nvt_ts_data *ts = dev_get_drvdata(dev);
+
+       ts->single_tap_enabled = (buf[0] != '0');
+
+       return count;
+}
+
 #endif
 
 #ifdef NVT_STOWED_MODE_SUPPORT
@@ -2357,6 +2377,7 @@ static struct device_attribute touchscreen_attributes[] = {
 	__ATTR(gesture, S_IRUGO | S_IWUSR | S_IWGRP, gesture_show, gesture_store),
 	__ATTR(gesture_type_dbg, S_IRUGO | S_IWUSR | S_IWGRP, gesture_type_dbg_show, gesture_type_dbg_store),
 	__ATTR(double_tap_enabled, S_IRUGO | S_IWUSR | S_IWGRP, double_tap_enabled_show, double_tap_enabled_store),
+	__ATTR(single_tap_enabled, S_IRUGO | S_IWUSR | S_IWGRP, single_tap_enabled_show, single_tap_enabled_store),
 #endif
 #ifdef NVT_STOWED_MODE_SUPPORT
 	__ATTR_RW(stowed),
