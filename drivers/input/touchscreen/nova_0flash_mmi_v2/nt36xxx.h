@@ -389,7 +389,7 @@ uint8_t nvt_touch_is_awake(void);
 extern int touch_set_state(int state, int panel_idx);
 #endif
 #ifdef NVT_DOUBLE_TAP_CTRL
-extern int nvt_gesture_type_store(uint8_t g_type);
+extern void nvt_gesture_type_store(void);
 #endif
 #if NVT_TOUCH_ESD_PROTECT
 extern void nvt_esd_check_enable(uint8_t enable);
