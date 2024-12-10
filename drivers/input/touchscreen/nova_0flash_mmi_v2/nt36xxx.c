@@ -3341,6 +3341,9 @@ static int32_t nvt_ts_resume(struct device *dev)
 
 	NVT_LOG("start\n");
 
+	NVT_LOG("previous double_tap_pressed value is: %d, setting it to false", ts->double_tap_pressed);
+	ts->double_tap_pressed = false;
+
 	// please make sure display reset(RESX) sequence and mipi dsi cmds sent before this
 #if NVT_TOUCH_SUPPORT_HW_RST
 	gpio_set_value(ts->reset_gpio, 1);
@@ -3384,7 +3387,6 @@ static int32_t nvt_ts_resume(struct device *dev)
 
 #ifdef NVT_SENSOR_EN
 	ts->screen_state = SCREEN_ON;
-	ts->double_tap_pressed = false;
 	mutex_unlock(&ts->state_mutex);
 #endif
 	return 0;
