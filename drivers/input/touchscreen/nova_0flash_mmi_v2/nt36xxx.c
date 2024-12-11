@@ -138,7 +138,8 @@ const uint16_t gesture_key_array[] = {
 	KEY_POWER,  //GESTURE_WORD_C
 	KEY_POWER,  //GESTURE_WORD_W
 	KEY_POWER,  //GESTURE_WORD_V
-	KEY_WAKEUP,  //GESTURE_DOUBLE_CLICK, GESTURE_SINGLE_CLICK
+	KEY_WAKEUP,  //GESTURE_DOUBLE_CLICK
+	BTN_TRIGGER_HAPPY3, //GESTURE_SINGLE_CLICK
 	KEY_POWER,  //GESTURE_WORD_Z
 	KEY_POWER,  //GESTURE_WORD_M
 	KEY_POWER,  //GESTURE_WORD_O
@@ -1001,8 +1002,8 @@ void nvt_ts_wakeup_gesture_report(uint8_t gesture_id, uint8_t *data)
 #ifdef NVT_DOUBLE_TAP_CTRL
 		case GESTURE_SINGLE_CLICK:
 			if (ts->single_tap_enabled) {
-				keycode = KEY_F1;
-				NVT_LOG("Gesture : Single Click, keycode KEY_F1:%d\n", keycode);
+				keycode = BTN_TRIGGER_HAPPY3;
+				NVT_LOG("Gesture : Single Click, keycode BTN_TRIGGER_HAPPY3:%d\n", keycode);
 			}
 			break;
 		case GESTURE_DOUBLE_CLICK:
@@ -1951,7 +1952,7 @@ static int nvt_sensor_init(struct nvt_ts_data *data)
 
 	if (data->report_gesture_key) {
 		__set_bit(EV_KEY, sensor_input_dev->evbit);
-		__set_bit(KEY_F1, sensor_input_dev->keybit);
+		__set_bit(BTN_TRIGGER_HAPPY3, sensor_input_dev->keybit);
 #ifdef NVT_DOUBLE_TAP_CTRL
 		__set_bit(KEY_WAKEUP, sensor_input_dev->keybit);
 #endif
