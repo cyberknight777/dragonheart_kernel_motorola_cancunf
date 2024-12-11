@@ -1372,6 +1372,7 @@ struct ilitek_ts_data {
 	ktime_t last_event_time;
 #endif
 	bool double_tap_enabled;
+	bool single_tap_enabled;
 };
 extern struct ilitek_ts_data *ilits;
 
