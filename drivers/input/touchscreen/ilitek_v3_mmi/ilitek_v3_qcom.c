@@ -464,28 +464,18 @@ static int ili_disp_notifier_callback(struct notifier_block *nb,
 	if (v) {
 		if (value == MTK_DISP_EARLY_EVENT_BLANK) {
 			if (*data == MTK_DISP_BLANK_POWERDOWN) {
-#ifdef ILI_DOUBLE_TAP_CTRL
-                                if (ilits->should_enable_gesture) {
+                                if (ilits->double_tap_enabled || ilits->single_tap_enabled) {
                                         ILI_INFO("TP suspend: tap gesture suspend\n");
                                         if (ili_sleep_handler(TP_SUSPEND) < 0)
                                                 ILI_ERR("TP suspend failed\n");
-#ifdef ILI_SET_TOUCH_STATE
                                         touch_set_state(TOUCH_LOW_POWER_STATE, TOUCH_PANEL_IDX_PRIMARY);
-#endif
                                 }
                                 else {
                                         ILI_INFO("TP suspend: TP_DEEP_SLEEP event = %lu\n", value);
                                         if (ili_sleep_handler(TP_DEEP_SLEEP) < 0)
                                                 ILI_ERR("TP suspend deep sleep fail\n");
-#ifdef ILI_SET_TOUCH_STATE
                                         touch_set_state(TOUCH_DEEP_SLEEP_STATE, TOUCH_PANEL_IDX_PRIMARY);
-#endif
                                 }
-#else //ILI_DOUBLE_TAP_CTRL
-                                ILI_INFO("TP suspend: event = %lu, TP_DEEP_SLEEP\n", value);
-                                if (ili_sleep_handler(TP_DEEP_SLEEP) < 0)
-                                        ILI_ERR("TP suspend deep sleep failed\n");
-#endif //ILI_DOUBLE_TAP_CTRL
                         }
 			/* before fb blank */
 			ILI_INFO("event %lu not care", value);
