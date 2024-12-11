@@ -2102,10 +2102,14 @@ void ili_report_gesture_mode(u8 *buf, int len)
 			return;
 		}
 		if (ilits->report_gesture_key) {
-			int key_code = KEY_F1;
+			int key_code;
 #ifdef ILI_DOUBLE_TAP_CTRL
 			if (GESTURE_DOUBLECLICK == gc->code && ilits->double_tap_enabled) {
 				key_code = KEY_WAKEUP;
+			} else if (GESTURE_SINGLECLICK == gc->code && ilits->single_tap_enabled) {
+				key_code = KEY_F1;
+			} else {
+				break;
 			}
 #endif
 			input_report_key(ilits->sensor_pdata->input_sensor_dev, key_code, 1);
@@ -2134,7 +2138,11 @@ void ili_report_gesture_mode(u8 *buf, int len)
 		input_report_key(input, KEY_GESTURE_POWER, 0);
 		input_sync(input);
 #endif
-		gc->type  = GESTURE_DOUBLECLICK;
+		if (GESTURE_DOUBLECLICK == gc->code && ilits->double_tap_enabled)
+			gc->type  = GESTURE_DOUBLECLICK;
+		else if (GESTURE_SINGLECLICK == gc->code && ilits->single_tap_enabled)
+			gc->type  = GESTURE_SINGLECLICK;
+
 		gc->clockwise = 1;
 		gc->pos_end.x = gc->pos_start.x;
 		gc->pos_end.y = gc->pos_start.y;
