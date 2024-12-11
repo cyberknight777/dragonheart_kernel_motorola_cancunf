@@ -2107,7 +2107,7 @@ void ili_report_gesture_mode(u8 *buf, int len)
 			if (GESTURE_DOUBLECLICK == gc->code && ilits->double_tap_enabled) {
 				key_code = KEY_WAKEUP;
 			} else if (GESTURE_SINGLECLICK == gc->code && ilits->single_tap_enabled) {
-				key_code = KEY_F1;
+				key_code = BTN_TRIGGER_HAPPY3;
 			} else {
 				break;
 			}
