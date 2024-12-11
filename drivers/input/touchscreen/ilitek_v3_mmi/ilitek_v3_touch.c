@@ -2104,8 +2104,8 @@ void ili_report_gesture_mode(u8 *buf, int len)
 		if (ilits->report_gesture_key) {
 			int key_code = KEY_F1;
 #ifdef ILI_DOUBLE_TAP_CTRL
-			if (GESTURE_DOUBLECLICK == gc->code) {
-				key_code = KEY_F4;
+			if (GESTURE_DOUBLECLICK == gc->code && ilits->double_tap_enabled) {
+				key_code = KEY_WAKEUP;
 			}
 #endif
 			input_report_key(ilits->sensor_pdata->input_sensor_dev, key_code, 1);
