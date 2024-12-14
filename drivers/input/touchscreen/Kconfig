@@ -1416,8 +1416,6 @@ config MTK_PANEL_NOTIFICATIONS
 	help
 	  Say Y here if you wish to include support for Mediatek's Panel Notifier on Motorola Touchscreen Drivers.
 
-source "drivers/input/touchscreen/focaltech_0flash_mmi_v2/Kconfig"
-
 source "drivers/input/touchscreen/ilitek_v3_mmi/Kconfig"
 
 source "drivers/input/touchscreen/nova_0flash_mmi_v2/Kconfig"
