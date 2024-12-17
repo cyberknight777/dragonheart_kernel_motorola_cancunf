@@ -310,9 +310,6 @@ pre() {
 
 # A function to modify LTO mode for builds. [thin|full] ThinLTO, FullLTO.
 lto() {
-	if [[ ${TGI} == "1" ]]; then
-		tg "*Modifying LTO mode to ${1}!*"
-	fi
 
 	echo -e "\n\e[1;93m[*] Modifying LTO mode to ${1}! \e[0m"
 
