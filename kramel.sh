@@ -308,6 +308,30 @@ pre() {
 	echo -e "\n\e[1;32m[✓] Copied built objects to prebuilt kernel tree! \e[0m"
 }
 
+# A function to modify LTO mode for builds. [thin|full] ThinLTO, FullLTO.
+lto() {
+	if [[ ${TGI} == "1" ]]; then
+		tg "*Modifying LTO mode to ${1}!*"
+	fi
+
+	echo -e "\n\e[1;93m[*] Modifying LTO mode to ${1}! \e[0m"
+
+	if [[ ${1} == "full" ]]; then
+		"${KDIR}"/scripts/config --file "${KDIR}"/arch/arm64/configs/"${CONFIG}" \
+			-e LTO_CLANG_FULL \
+			-d LTO_CLANG_THIN
+	elif [[ ${1} == "thin" ]]; then
+		"${KDIR}"/scripts/config --file "${KDIR}"/arch/arm64/configs/"${CONFIG}" \
+			-d LTO_CLANG_FULL \
+			-e LTO_CLANG_THIN
+	else
+		echo -e "\n\e[1;31m[✗] Incorrect LTO mode set! \e[0m"
+		exit 1
+	fi
+
+	echo -e "\n\e[1;32m[✓] Modified LTO mode to ${1}! \e[0m"
+}
+
 # A function to build an AnyKernel3 zip.
 mkzip() {
 	if [[ ${TGI} == "1" ]]; then
@@ -419,13 +443,15 @@ example: bash $0 --obj=drivers/android/binder.o
 example: bash $0 --obj=kernel/sched/
 example: bash $0 --upr=r16
 example: bash $0 --pre=YAAP/device_xiaomi_sunny-kernel
+example: bash $0 --lto=thin
 
 	 mcfg   Runs make menuconfig
 	 img    Builds Kernel
 	 dtb    Builds dtb(o).img
 	 mod    Builds out-of-tree modules
-	 hdr	Builds kernel UAPI headers
+	 hdr    Builds kernel UAPI headers
 	 --pre  Copies built objects to prebuilt kernel tree
+	 --lto  Modify LTO mode
 	 mkzip  Builds anykernel3 zip
 	 --obj  Builds specific driver/subsystem
 	 rgn    Regenerates defconfig
@@ -446,13 +472,14 @@ ndialog() {
 		3 "Build modules"
 		4 "Build kernel UAPI headers"
 		5 "Copy built objects to prebuilt kernel tree"
-		6 "Open menuconfig"
-		7 "Regenerate defconfig"
-		8 "Uprev localversion"
-		9 "Build AnyKernel3 zip"
-		10 "Build a specific object"
-		11 "Clean"
-		12 "Exit"
+		6 "Modify LTO mode"
+		7 "Open menuconfig"
+		8 "Regenerate defconfig"
+		9 "Uprev localversion"
+		10 "Build AnyKernel3 zip"
+		11 "Build a specific object"
+		12 "Clean"
+		13 "Exit"
 	)
 	CHOICE=$(dialog --clear \
 		--backtitle "$BACKTITLE" \
@@ -530,8 +557,14 @@ ndialog() {
 		fi
 		;;
 	6)
+		dialog --inputbox --stdout "Enter LTO mode (thin|full): " 15 50 | tee .l
+		pr=$(cat .l)
+		if [ -z "$lt" ]; then
+			dialog --inputbox --stdout "Enter LTO mode (thin|full): " 15 50 | tee .l
+		fi
 		clear
-		mcfg
+		lto "$lt"
+		rm .l
 		echo -ne "\e[1mPress enter to continue or 0 to exit! \e[0m"
 		read -r a1
 		if [ "$a1" == "0" ]; then
@@ -543,7 +576,7 @@ ndialog() {
 		;;
 	7)
 		clear
-		rgn
+		mcfg
 		echo -ne "\e[1mPress enter to continue or 0 to exit! \e[0m"
 		read -r a1
 		if [ "$a1" == "0" ]; then
@@ -554,6 +587,18 @@ ndialog() {
 		fi
 		;;
 	8)
+		clear
+		rgn
+		echo -ne "\e[1mPress enter to continue or 0 to exit! \e[0m"
+		read -r a1
+		if [ "$a1" == "0" ]; then
+			exit 0
+		else
+			clear
+			ndialog
+		fi
+		;;
+	9)
 		dialog --inputbox --stdout "Enter version number: " 15 50 | tee .t
 		ver=$(cat .t)
 		clear
@@ -568,7 +613,7 @@ ndialog() {
 			ndialog
 		fi
 		;;
-	9)
+	10)
 		mkzip
 		echo -ne "\e[1mPress enter to continue or 0 to exit! \e[0m"
 		read -r a1
@@ -579,7 +624,7 @@ ndialog() {
 			ndialog
 		fi
 		;;
-	10)
+	11)
 		dialog --inputbox --stdout "Enter object path: " 15 50 | tee .f
 		ob=$(cat .f)
 		if [ -z "$ob" ]; then
@@ -597,7 +642,7 @@ ndialog() {
 			ndialog
 		fi
 		;;
-	11)
+	12)
 		clear
 		clean
 		img
@@ -610,7 +655,7 @@ ndialog() {
 			ndialog
 		fi
 		;;
-	12)
+	13)
 		echo -e "\n\e[1m Exiting YAKB...\e[0m"
 		sleep 3
 		exit 0
@@ -650,6 +695,15 @@ for arg in "$@"; do
 			exit 1
 		else
 			pre "$preb"
+		fi
+		;;
+	"--lto="*)
+		ltom="${arg#*=}"
+		if [[ -z $ltom ]]; then
+			echo "Use --lto=(thin|full)"
+			exit 1
+		else
+			lto "$ltom"
 		fi
 		;;
 	"mkzip")
