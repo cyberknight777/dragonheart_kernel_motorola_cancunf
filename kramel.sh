@@ -45,11 +45,11 @@ export COMMIT_HASH
 # Build status. Set 1 for release builds. | Set 0 for bleeding edge builds.
 if [ "${RELEASE}" == 1 ]; then
 	export STATUS="Release"
-	export CHATID=-1001361882613
+	export CHATID=-1002403811064
 	export re="rc"
 else
 	export STATUS="Bleeding-Edge"
-	export CHATID=-1001564538644
+	export CHATID=-1002207791864
 	export re="r"
 fi
 
