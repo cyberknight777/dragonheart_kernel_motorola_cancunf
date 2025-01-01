@@ -4644,7 +4644,7 @@ int module_kallsyms_on_each_symbol(int (*fn)(void *, const char *,
 
 static void cfi_init(struct module *mod)
 {
-#ifdef CONFIG_CFI_CLANG
+#if defined(CONFIG_CFI_CLANG) && !defined(CONFIG_INTEGRATE_MODULES)
 	initcall_t *init;
 	exitcall_t *exit;
 
@@ -4667,7 +4667,7 @@ static void cfi_init(struct module *mod)
 
 static void cfi_cleanup(struct module *mod)
 {
-#ifdef CONFIG_CFI_CLANG
+#if defined(CONFIG_CFI_CLANG) && !defined(CONFIG_INTEGRATE_MODULES)
 	cfi_module_remove(mod, module_addr_min);
 #endif
 }
