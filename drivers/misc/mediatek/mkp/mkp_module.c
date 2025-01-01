@@ -8,6 +8,7 @@
 #include "mkp_module.h"
 #include "mkp_api.h"
 
+#ifdef CONFIG_MODULES
 static void frob_text(const struct module_layout *layout,
 	enum helper_ops ops, uint32_t policy)
 {
@@ -82,3 +83,4 @@ void module_enable_nx(const struct module *mod, uint32_t policy)
 		frob_writable_data(&mod->init_layout, HELPER_MAPPING_NX, policy);
 	}
 }
+#endif

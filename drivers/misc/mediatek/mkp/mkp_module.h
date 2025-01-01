@@ -41,8 +41,9 @@
 
 #include "helper.h"
 
+#ifdef CONFIG_MODULES
 void module_enable_x(const struct module *mod, uint32_t policy);
 void module_enable_ro(const struct module *mod, bool after_init, uint32_t policy);
 void module_enable_nx(const struct module *mod, uint32_t policy);
-
+#endif
 #endif

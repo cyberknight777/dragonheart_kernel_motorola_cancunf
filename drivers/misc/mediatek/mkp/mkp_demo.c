@@ -89,6 +89,7 @@ static void *p_etext;
 static void *p__init_begin;
 #endif
 
+#ifdef CONFIG_MODULES
 static void probe_android_vh_set_memory_ro(void *ignore, unsigned long addr,
 		int nr_pages)
 {
@@ -187,6 +188,7 @@ static void probe_android_vh_set_memory_nx(void *ignore, unsigned long addr,
 		write_unlock_irqrestore(&mkp_rbtree_rwlock, flags);
 	}
 }
+#endif
 
 #if !IS_ENABLED(CONFIG_KASAN_GENERIC) && !IS_ENABLED(CONFIG_KASAN_SW_TAGS)
 static int __init protect_kernel(void)
@@ -253,6 +255,7 @@ static int __init protect_kernel(void)
 }
 #endif
 
+#ifdef CONFIG_MODULES
 static void probe_android_vh_set_module_permit_before_init(void *ignore,
 	const struct module *mod)
 {
@@ -279,6 +282,7 @@ static void probe_android_vh_set_module_permit_after_init(void *ignore,
 	if (mod != THIS_MODULE && policy_ctrl[MKP_POLICY_DRV] != 0)
 		module_enable_ro(mod, true, MKP_POLICY_DRV);
 }
+#endif
 
 static void probe_android_vh_commit_creds(void *ignore, const struct task_struct *task,
 	const struct cred *new)
@@ -634,9 +638,11 @@ static void probe_android_vh_check_bpf_syscall(void *ignore,
 
 static int __init protect_mkp_self(void)
 {
+#ifdef CONFIG_MODULES
 	module_enable_ro(THIS_MODULE, false, MKP_POLICY_MKP);
 	module_enable_nx(THIS_MODULE, MKP_POLICY_MKP);
 	module_enable_x(THIS_MODULE, MKP_POLICY_MKP);
+#endif
 
 	mkp_start_granting_hvc_call();
 	return 0;
@@ -838,6 +844,7 @@ int __init mkp_demo_init(void)
 		}
 	}
 
+#ifdef CONFIG_MODULES
 	if (policy_ctrl[MKP_POLICY_DRV] != 0 ||
 		policy_ctrl[MKP_POLICY_KERNEL_PAGES] != 0 ||
 		policy_ctrl[MKP_POLICY_MKP] != 0) {
@@ -887,6 +894,7 @@ int __init mkp_demo_init(void)
 			goto failed;
 		}
 	}
+#endif
 
 	if (policy_ctrl[MKP_POLICY_SELINUX_STATE] != 0) {
 		// register selinux_state
