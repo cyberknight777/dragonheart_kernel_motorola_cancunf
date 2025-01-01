@@ -103,7 +103,7 @@ static void cleanup(void)
 	}
 }
 
-#ifdef MODULE
+#ifdef CONFIG_MODULES
 static int slog_module_callback(struct notifier_block *nb,
                                 unsigned long val, void *data)
 {
@@ -238,7 +238,7 @@ int slog_procfs_init(void)
 
 int mtk_slog_init(void)
 {
-#ifdef MODULE
+#ifdef CONFIG_MODULES
 	register_module_notifier(&slog_module_nb);
 #endif
 	for_each_kernel_tracepoint(lookup_tracepoints, NULL);
@@ -249,7 +249,7 @@ int mtk_slog_init(void)
 
 void mtk_slog_exit(void)
 {
-#ifdef MODULE
+#ifdef CONFIG_MODULES
 	unregister_module_notifier(&slog_module_nb);
 #endif
 	remove_proc_entry("slog_threshold", dir);

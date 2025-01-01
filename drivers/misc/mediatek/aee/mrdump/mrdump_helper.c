@@ -124,7 +124,9 @@ static void mrdump_ka_work_func(struct work_struct *work)
 		mrdump_km = (void *)(kinfo->_markers_pa + kimage_voffset);
 		aee_base_addrs_init();
 		mrdump_cblock_late_init();
+#ifdef CONFIG_MODULES
 		init_ko_addr_list_late();
+#endif
 		mrdump_mini_add_klog();
 		mrdump_mini_add_kallsyms();
 	} else {

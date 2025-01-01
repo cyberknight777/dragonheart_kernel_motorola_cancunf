@@ -92,6 +92,7 @@ int aee_nested_printf(const char *fmt, ...)
 
 static void check_last_ko(void)
 {
+#ifdef CONFIG_MODULES
 	struct list_head *p_modules = aee_get_modules();
 	struct module *mod;
 
@@ -104,6 +105,7 @@ static void check_last_ko(void)
 		load_ko_addr_list(mod);
 		break;
 	}
+#endif
 }
 
 static void mrdump_cblock_update(enum AEE_REBOOT_MODE reboot_mode,
