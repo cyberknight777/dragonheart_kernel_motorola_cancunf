@@ -114,9 +114,9 @@ int RingBuf_Map_RingBuf_bridge(struct ringbuf_bridge *buf_bridge,
 
 #endif
 
-void dump_ring_bufinfo(struct RingBuf *buf);
-int init_ring_buf(struct RingBuf *buf, char *vaaddr, int size);
-int init_ring_buf_bridge(struct ringbuf_bridge *buf_bridge,
+void scp_dump_ring_bufinfo(struct RingBuf *buf);
+int scp_init_ring_buf(struct RingBuf *buf, char *vaaddr, int size);
+int scp_init_ring_buf_bridge(struct ringbuf_bridge *buf_bridge,
 			 unsigned long long paaddr, int size);
 
 /**
@@ -125,83 +125,83 @@ int init_ring_buf_bridge(struct ringbuf_bridge *buf_bridge,
  *  get free sapce
  *  copy buffer from linear buffer/ring buffer
  */
-unsigned int RingBuf_getDataCount(const struct RingBuf *RingBuf1);
-unsigned int RingBuf_getFreeSpace(const struct RingBuf *RingBuf1);
-void RingBuf_copyToLinear(char *buf, struct RingBuf *RingBuf1,
+unsigned int scp_RingBuf_getDataCount(const struct RingBuf *RingBuf1);
+unsigned int scp_RingBuf_getFreeSpace(const struct RingBuf *RingBuf1);
+void scp_RingBuf_copyToLinear(char *buf, struct RingBuf *RingBuf1,
 			  unsigned int count);
-void RingBuf_copyFromLinear(struct RingBuf *RingBuf1, const char *buf,
+void scp_RingBuf_copyFromLinear(struct RingBuf *RingBuf1, const char *buf,
 			    unsigned int count);
 
-int RingBuf_copyFromRingBuf(struct RingBuf *RingBuft, struct RingBuf *RingBufs,
+int scp_RingBuf_copyFromRingBuf(struct RingBuf *RingBuft, struct RingBuf *RingBufs,
 			    unsigned int count);
 
 /* direct set value with buffer */
-void RingBuf_writeDataValue(struct RingBuf *RingBuf1, const char value,
+void scp_RingBuf_writeDataValue(struct RingBuf *RingBuf1, const char value,
 			    const unsigned int count);
 /*
  * update for write or read pointer , can use by hardware conusme data.
  */
-void RingBuf_update_writeptr(struct RingBuf *RingBuf1,
+void scp_RingBuf_update_writeptr(struct RingBuf *RingBuf1,
 			     unsigned int count);
-void RingBuf_update_readptr(struct RingBuf *RingBuf1, unsigned int count);
+void scp_RingBuf_update_readptr(struct RingBuf *RingBuf1, unsigned int count);
 
-void RingBuf_Bridge_update_writeptr(struct ringbuf_bridge *RingBuf1,
+void scp_RingBuf_Bridge_update_writeptr(struct ringbuf_bridge *RingBuf1,
 				    const unsigned int count);
-void RingBuf_Bridge_update_readptr(struct ringbuf_bridge *RingBuf1,
+void scp_RingBuf_Bridge_update_readptr(struct ringbuf_bridge *RingBuf1,
 				   const unsigned int count);
 
 /* clear ring buffer state , including read/write pointer.*/
-void RingBuf_Reset(struct RingBuf *RingBuf1);
-void RingBuf_Bridge_Reset(struct ringbuf_bridge *RingBuf1);
+void scp_RingBuf_Reset(struct RingBuf *RingBuf1);
+void scp_RingBuf_Bridge_Reset(struct ringbuf_bridge *RingBuf1);
 
 /* clear ring buffer state , including read/write pointer.*/
-int RingBuf_Clear(struct RingBuf *RingBuf1);
-int RingBuf_Bridge_Clear(struct ringbuf_bridge *RingBuf1);
+int scp_RingBuf_Clear(struct RingBuf *RingBuf1);
+int scp_RingBuf_Bridge_Clear(struct ringbuf_bridge *RingBuf1);
 
-bool is_ringbuf_clear(struct RingBuf *ring_buf);
-bool is_ringbuf_bridge_clear(struct ringbuf_bridge *ring_buf);
+bool scp_is_ringbuf_clear(struct RingBuf *ring_buf);
+bool scp_is_ringbuf_bridge_clear(struct ringbuf_bridge *ring_buf);
 
 /* check if ringbur read write pointer */
-void Ringbuf_Bridge_Check(struct ringbuf_bridge *buf_bridge);
+void scp_Ringbuf_Bridge_Check(struct ringbuf_bridge *buf_bridge);
 /* check if ringbur read write pointer */
-void Ringbuf_Check(struct RingBuf *RingBuf1);
+void scp_Ringbuf_Check(struct RingBuf *RingBuf1);
 
-int clear_audiobuffer_hw(struct audio_hw_buffer *audio_hwbuf);
+int scp_clear_audiobuffer_hw(struct audio_hw_buffer *audio_hwbuf);
 
 /* set audio_hw_buffer attribute */
-int set_audiobuffer_hw(struct audio_hw_buffer *audio_hwbuf, int hw_buffer);
-int set_audiobuffer_memorytype(struct audio_hw_buffer *audio_hwbuf,
+int scp_set_audiobuffer_hw(struct audio_hw_buffer *audio_hwbuf, int hw_buffer);
+int scp_set_audiobuffer_memorytype(struct audio_hw_buffer *audio_hwbuf,
 				       int memory_type);
-int set_audiobuffer_audio_memiftype(struct audio_hw_buffer *audio_hwbuf,
+int scp_set_audiobuffer_audio_memiftype(struct audio_hw_buffer *audio_hwbuf,
 				    int audio_memtype);
-int set_audiobuffer_audio_irq_num(struct audio_hw_buffer *audio_hwbuf,
+int scp_set_audiobuffer_audio_irq_num(struct audio_hw_buffer *audio_hwbuf,
 				  int irq_num);
 
-int sync_ringbuf_readidx(struct RingBuf *task_ring_buf,
+int scp_sync_ringbuf_readidx(struct RingBuf *task_ring_buf,
 		    struct ringbuf_bridge *buf_bridge);
-int sync_ringbuf_writeidx(struct RingBuf *task_ring_buf,
+int scp_sync_ringbuf_writeidx(struct RingBuf *task_ring_buf,
 		     struct ringbuf_bridge *buf_bridge);
-int sync_bridge_ringbuf_readidx(struct ringbuf_bridge *buf_bridge,
+int scp_sync_bridge_ringbuf_readidx(struct ringbuf_bridge *buf_bridge,
 			  struct RingBuf *task_ring_buf);
-int sync_bridge_ringbuf_writeidx(struct ringbuf_bridge *buf_bridge,
+int scp_sync_bridge_ringbuf_writeidx(struct ringbuf_bridge *buf_bridge,
 			   struct RingBuf *task_ring_buf);
 
 /* clear audiobuffer related API */
-int reset_audiobuffer(struct audio_buffer *audio_buf);
-int reset_audiobuffer_hw(struct audio_hw_buffer *audio_hwbuf);
+int scp_reset_audiobuffer(struct audio_buffer *audio_buf);
+int scp_reset_audiobuffer_hw(struct audio_hw_buffer *audio_hwbuf);
 
 /* dump buffer realted API */
-void dump_rbuf_bridge(struct ringbuf_bridge *ring_buffer_bridge);
-void dump_rbuf_bridge_s(const char *appendingstring,
+void scp_dump_rbuf_bridge(struct ringbuf_bridge *ring_buffer_bridge);
+void scp_dump_rbuf_bridge_s(const char *appendingstring,
 			struct ringbuf_bridge *ring_buffer_bridge);
-void dump_rbuf_s(const char *appendingstring,
+void scp_dump_rbuf_s(const char *appendingstring,
 		 struct RingBuf *ring_buffer);
-void dump_rbuf(struct RingBuf *ring_buffer);
-void dump_buf_attr(struct buf_attr bufattr);
-void dump_audio_buffer(struct audio_buffer *audio_buf);
-void dump_audio_hwbuffer(struct audio_hw_buffer *audio_hwbuf);
+void scp_dump_rbuf(struct RingBuf *ring_buffer);
+void scp_dump_buf_attr(struct buf_attr bufattr);
+void scp_dump_audio_buffer(struct audio_buffer *audio_buf);
+void scp_dump_audio_hwbuffer(struct audio_hw_buffer *audio_hwbuf);
 
-void dump_audio_dsp_dram(struct audio_dsp_dram *dsp_dram);
+void scp_dump_audio_dsp_dram(struct audio_dsp_dram *dsp_dram);
 
 /* linux OS API related */
 #if defined(__linux__)
@@ -211,36 +211,36 @@ struct snd_pcm_hw_params;
 struct audio_dsp_dram;
 struct snd_dma_buffer;
 
-int snd_dmabuffer_to_audio_ring_buffer_bridge(
+int scp_snd_dmabuffer_to_audio_ring_buffer_bridge(
 	struct snd_dma_buffer *dma_buffer,
 	struct ringbuf_bridge *audio_ring_buf_brideg);
 
 /* mapping audio reserved fram to snd_dma_buffer */
-int release_snd_dmabuffer(struct snd_dma_buffer *dma_buffer);
+int scp_release_snd_dmabuffer(struct snd_dma_buffer *dma_buffer);
 int dram_to_snd_dmabuffer(struct audio_dsp_dram *dsp_dram,
 			      struct snd_dma_buffer *dma_buffer);
 
 /* mapping snd_dma_buffer audio buffer fram */
-int snd_dmabuffer_to_audio_ring_buffer(struct snd_dma_buffer *dma_buffer,
+int scp_snd_dmabuffer_to_audio_ring_buffer(struct snd_dma_buffer *dma_buffer,
 				       struct RingBuf *audio_ring_buf);
 
-int set_audiobuffer_threshold(struct audio_hw_buffer *audio_hwbuf,
+int scp_set_audiobuffer_threshold(struct audio_hw_buffer *audio_hwbuf,
 			      struct snd_pcm_substream *substream);
 
 /* using afe substream to set audio_hw_buffer */
-int set_afe_audio_pcmbuf(struct audio_hw_buffer *audio_hwbuf,
+int scp_set_afe_audio_pcmbuf(struct audio_hw_buffer *audio_hwbuf,
 			 struct snd_pcm_substream *substream);
 
 /* set audio buffer by substream and snd_pcm_params */
-int set_audiobuffer_attribute(struct audio_hw_buffer *audio_buf,
+int scp_set_audiobuffer_attribute(struct audio_hw_buffer *audio_buf,
 			      struct snd_pcm_substream *substream,
 			      struct snd_pcm_hw_params *params,
 			      int direction);
 
-void RingBuf_copyFromUserLinear(struct RingBuf *RingBuf1, void __user *buf,
+void scp_RingBuf_copyFromUserLinear(struct RingBuf *RingBuf1, void __user *buf,
 				unsigned int count);
 
-void ringbuf_copyto_user_linear(void __user *buf, struct RingBuf *RingBuf1,
+void scp_ringbuf_copyto_user_linear(void __user *buf, struct RingBuf *RingBuf1,
 			  unsigned int count);
 #endif
 

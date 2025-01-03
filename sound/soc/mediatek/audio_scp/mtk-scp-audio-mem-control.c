@@ -193,8 +193,8 @@ int scp_audio_allocate_sharemem_ring(struct scp_aud_task_base *taskbase,
 	taskbase->ring_share_buf.vir_addr = (char *)vaddr;
 	taskbase->ring_share_buf.size = size;
 
-	init_ring_buf(ring_buf, (char *)vaddr, size);
-	init_ring_buf_bridge(buf_bridge, (unsigned long long)paddr, size);
+	scp_init_ring_buf(ring_buf, (char *)vaddr, size);
+	scp_init_ring_buf_bridge(buf_bridge, (unsigned long long)paddr, size);
 
 	return 0;
 }
@@ -217,8 +217,8 @@ int scp_audio_free_sharemem_ring(struct scp_aud_task_base *taskbase,
 	if (ring_buf->pBufBase != NULL) {
 		gen_pool_free(genpool, (unsigned long)ring_buf->pBufBase,
 		ring_buf->bufLen);
-		RingBuf_Bridge_Clear(buf_bridge);
-		RingBuf_Clear(ring_buf);
+		scp_RingBuf_Bridge_Clear(buf_bridge);
+		scp_RingBuf_Clear(ring_buf);
 	} else
 		pr_info("%s ring_buf->pBufBase = null\n", __func__);
 

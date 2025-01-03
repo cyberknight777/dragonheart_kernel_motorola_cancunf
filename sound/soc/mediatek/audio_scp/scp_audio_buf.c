@@ -41,7 +41,7 @@
  * function for get how many data is available
  * @return how many data exist
  */
-unsigned int RingBuf_getDataCount(const struct RingBuf *RingBuf1)
+unsigned int scp_RingBuf_getDataCount(const struct RingBuf *RingBuf1)
 {
 	return RingBuf1->datacount;
 }
@@ -51,7 +51,7 @@ unsigned int RingBuf_getDataCount(const struct RingBuf *RingBuf1)
  * @return how free sapce
  */
 
-unsigned int RingBuf_getFreeSpace(const struct RingBuf *RingBuf1)
+unsigned int scp_RingBuf_getFreeSpace(const struct RingBuf *RingBuf1)
 {
 	return RingBuf1->bufLen - RingBuf1->datacount;
 }
@@ -62,15 +62,15 @@ unsigned int RingBuf_getFreeSpace(const struct RingBuf *RingBuf1)
  * @param RingBuf1 buffer copy to
  * @param count number of bytes need to copy
  */
-void RingBuf_copyToLinear(char *buf, struct RingBuf *RingBuf1,
+void scp_RingBuf_copyToLinear(char *buf, struct RingBuf *RingBuf1,
 			  unsigned int count)
 {
 	if (count == 0)
 		return;
 
-	if (RingBuf_getDataCount(RingBuf1) < count) {
-		AUD_LOG_D("RingBuf_getDataCount(RingBuf1) %d < count %d\n",
-			  RingBuf_getDataCount(RingBuf1), count);
+	if (scp_RingBuf_getDataCount(RingBuf1) < count) {
+		AUD_LOG_D("scp_RingBuf_getDataCount(RingBuf1) %d < count %d\n",
+			  scp_RingBuf_getDataCount(RingBuf1), count);
 		return;
 	}
 
@@ -94,7 +94,7 @@ void RingBuf_copyToLinear(char *buf, struct RingBuf *RingBuf1,
 		}
 	}
 	RingBuf1->datacount -= count;
-	Ringbuf_Check(RingBuf1);
+	scp_Ringbuf_Check(RingBuf1);
 }
 
 /**
@@ -104,13 +104,13 @@ void RingBuf_copyToLinear(char *buf, struct RingBuf *RingBuf1,
  * @param count number of bytes need to copy
  */
 
-void RingBuf_copyFromLinear(struct RingBuf *RingBuf1, const char *buf,
+void scp_RingBuf_copyFromLinear(struct RingBuf *RingBuf1, const char *buf,
 			    unsigned int count)
 {
 	int spaceIHave;
 	char *end = RingBuf1->pBufBase + RingBuf1->bufLen;
 	/* count buffer data I have */
-	spaceIHave = RingBuf_getFreeSpace(RingBuf1);
+	spaceIHave = scp_RingBuf_getFreeSpace(RingBuf1);
 
 	/* if not enough, assert */
 	/* ASSERT(spaceIHave >= count); */
@@ -139,7 +139,7 @@ void RingBuf_copyFromLinear(struct RingBuf *RingBuf1, const char *buf,
 			RingBuf1->pWrite -= RingBuf1->bufLen;
 	}
 	RingBuf1->datacount += count;
-	Ringbuf_Check(RingBuf1);
+	scp_Ringbuf_Check(RingBuf1);
 }
 
 /**
@@ -147,30 +147,30 @@ void RingBuf_copyFromLinear(struct RingBuf *RingBuf1, const char *buf,
  * @param RingBuft ring buffer copy to
  * @param RingBufs copy from copy from
  */
-void RingBuf_copyFromRingBufAll(struct RingBuf *RingBuft,
+void scp_RingBuf_copyFromRingBufAll(struct RingBuf *RingBuft,
 				struct RingBuf *RingBufs)
 {
 	/* if not enough, assert */
-	/* ASSERT(RingBuf_getFreeSpace(RingBuft) >= */
-	/* RingBuf_getDataCount(RingBufs)); */
-	if (RingBuf_getFreeSpace(RingBuft) < RingBuf_getDataCount(RingBufs))
+	/* ASSERT(scp_RingBuf_getFreeSpace(RingBuft) >= */
+	/* scp_RingBuf_getDataCount(RingBufs)); */
+	if (scp_RingBuf_getFreeSpace(RingBuft) < scp_RingBuf_getDataCount(RingBufs))
 		AUD_LOG_D(
-			"RingBuf_getFreeSpace(RingBuft) %d < RingBuf_getDataCount(RingBufs) %d\n",
-			RingBuf_getFreeSpace(RingBuft),
-			RingBuf_getDataCount(RingBufs));
+			"scp_RingBuf_getFreeSpace(RingBuft) %d < scp_RingBuf_getDataCount(RingBufs) %d\n",
+			scp_RingBuf_getFreeSpace(RingBuft),
+			scp_RingBuf_getDataCount(RingBufs));
 
 	if (RingBufs->pRead <= RingBufs->pWrite) {
-		RingBuf_copyFromLinear(RingBuft, RingBufs->pRead,
+		scp_RingBuf_copyFromLinear(RingBuft, RingBufs->pRead,
 				       RingBufs->pWrite - RingBufs->pRead);
 	} else {
-		RingBuf_copyFromLinear(RingBuft, RingBufs->pRead,
+		scp_RingBuf_copyFromLinear(RingBuft, RingBufs->pRead,
 				       RingBufs->pBufEnd - RingBufs->pRead);
-		RingBuf_copyFromLinear(RingBuft, RingBufs->pBufBase,
+		scp_RingBuf_copyFromLinear(RingBuft, RingBufs->pBufBase,
 				       RingBufs->pWrite - RingBufs->pBufBase);
 	}
 	RingBufs->pRead = RingBufs->pWrite;
-	Ringbuf_Check(RingBuft);
-	Ringbuf_Check(RingBufs);
+	scp_Ringbuf_Check(RingBuft);
+	scp_Ringbuf_Check(RingBufs);
 }
 
 /**
@@ -178,23 +178,23 @@ void RingBuf_copyFromRingBufAll(struct RingBuf *RingBuft,
  * @param RingBuft ring buffer copy to
  * @param RingBufs copy from copy from
  */
-int RingBuf_copyFromRingBuf(struct RingBuf *RingBuft, struct RingBuf *RingBufs,
+int scp_RingBuf_copyFromRingBuf(struct RingBuf *RingBuft, struct RingBuf *RingBufs,
 			    unsigned int count)
 {
 	if (count == 0)
 		return 0;
 
 	/* if not enough, assert */
-	/* ASSERT(RingBuf_getDataCount(RingBufs) >= count && */
-	/* RingBuf_getFreeSpace(RingBuft) >= count); */
-	if ((RingBuf_getDataCount(RingBufs) < count) ||
-	    (RingBuf_getFreeSpace(RingBuft) < count)) {
+	/* ASSERT(scp_RingBuf_getDataCount(RingBufs) >= count && */
+	/* scp_RingBuf_getFreeSpace(RingBuft) >= count); */
+	if ((scp_RingBuf_getDataCount(RingBufs) < count) ||
+	    (scp_RingBuf_getFreeSpace(RingBuft) < count)) {
 		AUD_LOG_D("Space RingBuft %d || Data RingBufs %d < count %d\n",
-			  RingBuf_getFreeSpace(RingBuft),
-			  RingBuf_getDataCount(RingBufs), count);
+			  scp_RingBuf_getFreeSpace(RingBuft),
+			  scp_RingBuf_getDataCount(RingBufs), count);
 	}
 	if (RingBufs->pRead <= RingBufs->pWrite) {
-		RingBuf_copyFromLinear(RingBuft, RingBufs->pRead, count);
+		scp_RingBuf_copyFromLinear(RingBuft, RingBufs->pRead, count);
 		RingBufs->pRead += count;
 		if (RingBufs->pRead >= RingBufs->pBufEnd)
 			RingBufs->pRead -= RingBufs->bufLen;
@@ -202,20 +202,20 @@ int RingBuf_copyFromRingBuf(struct RingBuf *RingBuft, struct RingBuf *RingBufs,
 		unsigned int r2e = RingBufs->pBufEnd - RingBufs->pRead;
 
 		if (r2e >= count) {
-			RingBuf_copyFromLinear(RingBuft, RingBufs->pRead,
+			scp_RingBuf_copyFromLinear(RingBuft, RingBufs->pRead,
 					       count);
 			RingBufs->pRead += count;
 			if (RingBufs->pRead >= RingBufs->pBufEnd)
 				RingBufs->pRead -= RingBufs->bufLen;
 		} else {
-			RingBuf_copyFromLinear(RingBuft, RingBufs->pRead, r2e);
-			RingBuf_copyFromLinear(RingBuft, RingBufs->pBufBase,
+			scp_RingBuf_copyFromLinear(RingBuft, RingBufs->pRead, r2e);
+			scp_RingBuf_copyFromLinear(RingBuft, RingBufs->pBufBase,
 					       count - r2e);
 			RingBufs->pRead = RingBufs->pBufBase + count - r2e;
 		}
 	}
-	Ringbuf_Check(RingBuft);
-	Ringbuf_Check(RingBufs);
+	scp_Ringbuf_Check(RingBuft);
+	scp_Ringbuf_Check(RingBufs);
 	return count;
 }
 
@@ -226,16 +226,16 @@ int RingBuf_copyFromRingBuf(struct RingBuf *RingBuft, struct RingBuf *RingBufs,
  * @count bytes ned to put.
  */
 
-void RingBuf_writeDataValue(struct RingBuf *RingBuf1, const char value,
+void scp_RingBuf_writeDataValue(struct RingBuf *RingBuf1, const char value,
 			    const unsigned int count)
 {
 	if (count == 0)
 		return;
 
 	/* if not enough, assert */
-	if (RingBuf_getFreeSpace(RingBuf1) < count) {
-		AUD_LOG_D("RingBuf_getFreeSpace(RingBuf1) %d < count %d\n",
-			  RingBuf_getFreeSpace(RingBuf1), count);
+	if (scp_RingBuf_getFreeSpace(RingBuf1) < count) {
+		AUD_LOG_D("scp_RingBuf_getFreeSpace(RingBuf1) %d < count %d\n",
+			  scp_RingBuf_getFreeSpace(RingBuf1), count);
 	}
 	if (RingBuf1->pRead <= RingBuf1->pWrite) {
 		unsigned int w2e = RingBuf1->pBufEnd - RingBuf1->pWrite;
@@ -259,7 +259,7 @@ void RingBuf_writeDataValue(struct RingBuf *RingBuf1, const char value,
 	RingBuf1->datacount += count;
 }
 
-void RingBuf_update_writeptr(struct RingBuf *RingBuf1, unsigned int count)
+void scp_RingBuf_update_writeptr(struct RingBuf *RingBuf1, unsigned int count)
 {
 	if (count == 0 || count > RingBuf1->bufLen) {
 		AUD_LOG_W("%s count[%u] datacount[%d] Len[%d]\n",
@@ -300,10 +300,10 @@ void RingBuf_update_writeptr(struct RingBuf *RingBuf1, unsigned int count)
 	} else
 		RingBuf1->datacount += count;
 
-	Ringbuf_Check(RingBuf1);
+	scp_Ringbuf_Check(RingBuf1);
 }
 
-void RingBuf_update_readptr(struct RingBuf *RingBuf1, unsigned int count)
+void scp_RingBuf_update_readptr(struct RingBuf *RingBuf1, unsigned int count)
 {
 	if (count == 0 || count > RingBuf1->bufLen) {
 #ifdef RINGBUF_COUNT_CHECK
@@ -347,10 +347,10 @@ void RingBuf_update_readptr(struct RingBuf *RingBuf1, unsigned int count)
 			RingBuf1->pRead + RingBuf1->bufLen - RingBuf1->pWrite;
 	} else
 		RingBuf1->datacount -= count;
-	Ringbuf_Check(RingBuf1);
+	scp_Ringbuf_Check(RingBuf1);
 }
 
-void RingBuf_Bridge_update_writeptr(struct ringbuf_bridge *RingBuf1,
+void scp_RingBuf_Bridge_update_writeptr(struct ringbuf_bridge *RingBuf1,
 				    const unsigned int count)
 {
 	if (count == 0)
@@ -381,10 +381,10 @@ void RingBuf_Bridge_update_writeptr(struct ringbuf_bridge *RingBuf1,
 		if (RingBuf1->pWrite >= RingBuf1->pBufEnd)
 			RingBuf1->pWrite -= RingBuf1->bufLen;
 	}
-	Ringbuf_Bridge_Check(RingBuf1);
+	scp_Ringbuf_Bridge_Check(RingBuf1);
 }
 
-void RingBuf_Bridge_update_readptr(struct ringbuf_bridge *RingBuf1,
+void scp_RingBuf_Bridge_update_readptr(struct ringbuf_bridge *RingBuf1,
 				   const unsigned int count)
 {
 	if (count == 0)
@@ -407,10 +407,10 @@ void RingBuf_Bridge_update_readptr(struct ringbuf_bridge *RingBuf1,
 				RingBuf1->pRead -= RingBuf1->bufLen;
 		}
 	}
-	Ringbuf_Bridge_Check(RingBuf1);
+	scp_Ringbuf_Bridge_Check(RingBuf1);
 }
 
-void dump_audio_dsp_dram(struct audio_dsp_dram *dsp_dram)
+void scp_dump_audio_dsp_dram(struct audio_dsp_dram *dsp_dram)
 {
 	AUD_LOG_D(
 		"%s dsp_dram vir_addr = %p va_addr = 0x%llx phy_addr =0x%llx size=%llu\n",
@@ -420,7 +420,7 @@ void dump_audio_dsp_dram(struct audio_dsp_dram *dsp_dram)
 
 #if defined(__linux__)
 
-int release_snd_dmabuffer(struct snd_dma_buffer *dma_buffer)
+int scp_release_snd_dmabuffer(struct snd_dma_buffer *dma_buffer)
 {
 	dma_buffer->area = NULL;
 	dma_buffer->addr = 0;
@@ -444,7 +444,7 @@ int dram_to_snd_dmabuffer(struct audio_dsp_dram *dsp_dram,
 }
 
 /* wrap snd_dma_buffer to audio_hw_buffer */
-int snd_dmabuffer_to_audio_ring_buffer(struct snd_dma_buffer *dma_buffer,
+int scp_snd_dmabuffer_to_audio_ring_buffer(struct snd_dma_buffer *dma_buffer,
 				       struct RingBuf *audio_ring_buf)
 {
 	int ret = 0;
@@ -471,7 +471,7 @@ int snd_dmabuffer_to_audio_ring_buffer(struct snd_dma_buffer *dma_buffer,
 	return ret;
 }
 
-int snd_dmabuffer_to_audio_ring_buffer_bridge(
+int scp_snd_dmabuffer_to_audio_ring_buffer_bridge(
 	struct snd_dma_buffer *dma_buffer,
 	struct ringbuf_bridge *audio_ring_buf_brideg)
 {
@@ -500,7 +500,7 @@ int snd_dmabuffer_to_audio_ring_buffer_bridge(
 	return ret;
 }
 
-int set_audiobuffer_threshold(struct audio_hw_buffer *audio_hwbuf,
+int scp_set_audiobuffer_threshold(struct audio_hw_buffer *audio_hwbuf,
 			      struct snd_pcm_substream *substream)
 {
 	int ret = 0;
@@ -520,12 +520,12 @@ int set_audiobuffer_threshold(struct audio_hw_buffer *audio_hwbuf,
 	return ret;
 }
 
-int set_afe_audio_pcmbuf(struct audio_hw_buffer *audio_hwbuf,
+int scp_set_afe_audio_pcmbuf(struct audio_hw_buffer *audio_hwbuf,
 			 struct snd_pcm_substream *substream)
 {
 	int ret = 0;
 
-	ret = init_ring_buf_bridge(
+	ret = scp_init_ring_buf_bridge(
 		&audio_hwbuf->aud_buffer.buf_bridge,
 		(unsigned long long)substream->runtime->dma_addr,
 		substream->runtime->dma_bytes);
@@ -533,7 +533,7 @@ int set_afe_audio_pcmbuf(struct audio_hw_buffer *audio_hwbuf,
 	return ret;
 }
 
-int set_audiobuffer_attribute(struct audio_hw_buffer *audio_hwbuf,
+int scp_set_audiobuffer_attribute(struct audio_hw_buffer *audio_hwbuf,
 			      struct snd_pcm_substream *substream,
 			      struct snd_pcm_hw_params *params,
 			      int direction)
@@ -557,13 +557,13 @@ int set_audiobuffer_attribute(struct audio_hw_buffer *audio_hwbuf,
 	return ret;
 }
 
-void RingBuf_copyFromUserLinear(struct RingBuf *RingBuf1, void __user *buf,
+void scp_RingBuf_copyFromUserLinear(struct RingBuf *RingBuf1, void __user *buf,
 				unsigned int count)
 {
 	int spaceIHave, ret;
 	char *end = RingBuf1->pBufBase + RingBuf1->bufLen;
 	/* count buffer data I have */
-	spaceIHave = RingBuf_getFreeSpace(RingBuf1);
+	spaceIHave = scp_RingBuf_getFreeSpace(RingBuf1);
 
 	/* if not enough, assert */
 	/* ASSERT(spaceIHave >= count); */
@@ -607,7 +607,7 @@ void RingBuf_copyFromUserLinear(struct RingBuf *RingBuf1, void __user *buf,
 	RingBuf1->datacount += count;
 }
 
-void ringbuf_copyto_user_linear(void __user *buf, struct RingBuf *RingBuf1,
+void scp_ringbuf_copyto_user_linear(void __user *buf, struct RingBuf *RingBuf1,
 			  unsigned int count)
 {
 	int ret = 0;
@@ -615,9 +615,9 @@ void ringbuf_copyto_user_linear(void __user *buf, struct RingBuf *RingBuf1,
 	if (count == 0)
 		return;
 
-	if (RingBuf_getDataCount(RingBuf1) < count) {
-		AUD_LOG_D("RingBuf_getDataCount(RingBuf1) %d < count %d\n",
-			  RingBuf_getDataCount(RingBuf1), count);
+	if (scp_RingBuf_getDataCount(RingBuf1) < count) {
+		AUD_LOG_D("scp_RingBuf_getDataCount(RingBuf1) %d < count %d\n",
+			  scp_RingBuf_getDataCount(RingBuf1), count);
 		return;
 	}
 
@@ -655,12 +655,12 @@ void ringbuf_copyto_user_linear(void __user *buf, struct RingBuf *RingBuf1,
 		}
 	}
 	RingBuf1->datacount -= count;
-	Ringbuf_Check(RingBuf1);
+	scp_Ringbuf_Check(RingBuf1);
 }
 
 #endif
 
-int init_ring_buf(struct RingBuf *buf, char *vaaddr, int size)
+int scp_init_ring_buf(struct RingBuf *buf, char *vaaddr, int size)
 {
 	if (buf == NULL) {
 		AUD_LOG_D("%s buf == NULL\n", __func__);
@@ -682,7 +682,7 @@ int init_ring_buf(struct RingBuf *buf, char *vaaddr, int size)
 	return 0;
 }
 
-int init_ring_buf_bridge(struct ringbuf_bridge *buf_bridge,
+int scp_init_ring_buf_bridge(struct ringbuf_bridge *buf_bridge,
 			 unsigned long long paaddr, int size)
 {
 	if (buf_bridge == NULL) {
@@ -705,7 +705,7 @@ int init_ring_buf_bridge(struct ringbuf_bridge *buf_bridge,
 	return 0;
 }
 
-void RingBuf_Bridge_Reset(struct ringbuf_bridge *RingBuf1)
+void scp_RingBuf_Bridge_Reset(struct ringbuf_bridge *RingBuf1)
 {
 	if (RingBuf1 == NULL)
 		return;
@@ -715,7 +715,7 @@ void RingBuf_Bridge_Reset(struct ringbuf_bridge *RingBuf1)
 	RingBuf1->datacount = 0;
 }
 
-int RingBuf_Bridge_Clear(struct ringbuf_bridge *RingBuf1)
+int scp_RingBuf_Bridge_Clear(struct ringbuf_bridge *RingBuf1)
 {
 	if (RingBuf1 == NULL)
 		return -1;
@@ -732,7 +732,7 @@ int RingBuf_Bridge_Clear(struct ringbuf_bridge *RingBuf1)
 	return 0;
 }
 
-bool is_ringbuf_clear(struct RingBuf *ring_buf)
+bool scp_is_ringbuf_clear(struct RingBuf *ring_buf)
 {
 	if (ring_buf == NULL) {
 		AUD_LOG_W("%s() ring_buf NULL\n", __func__);
@@ -749,7 +749,7 @@ bool is_ringbuf_clear(struct RingBuf *ring_buf)
 	return false;
 }
 
-bool is_ringbuf_bridge_clear(struct ringbuf_bridge *ring_buf)
+bool scp_is_ringbuf_bridge_clear(struct ringbuf_bridge *ring_buf)
 {
 	if (ring_buf == NULL) {
 		AUD_LOG_W("%s() ring_buf bridge NULL\n", __func__);
@@ -767,31 +767,31 @@ bool is_ringbuf_bridge_clear(struct ringbuf_bridge *ring_buf)
 }
 
 /* check if ringbur read write pointer*/
-void Ringbuf_Bridge_Check(struct ringbuf_bridge *buf_bridge)
+void scp_Ringbuf_Bridge_Check(struct ringbuf_bridge *buf_bridge)
 {
 	if (buf_bridge->pRead > buf_bridge->pBufBase + buf_bridge->bufLen) {
-		dump_rbuf_bridge(buf_bridge);
+		scp_dump_rbuf_bridge(buf_bridge);
 #if defined(__linux__)
 		dump_stack();
 #endif
 		SCP_AUD_ASSERT(0);
 	}
 	if (buf_bridge->pWrite > buf_bridge->pBufBase + buf_bridge->bufLen) {
-		dump_rbuf_bridge(buf_bridge);
+		scp_dump_rbuf_bridge(buf_bridge);
 #if defined(__linux__)
 		dump_stack();
 #endif
 		SCP_AUD_ASSERT(0);
 	}
 	if (buf_bridge->pWrite < buf_bridge->pBufBase) {
-		dump_rbuf_bridge(buf_bridge);
+		scp_dump_rbuf_bridge(buf_bridge);
 #if defined(__linux__)
 		dump_stack();
 #endif
 		SCP_AUD_ASSERT(0);
 	}
 	if (buf_bridge->pRead < buf_bridge->pBufBase) {
-		dump_rbuf_bridge(buf_bridge);
+		scp_dump_rbuf_bridge(buf_bridge);
 #if defined(__linux__)
 		dump_stack();
 #endif
@@ -800,13 +800,13 @@ void Ringbuf_Bridge_Check(struct ringbuf_bridge *buf_bridge)
 }
 
 /* check if ringbur read write pointer */
-void Ringbuf_Check(struct RingBuf *RingBuf1)
+void scp_Ringbuf_Check(struct RingBuf *RingBuf1)
 {
 	if (RingBuf1->pRead  ==  RingBuf1->pWrite) {
 #ifdef RINGBUF_COUNT_CHECK
 		if (RingBuf1->datacount != 0 && RingBuf1->datacount
 		    != RingBuf1->bufLen) {
-			dump_ring_bufinfo(RingBuf1);
+			scp_dump_ring_bufinfo(RingBuf1);
 #if defined(__linux__)
 			dump_stack();
 #endif
@@ -817,7 +817,7 @@ void Ringbuf_Check(struct RingBuf *RingBuf1)
 #ifdef RINGBUF_COUNT_CHECK
 		if ((RingBuf1->pWrite - RingBuf1->pRead)
 		     != RingBuf1->datacount) {
-			dump_ring_bufinfo(RingBuf1);
+			scp_dump_ring_bufinfo(RingBuf1);
 #if defined(__linux__)
 			dump_stack();
 #endif
@@ -828,7 +828,7 @@ void Ringbuf_Check(struct RingBuf *RingBuf1)
 #ifdef RINGBUF_COUNT_CHECK
 		if ((RingBuf1->bufLen - (RingBuf1->pRead - RingBuf1->pWrite))
 		     != RingBuf1->datacount) {
-			dump_ring_bufinfo(RingBuf1);
+			scp_dump_ring_bufinfo(RingBuf1);
 #if defined(__linux__)
 			dump_stack();
 #endif
@@ -838,7 +838,7 @@ void Ringbuf_Check(struct RingBuf *RingBuf1)
 	}
 	if (RingBuf1->pWrite < RingBuf1->pBufBase ||
 	    RingBuf1->pWrite > RingBuf1->pBufEnd) {
-		dump_rbuf(RingBuf1);
+		scp_dump_rbuf(RingBuf1);
 #if defined(__linux__)
 		dump_stack();
 #endif
@@ -846,14 +846,14 @@ void Ringbuf_Check(struct RingBuf *RingBuf1)
 	}
 	if (RingBuf1->pRead < RingBuf1->pBufBase ||
 	    RingBuf1->pRead > RingBuf1->pBufEnd) {
-		dump_rbuf(RingBuf1);
+		scp_dump_rbuf(RingBuf1);
 #if defined(__linux__)
 		dump_stack();
 #endif
 		SCP_AUD_ASSERT(0);
 	}
 	if (RingBuf1->datacount < 0) {
-		dump_ring_bufinfo(RingBuf1);
+		scp_dump_ring_bufinfo(RingBuf1);
 #if defined(__linux__)
 		dump_stack();
 #endif
@@ -861,7 +861,7 @@ void Ringbuf_Check(struct RingBuf *RingBuf1)
 	}
 }
 
-void RingBuf_Reset(struct RingBuf *RingBuf1)
+void scp_RingBuf_Reset(struct RingBuf *RingBuf1)
 {
 	if (RingBuf1 == NULL)
 		return;
@@ -873,7 +873,7 @@ void RingBuf_Reset(struct RingBuf *RingBuf1)
 	RingBuf1->datacount = 0;
 }
 
-int RingBuf_Clear(struct RingBuf *RingBuf1)
+int scp_RingBuf_Clear(struct RingBuf *RingBuf1)
 {
 	if (RingBuf1 == NULL)
 		return -1;
@@ -892,7 +892,7 @@ int RingBuf_Clear(struct RingBuf *RingBuf1)
 	return 0;
 }
 
-int clear_audiobuffer_hw(struct audio_hw_buffer *audio_hwbuf)
+int scp_clear_audiobuffer_hw(struct audio_hw_buffer *audio_hwbuf)
 {
 
 	int ret = 0;
@@ -900,12 +900,12 @@ int clear_audiobuffer_hw(struct audio_hw_buffer *audio_hwbuf)
 	if (audio_hwbuf == NULL)
 		return -1;
 
-	RingBuf_Bridge_Reset(&audio_hwbuf->aud_buffer.buf_bridge);
+	scp_RingBuf_Bridge_Reset(&audio_hwbuf->aud_buffer.buf_bridge);
 
 	return ret;
 }
 
-int reset_audiobuffer(struct audio_buffer *audio_buf)
+int scp_reset_audiobuffer(struct audio_buffer *audio_buf)
 {
 	int ret = 0;
 
@@ -916,12 +916,12 @@ int reset_audiobuffer(struct audio_buffer *audio_buf)
 	audio_buf->start_threshold = 0;
 	audio_buf->stop_threshold = 0;
 
-	RingBuf_Bridge_Reset(&audio_buf->buf_bridge);
+	scp_RingBuf_Bridge_Reset(&audio_buf->buf_bridge);
 
 	return ret;
 }
 
-int reset_audiobuffer_hw(struct audio_hw_buffer *audio_hwbuf)
+int scp_reset_audiobuffer_hw(struct audio_hw_buffer *audio_hwbuf)
 {
 	int ret = 0;
 	struct audio_buffer *audio_buf = &audio_hwbuf->aud_buffer;
@@ -935,12 +935,12 @@ int reset_audiobuffer_hw(struct audio_hw_buffer *audio_hwbuf)
 	audio_hwbuf->audio_memiftype = 0;
 	audio_hwbuf->irq_num = 0;
 
-	ret = reset_audiobuffer(audio_buf);
+	ret = scp_reset_audiobuffer(audio_buf);
 
 	return ret;
 }
 
-int set_audiobuffer_hw(struct audio_hw_buffer *audio_hwbuf, int hw_buffer)
+int scp_set_audiobuffer_hw(struct audio_hw_buffer *audio_hwbuf, int hw_buffer)
 {
 	int ret = 0;
 
@@ -953,7 +953,7 @@ int set_audiobuffer_hw(struct audio_hw_buffer *audio_hwbuf, int hw_buffer)
 	return ret;
 }
 
-int set_audiobuffer_memorytype(struct audio_hw_buffer *audio_hwbuf,
+int scp_set_audiobuffer_memorytype(struct audio_hw_buffer *audio_hwbuf,
 				       int memory_type)
 {
 	int ret = 0;
@@ -967,7 +967,7 @@ int set_audiobuffer_memorytype(struct audio_hw_buffer *audio_hwbuf,
 	return ret;
 }
 
-int set_audiobuffer_audio_memiftype(struct audio_hw_buffer *audio_hwbuf,
+int scp_set_audiobuffer_audio_memiftype(struct audio_hw_buffer *audio_hwbuf,
 				    int audio_memiftype)
 {
 	int ret = 0;
@@ -981,7 +981,7 @@ int set_audiobuffer_audio_memiftype(struct audio_hw_buffer *audio_hwbuf,
 	return ret;
 }
 
-int set_audiobuffer_audio_irq_num(struct audio_hw_buffer *audio_hwbuf,
+int scp_set_audiobuffer_audio_irq_num(struct audio_hw_buffer *audio_hwbuf,
 				  int irq_num)
 {
 	int ret = 0;
@@ -995,7 +995,7 @@ int set_audiobuffer_audio_irq_num(struct audio_hw_buffer *audio_hwbuf,
 	return ret;
 }
 
-int sync_ringbuf_readidx(struct RingBuf *task_ring_buf,
+int scp_sync_ringbuf_readidx(struct RingBuf *task_ring_buf,
 			 struct ringbuf_bridge *buf_bridge)
 {
 	unsigned int datacount = 0;
@@ -1009,14 +1009,14 @@ int sync_ringbuf_readidx(struct RingBuf *task_ring_buf,
 		return -1;
 	}
 
-	if (is_ringbuf_clear(task_ring_buf)) {
-		dump_rbuf_s("sync ringbuf readidx, rbuf is clear",
+	if (scp_is_ringbuf_clear(task_ring_buf)) {
+		scp_dump_rbuf_s("sync ringbuf readidx, rbuf is clear",
 			    task_ring_buf);
 		return -1;
 	}
 
-	if (is_ringbuf_bridge_clear(buf_bridge)) {
-		dump_rbuf_bridge_s("sync ringbuf readidx, rbuf_bridge is clear",
+	if (scp_is_ringbuf_bridge_clear(buf_bridge)) {
+		scp_dump_rbuf_bridge_s("sync ringbuf readidx, rbuf_bridge is clear",
 				   buf_bridge);
 		return -1;
 	}
@@ -1039,18 +1039,18 @@ int sync_ringbuf_readidx(struct RingBuf *task_ring_buf,
 
 #ifdef RINGBUF_COUNT_CHECK
 	if (datacount == 0 || datacount == task_ring_buf->bufLen) {
-		dump_rbuf_s(__func__, task_ring_buf);
-		dump_rbuf_bridge_s(__func__, buf_bridge);
+		scp_dump_rbuf_s(__func__, task_ring_buf);
+		scp_dump_rbuf_bridge_s(__func__, buf_bridge);
 	}
 #endif
-	RingBuf_update_readptr(task_ring_buf, datacount);
+	scp_RingBuf_update_readptr(task_ring_buf, datacount);
 
-	Ringbuf_Check(task_ring_buf);
-	Ringbuf_Bridge_Check(buf_bridge);
+	scp_Ringbuf_Check(task_ring_buf);
+	scp_Ringbuf_Bridge_Check(buf_bridge);
 	return 0;
 }
 
-int sync_ringbuf_writeidx(struct RingBuf *task_ring_buf,
+int scp_sync_ringbuf_writeidx(struct RingBuf *task_ring_buf,
 			  struct ringbuf_bridge *buf_bridge)
 {
 	unsigned int datacount = 0;
@@ -1064,14 +1064,14 @@ int sync_ringbuf_writeidx(struct RingBuf *task_ring_buf,
 		return -1;
 	}
 
-	if (is_ringbuf_clear(task_ring_buf)) {
-		dump_rbuf_s("sync ringbuf writeidx, rbuf is clear",
+	if (scp_is_ringbuf_clear(task_ring_buf)) {
+		scp_dump_rbuf_s("sync ringbuf writeidx, rbuf is clear",
 			    task_ring_buf);
 		return -1;
 	}
 
-	if (is_ringbuf_bridge_clear(buf_bridge)) {
-		dump_rbuf_bridge_s("sync ringbuf writeidx, rbuf_bridge is clear",
+	if (scp_is_ringbuf_bridge_clear(buf_bridge)) {
+		scp_dump_rbuf_bridge_s("sync ringbuf writeidx, rbuf_bridge is clear",
 				   buf_bridge);
 		return -1;
 	}
@@ -1092,14 +1092,14 @@ int sync_ringbuf_writeidx(struct RingBuf *task_ring_buf,
 		datacount = task_ring_buf->bufLen -
 				(task_ring_buf->pWrite - writeidx);
 
-	RingBuf_update_writeptr(task_ring_buf, datacount);
+	scp_RingBuf_update_writeptr(task_ring_buf, datacount);
 
-	Ringbuf_Check(task_ring_buf);
-	Ringbuf_Bridge_Check(buf_bridge);
+	scp_Ringbuf_Check(task_ring_buf);
+	scp_Ringbuf_Bridge_Check(buf_bridge);
 	return 0;
 }
 
-int sync_bridge_ringbuf_readidx(struct ringbuf_bridge *buf_bridge,
+int scp_sync_bridge_ringbuf_readidx(struct ringbuf_bridge *buf_bridge,
 				struct RingBuf *task_ring_buf)
 {
 	if (task_ring_buf == NULL) {
@@ -1113,12 +1113,12 @@ int sync_bridge_ringbuf_readidx(struct ringbuf_bridge *buf_bridge,
 	buf_bridge->pRead = buf_bridge->pBufBase +
 	(task_ring_buf->pRead - task_ring_buf->pBufBase);
 
-	Ringbuf_Check(task_ring_buf);
-	Ringbuf_Bridge_Check(buf_bridge);
+	scp_Ringbuf_Check(task_ring_buf);
+	scp_Ringbuf_Bridge_Check(buf_bridge);
 	return 0;
 }
 
-int sync_bridge_ringbuf_writeidx(struct ringbuf_bridge *buf_bridge,
+int scp_sync_bridge_ringbuf_writeidx(struct ringbuf_bridge *buf_bridge,
 				 struct RingBuf *task_ring_buf)
 {
 	if (task_ring_buf == NULL) {
@@ -1138,13 +1138,13 @@ int sync_bridge_ringbuf_writeidx(struct ringbuf_bridge *buf_bridge,
 	buf_bridge->pWrite = buf_bridge->pBufBase +
 		(task_ring_buf->pWrite - task_ring_buf->pBufBase);
 
-	Ringbuf_Check(task_ring_buf);
-	Ringbuf_Bridge_Check(buf_bridge);
+	scp_Ringbuf_Check(task_ring_buf);
+	scp_Ringbuf_Bridge_Check(buf_bridge);
 	return 0;
 }
 
 
-void dump_rbuf_bridge(struct ringbuf_bridge *ring_buffer_bridge)
+void scp_dump_rbuf_bridge(struct ringbuf_bridge *ring_buffer_bridge)
 {
 	if (ring_buffer_bridge == NULL)
 		return;
@@ -1173,7 +1173,7 @@ void dump_rbuf_bridge(struct ringbuf_bridge *ring_buffer_bridge)
 #endif
 }
 
-void dump_rbuf_bridge_s(const char *appendingstring,
+void scp_dump_rbuf_bridge_s(const char *appendingstring,
 			struct ringbuf_bridge *ring_buffer_bridge)
 {
 	if (ring_buffer_bridge == NULL)
@@ -1203,7 +1203,7 @@ void dump_rbuf_bridge_s(const char *appendingstring,
 }
 
 
-void dump_rbuf(struct RingBuf *ring_buffer)
+void scp_dump_rbuf(struct RingBuf *ring_buffer)
 {
 	if (ring_buffer == NULL)
 		return;
@@ -1228,7 +1228,7 @@ void dump_rbuf(struct RingBuf *ring_buffer)
 #endif
 }
 
-void dump_rbuf_s(const char *appendingstring, struct RingBuf *ring_buffer)
+void scp_dump_rbuf_s(const char *appendingstring, struct RingBuf *ring_buffer)
 {
 	if (ring_buffer == NULL)
 		return;
@@ -1253,13 +1253,13 @@ void dump_rbuf_s(const char *appendingstring, struct RingBuf *ring_buffer)
 #endif
 }
 
-void dump_buf_attr(struct buf_attr bufattr)
+void scp_dump_buf_attr(struct buf_attr bufattr)
 {
 	AUD_LOG_D("%s format = %d rate = %d channel = %d\n", __func__,
 		  bufattr.format, bufattr.rate, bufattr.channel);
 }
 
-void dump_audio_buffer(struct audio_buffer *audio_buf)
+void scp_dump_audio_buffer(struct audio_buffer *audio_buf)
 {
 	if (audio_buf == NULL)
 		return;
@@ -1271,11 +1271,11 @@ void dump_audio_buffer(struct audio_buffer *audio_buf)
 		audio_buf->start_threshold,
 		audio_buf->stop_threshold);
 
-	dump_rbuf_bridge(&audio_buf->buf_bridge);
-	dump_buf_attr(audio_buf->buffer_attr);
+	scp_dump_rbuf_bridge(&audio_buf->buf_bridge);
+	scp_dump_buf_attr(audio_buf->buffer_attr);
 }
 
-void dump_audio_hwbuffer(struct audio_hw_buffer *audio_hwbuf)
+void scp_dump_audio_hwbuffer(struct audio_hw_buffer *audio_hwbuf)
 {
 	if (audio_hwbuf == NULL)
 		return;
@@ -1295,21 +1295,21 @@ void dump_audio_hwbuffer(struct audio_hw_buffer *audio_hwbuf)
 		audio_hwbuf->memory_type);
 
 #endif
-	dump_audio_buffer(&audio_hwbuf->aud_buffer);
+	scp_dump_audio_buffer(&audio_hwbuf->aud_buffer);
 }
 
-void dump_ring_bufinfo(struct RingBuf *buf)
+void scp_dump_ring_bufinfo(struct RingBuf *buf)
 {
 #if defined(__linux__)
 	pr_info(
 		"pBufBase = %p pBufEnd = %p  pread = %p write = %p DataCount = %u freespace = %u\n",
 		buf->pBufBase, buf->pBufEnd, buf->pRead, buf->pWrite,
-		RingBuf_getDataCount(buf), RingBuf_getFreeSpace(buf));
+		scp_RingBuf_getDataCount(buf), scp_RingBuf_getFreeSpace(buf));
 #else
 	AUD_LOG_D(
 		"pBufBase = %p pBufEnd = %p  pread = %p p write = %p DataCount = %u freespace = %u\n",
 		buf->pBufBase, buf->pBufEnd, buf->pRead, buf->pWrite,
-		RingBuf_getDataCount(buf), RingBuf_getFreeSpace(buf));
+		scp_RingBuf_getDataCount(buf), scp_RingBuf_getFreeSpace(buf));
 #endif
 }
 
@@ -1425,11 +1425,11 @@ int RingBuf_copyFromRingBuf_dma(struct RingBuf *RingBuft,
 	if (count == 0)
 		return 0;
 
-	if ((RingBuf_getDataCount(RingBufs) < count) ||
-	    (RingBuf_getFreeSpace(RingBuft) < count)) {
+	if ((scp_RingBuf_getDataCount(RingBufs) < count) ||
+	    (scp_RingBuf_getFreeSpace(RingBuft) < count)) {
 		AUD_LOG_D("Space RingBuft %d || Data RingBufs %d < count %d\n",
-			  RingBuf_getFreeSpace(RingBuft),
-			  RingBuf_getDataCount(RingBufs), count);
+			  scp_RingBuf_getFreeSpace(RingBuft),
+			  scp_RingBuf_getDataCount(RingBufs), count);
 		return 0;
 	}
 	if (RingBufs->pRead <= RingBufs->pWrite) {
@@ -1456,8 +1456,8 @@ int RingBuf_copyFromRingBuf_dma(struct RingBuf *RingBuft,
 		}
 	}
 	RingBufs->datacount += count;
-	Ringbuf_Check(RingBuft);
-	Ringbuf_Check(RingBufs);
+	scp_Ringbuf_Check(RingBuft);
+	scp_Ringbuf_Check(RingBufs);
 	return count;
 }
 
@@ -1468,11 +1468,11 @@ void RingBuf_copyToLinear_dma(char *buf, struct RingBuf *RingBuf1,
 		return;
 
 	/* if not enough, assert */
-	/* ASSERT(RingBuf_getDataCount(RingBuf1) >= count); */
+	/* ASSERT(scp_RingBuf_getDataCount(RingBuf1) >= count); */
 
-	if (RingBuf_getDataCount(RingBuf1) < count)
+	if (scp_RingBuf_getDataCount(RingBuf1) < count)
 		AUD_LOG_D("datacount(RingBuf1) %d < count %d\n",
-			  RingBuf_getDataCount(RingBuf1), count);
+			  scp_RingBuf_getDataCount(RingBuf1), count);
 
 	if (RingBuf1->pRead <= RingBuf1->pWrite) {
 		dma_memcpy(buf, RingBuf1->pRead, count, IsDram, mem_id);
@@ -1493,7 +1493,7 @@ void RingBuf_copyToLinear_dma(char *buf, struct RingBuf *RingBuf1,
 		}
 	}
 	RingBuf1->datacount -= count;
-	Ringbuf_Check(RingBuf1);
+	scp_Ringbuf_Check(RingBuf1);
 }
 
 /**
@@ -1506,13 +1506,13 @@ void RingBuf_copyFromRingBufAll_dma(struct RingBuf *RingBuft,
 				    int mem_id)
 {
 	/* if not enough, assert */
-	/* ASSERT(RingBuf_getFreeSpace(RingBuft) >= */
-	/* RingBuf_getDataCount(RingBufs)); */
-	if (RingBuf_getFreeSpace(RingBuft) < RingBuf_getDataCount(RingBufs))
+	/* ASSERT(scp_RingBuf_getFreeSpace(RingBuft) >= */
+	/* scp_RingBuf_getDataCount(RingBufs)); */
+	if (scp_RingBuf_getFreeSpace(RingBuft) < scp_RingBuf_getDataCount(RingBufs))
 		AUD_LOG_D(
-			"RingBuf_getFreeSpace(RingBuft) %d < RingBuf_getDataCount(RingBufs) %d\n",
-			RingBuf_getFreeSpace(RingBuft),
-			RingBuf_getDataCount(RingBufs));
+			"scp_RingBuf_getFreeSpace(RingBuft) %d < scp_RingBuf_getDataCount(RingBufs) %d\n",
+			scp_RingBuf_getFreeSpace(RingBuft),
+			scp_RingBuf_getDataCount(RingBufs));
 
 	if (RingBufs->pRead <= RingBufs->pWrite) {
 		RingBuf_copyFromLinear_dma(RingBuft, RingBufs->pRead,
@@ -1527,8 +1527,8 @@ void RingBuf_copyFromRingBufAll_dma(struct RingBuf *RingBuft,
 			RingBufs->pWrite - RingBufs->pBufBase, IsDram, mem_id);
 	}
 	RingBufs->pRead = RingBufs->pWrite;
-	Ringbuf_Check(RingBuft);
-	Ringbuf_Check(RingBufs);
+	scp_Ringbuf_Check(RingBuft);
+	scp_Ringbuf_Check(RingBufs);
 }
 
 void RingBuf_copyFromLinear_dma(struct RingBuf *RingBuf1, const char *buf,
@@ -1537,7 +1537,7 @@ void RingBuf_copyFromLinear_dma(struct RingBuf *RingBuf1, const char *buf,
 	int spaceIHave;
 	char *end = RingBuf1->pBufBase + RingBuf1->bufLen;
 	/* count buffer data I have */
-	spaceIHave = RingBuf_getFreeSpace(RingBuf1);
+	spaceIHave = scp_RingBuf_getFreeSpace(RingBuf1);
 
 	/* if not enough, assert */
 	/* ASSERT(spaceIHave >= count); */
@@ -1568,7 +1568,7 @@ void RingBuf_copyFromLinear_dma(struct RingBuf *RingBuf1, const char *buf,
 			RingBuf1->pWrite -= RingBuf1->bufLen;
 	}
 	RingBuf1->datacount += count;
-	Ringbuf_Check(RingBuf1);
+	scp_Ringbuf_Check(RingBuf1);
 }
 
 
