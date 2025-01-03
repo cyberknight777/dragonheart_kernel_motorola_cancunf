@@ -1,9 +1,0 @@
-config MOTO_F_MASS_STORAGE
-	tristate "Moto MASS_STORAGE extension"
-	default n
-	help
-	  Say Y here if you have a MOTO MASS STORAGE compatible
-	  device connected.
-
-	  This driver can also be built as a module. If so, the module
-	  will be called moto_f_mass_storage.
