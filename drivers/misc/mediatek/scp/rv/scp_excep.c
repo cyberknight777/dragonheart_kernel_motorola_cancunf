@@ -75,10 +75,10 @@ struct scp_dump_st scp_dump;
 //static unsigned int scp_A_dump_length;
 static unsigned int scp_A_task_context_addr;
 
-struct scp_status_reg *c0_m = NULL;
-struct scp_status_reg *c0_t1_m = NULL;
-struct scp_status_reg *c1_m = NULL;
-struct scp_status_reg *c1_t1_m = NULL;
+struct scp_status_reg *scp_c0_m = NULL;
+struct scp_status_reg *scp_c0_t1_m = NULL;
+struct scp_status_reg *scp_c1_m = NULL;
+struct scp_status_reg *scp_c1_t1_m = NULL;
 void (*scp_do_tbufdump)(uint32_t*, uint32_t*) = NULL;
 
 int scp_ee_enable;
@@ -117,75 +117,75 @@ uint32_t memorydump_size_probe(struct platform_device *pdev)
 
 void scp_dump_last_regs(void)
 {
-	c0_m->status = readl(R_CORE0_STATUS);
-	c0_m->pc = readl(R_CORE0_MON_PC);
-	c0_m->lr = readl(R_CORE0_MON_LR);
-	c0_m->sp = readl(R_CORE0_MON_SP);
-	c0_m->pc_latch = readl(R_CORE0_MON_PC_LATCH);
-	c0_m->lr_latch = readl(R_CORE0_MON_LR_LATCH);
-	c0_m->sp_latch = readl(R_CORE0_MON_SP_LATCH);
+	scp_c0_m->status = readl(R_CORE0_STATUS);
+	scp_c0_m->pc = readl(R_CORE0_MON_PC);
+	scp_c0_m->lr = readl(R_CORE0_MON_LR);
+	scp_c0_m->sp = readl(R_CORE0_MON_SP);
+	scp_c0_m->pc_latch = readl(R_CORE0_MON_PC_LATCH);
+	scp_c0_m->lr_latch = readl(R_CORE0_MON_LR_LATCH);
+	scp_c0_m->sp_latch = readl(R_CORE0_MON_SP_LATCH);
 	if (scpreg.twohart) {
-		c0_t1_m->pc = readl(R_CORE0_T1_MON_PC);
-		c0_t1_m->lr = readl(R_CORE0_T1_MON_LR);
-		c0_t1_m->sp = readl(R_CORE0_T1_MON_SP);
-		c0_t1_m->pc_latch = readl(R_CORE0_T1_MON_PC_LATCH);
-		c0_t1_m->lr_latch = readl(R_CORE0_T1_MON_LR_LATCH);
-		c0_t1_m->sp_latch = readl(R_CORE0_T1_MON_SP_LATCH);
+		scp_c0_t1_m->pc = readl(R_CORE0_T1_MON_PC);
+		scp_c0_t1_m->lr = readl(R_CORE0_T1_MON_LR);
+		scp_c0_t1_m->sp = readl(R_CORE0_T1_MON_SP);
+		scp_c0_t1_m->pc_latch = readl(R_CORE0_T1_MON_PC_LATCH);
+		scp_c0_t1_m->lr_latch = readl(R_CORE0_T1_MON_LR_LATCH);
+		scp_c0_t1_m->sp_latch = readl(R_CORE0_T1_MON_SP_LATCH);
 	}
 	if (scpreg.core_nums == 2) {
-		c1_m->status = readl(R_CORE1_STATUS);
-		c1_m->pc = readl(R_CORE1_MON_PC);
-		c1_m->lr = readl(R_CORE1_MON_LR);
-		c1_m->sp = readl(R_CORE1_MON_SP);
-		c1_m->pc_latch = readl(R_CORE1_MON_PC_LATCH);
-		c1_m->lr_latch = readl(R_CORE1_MON_LR_LATCH);
-		c1_m->sp_latch = readl(R_CORE1_MON_SP_LATCH);
+		scp_c1_m->status = readl(R_CORE1_STATUS);
+		scp_c1_m->pc = readl(R_CORE1_MON_PC);
+		scp_c1_m->lr = readl(R_CORE1_MON_LR);
+		scp_c1_m->sp = readl(R_CORE1_MON_SP);
+		scp_c1_m->pc_latch = readl(R_CORE1_MON_PC_LATCH);
+		scp_c1_m->lr_latch = readl(R_CORE1_MON_LR_LATCH);
+		scp_c1_m->sp_latch = readl(R_CORE1_MON_SP_LATCH);
 	}
 
 	if (scpreg.core_nums == 2 && scpreg.twohart) {
-		c1_t1_m->pc = readl(R_CORE1_T1_MON_PC);
-		c1_t1_m->lr = readl(R_CORE1_T1_MON_LR);
-		c1_t1_m->sp = readl(R_CORE1_T1_MON_SP);
-		c1_t1_m->pc_latch = readl(R_CORE1_T1_MON_PC_LATCH);
-		c1_t1_m->lr_latch = readl(R_CORE1_T1_MON_LR_LATCH);
-		c1_t1_m->sp_latch = readl(R_CORE1_T1_MON_SP_LATCH);
+		scp_c1_t1_m->pc = readl(R_CORE1_T1_MON_PC);
+		scp_c1_t1_m->lr = readl(R_CORE1_T1_MON_LR);
+		scp_c1_t1_m->sp = readl(R_CORE1_T1_MON_SP);
+		scp_c1_t1_m->pc_latch = readl(R_CORE1_T1_MON_PC_LATCH);
+		scp_c1_t1_m->lr_latch = readl(R_CORE1_T1_MON_LR_LATCH);
+		scp_c1_t1_m->sp_latch = readl(R_CORE1_T1_MON_SP_LATCH);
 	}
 	scp_dump_bus_tracker_status();
 }
 
 void scp_show_last_regs(void)
 {
-	pr_notice("[SCP] c0h0_status = %08x\n", c0_m->status);
-	pr_notice("[SCP] c0h0_pc = %08x\n", c0_m->pc);
-	pr_notice("[SCP] c0h0_lr = %08x\n", c0_m->lr);
-	pr_notice("[SCP] c0h0_sp = %08x\n", c0_m->sp);
-	pr_notice("[SCP] c0h0_pc_latch = %08x\n", c0_m->pc_latch);
-	pr_notice("[SCP] c0h0_lr_latch = %08x\n", c0_m->lr_latch);
-	pr_notice("[SCP] c0h0_sp_latch = %08x\n", c0_m->sp_latch);
+	pr_notice("[SCP] c0h0_status = %08x\n", scp_c0_m->status);
+	pr_notice("[SCP] c0h0_pc = %08x\n", scp_c0_m->pc);
+	pr_notice("[SCP] c0h0_lr = %08x\n", scp_c0_m->lr);
+	pr_notice("[SCP] c0h0_sp = %08x\n", scp_c0_m->sp);
+	pr_notice("[SCP] c0h0_pc_latch = %08x\n", scp_c0_m->pc_latch);
+	pr_notice("[SCP] c0h0_lr_latch = %08x\n", scp_c0_m->lr_latch);
+	pr_notice("[SCP] c0h0_sp_latch = %08x\n", scp_c0_m->sp_latch);
 	if (scpreg.twohart) {
-		pr_notice("[SCP] c0h1_pc = %08x\n", c0_t1_m->pc);
-		pr_notice("[SCP] c0h1_lr = %08x\n", c0_t1_m->lr);
-		pr_notice("[SCP] c0h1_sp = %08x\n", c0_t1_m->sp);
-		pr_notice("[SCP] c0h1_pc_latch = %08x\n", c0_t1_m->pc_latch);
-		pr_notice("[SCP] c0h1_lr_latch = %08x\n", c0_t1_m->lr_latch);
-		pr_notice("[SCP] c0h1_sp_latch = %08x\n", c0_t1_m->sp_latch);
+		pr_notice("[SCP] c0h1_pc = %08x\n", scp_c0_t1_m->pc);
+		pr_notice("[SCP] c0h1_lr = %08x\n", scp_c0_t1_m->lr);
+		pr_notice("[SCP] c0h1_sp = %08x\n", scp_c0_t1_m->sp);
+		pr_notice("[SCP] c0h1_pc_latch = %08x\n", scp_c0_t1_m->pc_latch);
+		pr_notice("[SCP] c0h1_lr_latch = %08x\n", scp_c0_t1_m->lr_latch);
+		pr_notice("[SCP] c0h1_sp_latch = %08x\n", scp_c0_t1_m->sp_latch);
 	}
 	if (scpreg.core_nums == 2) {
-		pr_notice("[SCP] c1h0_status = %08x\n", c1_m->status);
-		pr_notice("[SCP] c1h0_pc = %08x\n", c1_m->pc);
-		pr_notice("[SCP] c1h0_lr = %08x\n", c1_m->lr);
-		pr_notice("[SCP] c1h0_sp = %08x\n", c1_m->sp);
-		pr_notice("[SCP] c1h0_pc_latch = %08x\n", c1_m->pc_latch);
-		pr_notice("[SCP] c1h0_lr_latch = %08x\n", c1_m->lr_latch);
-		pr_notice("[SCP] c1h0_sp_latch = %08x\n", c1_m->sp_latch);
+		pr_notice("[SCP] c1h0_status = %08x\n", scp_c1_m->status);
+		pr_notice("[SCP] c1h0_pc = %08x\n", scp_c1_m->pc);
+		pr_notice("[SCP] c1h0_lr = %08x\n", scp_c1_m->lr);
+		pr_notice("[SCP] c1h0_sp = %08x\n", scp_c1_m->sp);
+		pr_notice("[SCP] c1h0_pc_latch = %08x\n", scp_c1_m->pc_latch);
+		pr_notice("[SCP] c1h0_lr_latch = %08x\n", scp_c1_m->lr_latch);
+		pr_notice("[SCP] c1h0_sp_latch = %08x\n", scp_c1_m->sp_latch);
 	}
 	if (scpreg.core_nums == 2 && scpreg.twohart) {
-		pr_notice("[SCP] c1h1_pc = %08x\n", c1_t1_m->pc);
-		pr_notice("[SCP] c1h1_lr = %08x\n", c1_t1_m->lr);
-		pr_notice("[SCP] c1h1_sp = %08x\n", c1_t1_m->sp);
-		pr_notice("[SCP] c1h1_pc_latch = %08x\n", c1_t1_m->pc_latch);
-		pr_notice("[SCP] c1h1_lr_latch = %08x\n", c1_t1_m->lr_latch);
-		pr_notice("[SCP] c1h1_sp_latch = %08x\n", c1_t1_m->sp_latch);
+		pr_notice("[SCP] c1h1_pc = %08x\n", scp_c1_t1_m->pc);
+		pr_notice("[SCP] c1h1_lr = %08x\n", scp_c1_t1_m->lr);
+		pr_notice("[SCP] c1h1_sp = %08x\n", scp_c1_t1_m->sp);
+		pr_notice("[SCP] c1h1_pc_latch = %08x\n", scp_c1_t1_m->pc_latch);
+		pr_notice("[SCP] c1h1_lr_latch = %08x\n", scp_c1_t1_m->lr_latch);
+		pr_notice("[SCP] c1h1_sp_latch = %08x\n", scp_c1_t1_m->sp_latch);
 	}
 	scp_show_bus_tracker_status();
 }
@@ -620,7 +620,7 @@ static void scp_prepare_aed_dump(char *aed_str,
 		offset += SCP_CHECK_AED_STR_LEN(snprintf(scp_dump.detail_buff + offset,
 		SCP_AED_STR_LEN - offset,
 		"core0 pc=0x%08x, lr=0x%08x, sp=0x%08x\n",
-		c0_m->pc, c0_m->lr, c0_m->sp), offset);
+		scp_c0_m->pc, scp_c0_m->lr, scp_c0_m->sp), offset);
 
 		if (!scpreg.twohart)
 			goto core1;
@@ -628,7 +628,7 @@ static void scp_prepare_aed_dump(char *aed_str,
 		offset += SCP_CHECK_AED_STR_LEN(snprintf(scp_dump.detail_buff + offset,
 		SCP_AED_STR_LEN - offset,
 		"hart1 pc=0x%08x, lr=0x%08x, sp=0x%08x\n",
-		c0_t1_m->pc, c0_t1_m->lr, c0_t1_m->sp), offset);
+		scp_c0_t1_m->pc, scp_c0_t1_m->lr, scp_c0_t1_m->sp), offset);
 core1:
 		if (scpreg.core_nums == 1)
 			goto end;
@@ -636,7 +636,7 @@ core1:
 		offset += SCP_CHECK_AED_STR_LEN(snprintf(scp_dump.detail_buff + offset,
 		SCP_AED_STR_LEN - offset,
 		"core1 pc=0x%08x, lr=0x%08x, sp=0x%08x\n",
-		c1_m->pc, c1_m->lr, c1_m->sp), offset);
+		scp_c1_m->pc, scp_c1_m->lr, scp_c1_m->sp), offset);
 
 		if (!scpreg.twohart)
 			goto end;
@@ -644,7 +644,7 @@ core1:
 		offset += SCP_CHECK_AED_STR_LEN(snprintf(scp_dump.detail_buff + offset,
 		SCP_AED_STR_LEN - offset,
 		"hart1 pc=0x%08x, lr=0x%08x, sp=0x%08x\n",
-		c1_t1_m->pc, c1_t1_m->lr, c1_t1_m->sp), offset);
+		scp_c1_t1_m->pc, scp_c1_t1_m->lr, scp_c1_t1_m->sp), offset);
 end:
 		offset += SCP_CHECK_AED_STR_LEN(snprintf(scp_dump.detail_buff + offset,
 			SCP_AED_STR_LEN - offset, "last log:\n%s", scp_A_log), offset);
@@ -832,22 +832,22 @@ int scp_excep_init(void)
 	pr_notice("[SCP] %s cleaned ramdump\n", __func__);
 
 	/* scp_status_reg init */
-	c0_m = vmalloc(sizeof(struct scp_status_reg));
-	if (!c0_m)
+	scp_c0_m = vmalloc(sizeof(struct scp_status_reg));
+	if (!scp_c0_m)
 		return -1;
 	if (scpreg.twohart) {
-		c0_t1_m = vmalloc(sizeof(struct scp_status_reg));
-		if (!c0_t1_m)
+		scp_c0_t1_m = vmalloc(sizeof(struct scp_status_reg));
+		if (!scp_c0_t1_m)
 			return -1;
 	}
 	if (scpreg.core_nums == 2) {
-		c1_m = vmalloc(sizeof(struct scp_status_reg));
-		if (!c1_m)
+		scp_c1_m = vmalloc(sizeof(struct scp_status_reg));
+		if (!scp_c1_m)
 			return -1;
 	}
 	if (scpreg.core_nums == 2 && scpreg.twohart) {
-		c1_t1_m = vmalloc(sizeof(struct scp_status_reg));
-		if (!c1_t1_m)
+		scp_c1_t1_m = vmalloc(sizeof(struct scp_status_reg));
+		if (!scp_c1_t1_m)
 			return -1;
 	}
 	/* scp_do_tbufdump init, because tbuf is different between rv33/rv55 */

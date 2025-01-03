@@ -52,10 +52,10 @@ enum { r0, r1, r2, r3, r12, lr, pc, psr};
 extern int scp_ee_enable;
 extern int scp_reset_counts;
 
-extern struct scp_status_reg *c0_m;
-extern struct scp_status_reg *c0_t1_m;
-extern struct scp_status_reg *c1_m;
-extern struct scp_status_reg *c1_t1_m;
+extern struct scp_status_reg *scp_c0_m;
+extern struct scp_status_reg *scp_c0_t1_m;
+extern struct scp_status_reg *scp_c1_m;
+extern struct scp_status_reg *scp_c1_t1_m;
 extern uint32_t scp_reg_base_phy;
 
 typedef enum MDUMP {
