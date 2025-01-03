@@ -1222,7 +1222,7 @@ void scp_register_feature(enum feature_id id)
 		return;
 	}
 
-	/* because feature_table is a global variable,
+	/* because scp_feature_table is a global variable,
 	 * use mutex lock to protect it from accessing in the same time
 	 */
 	mutex_lock(&scp_feature_mutex);
@@ -1235,8 +1235,8 @@ void scp_register_feature(enum feature_id id)
 	}
 
 	for (i = 0; i < NUM_FEATURE_ID; i++) {
-		if (feature_table[i].feature == id)
-			feature_table[i].enable = 1;
+		if (scp_feature_table[i].feature == id)
+			scp_feature_table[i].enable = 1;
 	}
 #if SCP_DVFS_INIT_ENABLE
 	scp_expected_freq = scp_get_freq();
@@ -1292,8 +1292,8 @@ void scp_deregister_feature(enum feature_id id)
 	}
 
 	for (i = 0; i < NUM_FEATURE_ID; i++) {
-		if (feature_table[i].feature == id)
-			feature_table[i].enable = 0;
+		if (scp_feature_table[i].feature == id)
+			scp_feature_table[i].enable = 0;
 	}
 #if SCP_DVFS_INIT_ENABLE
 	scp_expected_freq = scp_get_freq();
@@ -1340,7 +1340,7 @@ void scp_register_sensor(enum feature_id id, enum scp_sensor_id sensor_id)
 		pr_debug("[SCP]register sensor id err");
 		return;
 	}
-	/* because feature_table is a global variable
+	/* because scp_feature_table is a global variable
 	 * use mutex lock to protect it from
 	 * accessing in the same time
 	 */
@@ -1368,7 +1368,7 @@ void scp_deregister_sensor(enum feature_id id, enum scp_sensor_id sensor_id)
 		pr_debug("[SCP]deregister sensor id err");
 		return;
 	}
-	/* because feature_table is a global variable
+	/* because scp_feature_table is a global variable
 	 * use mutex lock to protect it from
 	 * accessing in the same time
 	 */
@@ -1780,7 +1780,7 @@ static int scp_device_probe(struct platform_device *pdev)
 			continue;
 		}
 
-		feature_table[f_idx].freq = f_mcps;
+		scp_feature_table[f_idx].freq = f_mcps;
 		pr_err("[SCP] feature maps: <%d  %d>\n", f_idx, f_mcps);
 	}
 

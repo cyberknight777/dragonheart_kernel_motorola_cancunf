@@ -422,9 +422,9 @@ static uint32_t sum_required_freq(uint32_t core_id)
 	 */
 	for (i = 0; i < NUM_FEATURE_ID; i++) {
 		if (i != VCORE_TEST_FEATURE_ID &&
-			feature_table[i].enable == 1 &&
-			feature_table[i].sys_id == core_id)
-			sum += feature_table[i].freq;
+			scp_feature_table[i].enable == 1 &&
+			scp_feature_table[i].sys_id == core_id)
+			sum += scp_feature_table[i].freq;
 	}
 
 	/*
@@ -455,7 +455,7 @@ static uint32_t _mt_scp_dvfs_set_test_freq(uint32_t sum)
 			break;
 		}
 	}
-	feature_table[VCORE_TEST_FEATURE_ID].freq = added_freq;
+	scp_feature_table[VCORE_TEST_FEATURE_ID].freq = added_freq;
 	pr_notice("[%s]test freq: %d + %d = %d (MHz)\n",
 			__func__,
 			sum,
@@ -482,10 +482,10 @@ uint32_t scp_get_freq(void)
 
 	if (sum_core0 > sum_core1) {
 		sum = sum_core0;
-		feature_table[VCORE_TEST_FEATURE_ID].sys_id = SCPSYS_CORE0;
+		scp_feature_table[VCORE_TEST_FEATURE_ID].sys_id = SCPSYS_CORE0;
 	} else {
 		sum = sum_core1;
-		feature_table[VCORE_TEST_FEATURE_ID].sys_id = SCPSYS_CORE1;
+		scp_feature_table[VCORE_TEST_FEATURE_ID].sys_id = SCPSYS_CORE1;
 	}
 
 	/*
@@ -1158,8 +1158,8 @@ static int mt_scp_dvfs_ctrl_proc_show(struct seq_file *m, void *v)
 
 	for (i = 0; i < NUM_FEATURE_ID; i++)
 		seq_printf(m, "feature=%d, freq=%d, enable=%d\n",
-			feature_table[i].feature, feature_table[i].freq,
-			feature_table[i].enable);
+			scp_feature_table[i].feature, scp_feature_table[i].freq,
+			scp_feature_table[i].enable);
 
 	for (i = 0; i < NUM_SENSOR_TYPE; i++)
 		seq_printf(m, "sensor id=%d, freq=%d, enable=%d\n",
@@ -1204,7 +1204,7 @@ static ssize_t mt_scp_dvfs_ctrl_proc_write(
 			if (dvfs_opp == -1) {
 				/* deregister dvfs debug feature */
 				pr_info("remove the opp setting of command\n");
-				feature_table[VCORE_TEST_FEATURE_ID].freq = 0;
+				scp_feature_table[VCORE_TEST_FEATURE_ID].freq = 0;
 				scp_deregister_feature(
 						VCORE_TEST_FEATURE_ID);
 				scp_dvfs_debug_flag = dvfs_opp;

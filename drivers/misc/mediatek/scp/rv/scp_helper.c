@@ -1593,7 +1593,7 @@ static void scp_control_feature(enum feature_id id, bool enable)
 	}
 	mutex_lock(&scp_feature_mutex);
 
-	feature_table[id].enable = enable;
+	scp_feature_table[id].enable = enable;
 #if SCP_DVFS_INIT_ENABLE
 	if (scp_dvfs_feature_enable())
 		scp_expected_freq = scp_get_freq();
@@ -1660,7 +1660,7 @@ void scp_register_sensor(enum feature_id id, int sensor_id)
 		pr_info("[SCP] sensor id not in sensor freq table");
 		return;
 	}
-	/* because feature_table is a global variable
+	/* because scp_feature_table is a global variable
 	 * use mutex lock to protect it from
 	 * accessing in the same time
 	 */
@@ -1695,7 +1695,7 @@ void scp_deregister_sensor(enum feature_id id, int sensor_id)
 		pr_info("[SCP] sensor id not in sensor freq table");
 		return;
 	}
-	/* because feature_table is a global variable
+	/* because scp_feature_table is a global variable
 	 * use mutex lock to protect it from
 	 * accessing in the same time
 	 */
@@ -2111,14 +2111,14 @@ static int scp_feature_table_probe(struct platform_device *pdev)
 			return -1;
 		}
 
-		if (feature_id != feature_table[i].feature) {
+		if (feature_id != scp_feature_table[i].feature) {
 			pr_notice("[SCP] %s: feature id don't match(%d:%d):line %d\n",
-				__func__, feature_id, feature_table[i].feature,
+				__func__, feature_id, scp_feature_table[i].feature,
 				__LINE__);
 			return -1;
 		}
 
-		/* because feature_table data member is bit-field */
+		/* because scp_feature_table data member is bit-field */
 		ret = of_property_read_u32_index(pdev->dev.of_node,
 			"scp_feature_tbl",
 			i * feaure_tbl_item_size + 1,
@@ -2129,7 +2129,7 @@ static int scp_feature_table_probe(struct platform_device *pdev)
 				__func__, i, __LINE__);
 			return -1;
 		}
-		feature_table[i].freq = frequency;
+		scp_feature_table[i].freq = frequency;
 
 		ret = of_property_read_u32_index(pdev->dev.of_node,
 			"scp_feature_tbl",
@@ -2141,7 +2141,7 @@ static int scp_feature_table_probe(struct platform_device *pdev)
 				__func__, i, __LINE__);
 			return -1;
 		}
-		feature_table[i].sys_id = core_id;
+		scp_feature_table[i].sys_id = core_id;
 	}
 	return 0;
 }
@@ -2556,7 +2556,7 @@ static int scp_device_probe(struct platform_device *pdev)
 	/* scp feature table probe */
 	ret = scp_feature_table_probe(pdev);
 	if (ret) {
-		pr_notice("[SCP] feature_table_probe failed\n");
+		pr_notice("[SCP] scp_feature_table_probe failed\n");
 		return ret;
 	}
 	/* scp memorydump size probe */

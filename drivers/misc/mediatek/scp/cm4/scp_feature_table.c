@@ -7,7 +7,7 @@
 #include "scp_feature_define.h"
 #include "scp_ipi.h"
 /*scp feature list*/
-struct scp_feature_tb feature_table[NUM_FEATURE_ID] = {
+struct scp_feature_tb scp_feature_table[NUM_FEATURE_ID] = {
 	{
 		.feature     = VOW_FEATURE_ID,
 		.freq        = 47,
