@@ -109,7 +109,7 @@ void *get_ipi_recv_private(void)
 }
 EXPORT_SYMBOL(get_ipi_recv_private);
 
-void set_ipi_recv_private(void *priv)
+void dsp_set_ipi_recv_private(void *priv)
 {
 	pr_debug("%s\n", __func__);
 

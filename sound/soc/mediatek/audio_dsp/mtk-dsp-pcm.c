@@ -159,7 +159,7 @@ static int dsp_pcm_dev_probe(struct platform_device *pdev)
 		goto err_platform;
 	}
 
-	set_ipi_recv_private((void *)dsp);
+	dsp_set_ipi_recv_private((void *)dsp);
 	set_dsp_base((void *)dsp);
 	dsp_pcm_taskattr_init(pdev);
 

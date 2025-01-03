@@ -63,7 +63,7 @@ int mtk_scp_ipi_send(int task_scene, int data_type, int ack_type,
 
 /* set priv data when receive IPI message */
 void *get_ipi_recv_private(void);
-void set_ipi_recv_private(void *priv);
+void dsp_set_ipi_recv_private(void *priv);
 
 void mtk_dsp_pcm_ipi_recv(struct ipi_msg_t *ipi_msg);
 void mtk_dsp_handler(struct mtk_base_dsp *dsp,
