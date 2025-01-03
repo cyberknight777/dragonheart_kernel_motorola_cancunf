@@ -106,8 +106,10 @@ static wait_queue_head_t scp_A_logwait;
 static DEFINE_MUTEX(scp_logger_mutex);
 static char *scp_last_logger;
 /*global value*/
+#if IS_ENABLED(CONFIG_MTK_TINYSYS_SCP_DEBUG_SUPPORT)
 unsigned int r_pos_debug;
 unsigned int log_ctl_debug;
+#endif
 static struct mutex scp_logger_mutex;
 
 /* ipi message buffer */
