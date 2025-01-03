@@ -114,7 +114,6 @@ struct ccci_cldma_clk_node cldma_clk_table[CLDMA_CLOCK_COUNT] = {
 #ifndef CCCI_LOG_LEVEL /* for platform override */
 #define CCCI_LOG_LEVEL CCCI_LOG_CRITICAL_UART
 #endif
-unsigned int ccci_debug_enable = CCCI_LOG_LEVEL;
 
 static inline struct device *ccci_md_get_dev_by_id(int md_id)
 {

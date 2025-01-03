@@ -31,7 +31,6 @@ static int adc_mV;
 #ifndef CCCI_LOG_LEVEL /* for platform override */
 #define CCCI_LOG_LEVEL CCCI_LOG_CRITICAL_UART
 #endif
-unsigned int ccci_debug_enable = CCCI_LOG_LEVEL;
 #endif
 
 static int ccci_get_adc_info(struct device *dev)
