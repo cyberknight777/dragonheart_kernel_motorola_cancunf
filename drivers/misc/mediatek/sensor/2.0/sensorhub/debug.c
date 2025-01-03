@@ -145,7 +145,7 @@ static int debug_share_mem_cfg(struct share_mem_config *cfg,
 	return share_mem_init(&debug_shm_reader, cfg);
 }
 
-int debug_init(void)
+int sensor_debug_init(void)
 {
 	unsigned long flags = 0;
 
@@ -162,7 +162,7 @@ int debug_init(void)
 	return 0;
 }
 
-void debug_exit(void)
+void sensor_debug_exit(void)
 {
 	sensor_comm_notify_handler_unregister(SENS_COMM_NOTIFY_DEBUG_CMD);
 	share_mem_config_handler_unregister(SHARE_MEM_DEBUG_PAYLOAD_TYPE);

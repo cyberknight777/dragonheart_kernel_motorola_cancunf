@@ -942,7 +942,7 @@ static int __init transceiver_init(void)
 		goto out_sensor_comm;
 	}
 
-	ret = debug_init();
+	ret = sensor_debug_init();
 	if (ret < 0) {
 		pr_err("debug init fail %d\n", ret);
 		goto out_sensor_list;
@@ -1032,7 +1032,7 @@ out_timesync_filter:
 out_cust_cmd:
 	custom_cmd_exit();
 out_debug:
-	debug_exit();
+	sensor_debug_exit();
 out_sensor_list:
 	sensor_list_exit();
 out_sensor_comm:
@@ -1058,7 +1058,7 @@ static void __exit transceiver_exit(void)
 	unregister_pm_notifier(&transceiver_pm_notifier);
 	timesync_exit();
 	custom_cmd_exit();
-	debug_exit();
+	sensor_debug_exit();
 	sensor_list_exit();
 	sensor_ready_notifier_chain_unregister(&transceiver_ready_notifier);
 	host_ready_exit();

@@ -7,7 +7,7 @@
 #define _SENSOR_DEBUG_H_
 
 int debug_get_debug(uint8_t sensor_type, uint8_t *buffer, unsigned int len);
-int debug_init(void);
-void debug_exit(void);
+int sensor_debug_init(void);
+void sensor_debug_exit(void);
 
 #endif
