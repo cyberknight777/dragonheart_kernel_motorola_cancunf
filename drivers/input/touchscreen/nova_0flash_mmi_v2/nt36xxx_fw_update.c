@@ -40,7 +40,7 @@ int32_t nvt_esd_vdd_tp_recovery(void);
 #endif /* NVT_TOUCH_VDD_TP_RECOVERY */
 
 struct TIME_TYPE start, end;
-const struct firmware *fw_entry = NULL;
+static const struct firmware *fw_entry = NULL;
 static size_t fw_need_write_size = 0;
 static uint8_t *fwbuf = NULL;
 
