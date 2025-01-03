@@ -28,7 +28,7 @@ struct usb_policy {
 
 static struct icc_path *usb_icc_path;
 unsigned int peak_bw;
-struct device *gdev;
+struct device *usb_gdev;
 
 #if IS_ENABLED(CONFIG_MTK_PPM_V3)
 
@@ -400,7 +400,7 @@ static int usb_boost_probe(struct platform_device *pdev)
 	USB_BOOST_NOTICE("%s: peak_bw(%x)\n", __func__, peak_bw);
 
 	audio_boost = of_property_read_bool(node, "usb-audio");
-	gdev = &pdev->dev;
+	usb_gdev = &pdev->dev;
 	usb_audio_boost(audio_boost);
 
 	return 0;
@@ -461,7 +461,7 @@ MODULE_LICENSE("GPL v2");
 
 int audio_freq_hold(void)
 {
-	struct device_node *np = gdev->of_node;
+	struct device_node *np = usb_gdev->of_node;
 	int cpu_freq_audio[3];
 	struct usb_policy *req_policy;
 	struct cpufreq_policy *policy;
@@ -497,9 +497,9 @@ int audio_freq_hold(void)
 
 	if (of_device_is_compatible(np, "mediatek,mt6983-usb_boost") ||
 		of_device_is_compatible(np, "mediatek,mt6895-usb_boost")) {
-		device_property_read_u32(gdev, "small-core", &(cpu_freq_audio[0]));
-		device_property_read_u32(gdev, "medium-core", &(cpu_freq_audio[1]));
-		device_property_read_u32(gdev, "big-core", &(cpu_freq_audio[2]));
+		device_property_read_u32(usb_gdev, "small-core", &(cpu_freq_audio[0]));
+		device_property_read_u32(usb_gdev, "medium-core", &(cpu_freq_audio[1]));
+		device_property_read_u32(usb_gdev, "big-core", &(cpu_freq_audio[2]));
 
 		USB_BOOST_NOTICE("%s: request cpu freq(%d) (%d) (%d)\n", __func__,
 			cpu_freq_audio[0], cpu_freq_audio[1], cpu_freq_audio[2]);
@@ -519,8 +519,8 @@ int audio_freq_hold(void)
 	if (of_device_is_compatible(np, "mediatek,mt6855-usb_boost") ||
 		of_device_is_compatible(np, "mediatek,mt6789-usb_boost") ||
 		of_device_is_compatible(np, "mediatek,mt6833-usb_boost")) {
-		device_property_read_u32(gdev, "small-core", &(cpu_freq_audio[0]));
-		device_property_read_u32(gdev, "big-core", &(cpu_freq_audio[1]));
+		device_property_read_u32(usb_gdev, "small-core", &(cpu_freq_audio[0]));
+		device_property_read_u32(usb_gdev, "big-core", &(cpu_freq_audio[1]));
 
 		USB_BOOST_NOTICE("%s: request cpu freq(%d) (%d)\n", __func__,
 			cpu_freq_audio[0], cpu_freq_audio[1]);
@@ -560,7 +560,7 @@ int audio_freq_release(void)
 
 int audio_core_hold(void)
 {
-	struct device_node *np = gdev->of_node;
+	struct device_node *np = usb_gdev->of_node;
 
 	/*Disable MCDI to save around 100us
 	 *"Power ON CPU -> CPU context restore"
@@ -582,7 +582,7 @@ int audio_core_hold(void)
 
 int audio_core_release(void)
 {
-	struct device_node *np = gdev->of_node;
+	struct device_node *np = usb_gdev->of_node;
 
 	/*Enable MCDI*/
 	if (of_device_is_compatible(np, "mediatek,mt6983-usb_boost") ||
