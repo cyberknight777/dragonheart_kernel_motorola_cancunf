@@ -106,7 +106,7 @@ static int nvt_disp_esd_notifier_callback(struct notifier_block *nb,
 #endif
 
 #ifdef NVT_MTK_CHECK_PANEL
-const char *active_panel_name;
+static const char *active_panel_name;
 #endif
 
 static int32_t nvt_ts_resume(struct device *dev);
