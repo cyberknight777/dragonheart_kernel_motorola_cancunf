@@ -58,7 +58,7 @@ int vcp_awake_lock(void *_vcp_id)
 	}
 
 	vcp_awake_count = (int *)&vcp_awake_counts[vcp_id];
-	core_id = core_ids[vcp_id];
+	core_id = vcp_core_ids[vcp_id];
 
 	if (is_vcp_ready(vcp_id) == 0) {
 		pr_notice("%s: %s not enabled\n", __func__, core_id);
@@ -103,7 +103,7 @@ int vcp_awake_unlock(void *_vcp_id)
 	}
 
 	vcp_awake_count = (int *)&vcp_awake_counts[vcp_id];
-	core_id = core_ids[vcp_id];
+	core_id = vcp_core_ids[vcp_id];
 
 	if (is_vcp_ready(vcp_id) == 0) {
 		pr_notice("%s: %s not enabled\n", __func__, core_id);

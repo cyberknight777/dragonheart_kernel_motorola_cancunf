@@ -168,7 +168,7 @@ static DEFINE_MUTEX(vcp_pw_clk_mutex);
 static DEFINE_MUTEX(vcp_A_notify_mutex);
 static DEFINE_MUTEX(vcp_feature_mutex);
 
-char *core_ids[VCP_CORE_TOTAL] = {"VCP A"};
+char *vcp_core_ids[VCP_CORE_TOTAL] = {"VCP A"};
 DEFINE_SPINLOCK(vcp_awake_spinlock);
 struct vcp_ipi_irq {
 	const char *name;
