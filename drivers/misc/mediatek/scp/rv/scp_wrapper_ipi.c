@@ -244,7 +244,7 @@ bool mbox_check_recv_table(unsigned int id)
 	return false;
 }
 
-void mbox_setup_pin_table(unsigned int mbox)
+void scp_mbox_setup_pin_table(unsigned int mbox)
 {
 	int i, last_ofs = 0, last_idx = 0, last_slot = 0, last_sz = 0;
 

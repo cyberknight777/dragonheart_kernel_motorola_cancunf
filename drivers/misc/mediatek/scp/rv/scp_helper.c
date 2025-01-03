@@ -2517,7 +2517,7 @@ static int scp_device_probe(struct platform_device *pdev)
 			pr_notice("[SCP]mbox%d enable irq fail\n", i, ret);
 			continue;
 		}
-		mbox_setup_pin_table(i);
+		scp_mbox_setup_pin_table(i);
 	}
 
 	for (i = 0; i < IRQ_NUMBER; i++) {

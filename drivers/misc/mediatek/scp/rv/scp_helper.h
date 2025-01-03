@@ -216,7 +216,7 @@ extern atomic_t scp_reset_status;
 
 extern bool mbox_check_send_table(unsigned int id);
 extern bool mbox_check_recv_table(unsigned int id);
-extern void mbox_setup_pin_table(int mbox);
+extern void scp_mbox_setup_pin_table(int mbox);
 extern void mt_print_scp_ipi_id(unsigned int irq_no);
 #ifdef CONFIG_MTK_GIC_V3_EXT
 extern u32 mt_irq_get_pending(unsigned int irq);
