@@ -78,7 +78,7 @@ static void remove_config(struct usb_composite_dev *cdev,
 	}
 }
 
-void usb_remove_config(struct usb_composite_dev *cdev,
+void mtk_usb_remove_config(struct usb_composite_dev *cdev,
 		      struct usb_configuration *config)
 {
 	unsigned long flags;
@@ -291,7 +291,7 @@ static void android_disable(struct android_dev *dev)
 		usb_gadget_disconnect(cdev->gadget);
 		/* Cancel pending control requests */
 		usb_ep_dequeue(cdev->gadget->ep0, cdev->req);
-		usb_remove_config(cdev, &android_config_driver);
+		mtk_usb_remove_config(cdev, &android_config_driver);
 	}
 }
 
