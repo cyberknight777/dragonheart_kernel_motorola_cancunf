@@ -39,7 +39,7 @@ void nvt_bootloader_reset_noflash_locked(void);
 int32_t nvt_esd_vdd_tp_recovery(void);
 #endif /* NVT_TOUCH_VDD_TP_RECOVERY */
 
-struct TIME_TYPE start, end;
+static struct TIME_TYPE start, end;
 static const struct firmware *fw_entry = NULL;
 static size_t fw_need_write_size = 0;
 static uint8_t *fwbuf = NULL;
