@@ -51,7 +51,7 @@ struct reg_save_st {
 	uint32_t size;
 };
 
-struct reg_save_st reg_save_list[] = {
+static struct reg_save_st reg_save_list[] = {
 	/* size must 16 byte alignment */
 	{0x00021000, 0x120},
 	{0x00024000, 0x170},
