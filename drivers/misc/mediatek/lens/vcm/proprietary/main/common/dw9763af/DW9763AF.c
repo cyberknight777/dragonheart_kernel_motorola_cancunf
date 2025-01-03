@@ -51,7 +51,7 @@ static int i2c_read(u8 a_u2Addr, u8 *a_puBuff)
 	return 0;
 }
 
-u8 read_data(u8 addr)
+static u8 read_data(u8 addr)
 {
 	u8 get_byte = 0;
 
