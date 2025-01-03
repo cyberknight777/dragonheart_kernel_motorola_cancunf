@@ -89,7 +89,7 @@ struct snd_pcm_substream;
 struct mtk_base_scp_ultra_dump;
 
 int ultra_set_dsp_afe(struct mtk_base_afe *afe);
-struct mtk_base_afe *get_afe_base(void);
+struct mtk_base_afe *ultra_get_afe_base(void);
 int set_scp_ultra_base(struct mtk_base_scp_ultra *scp_ultra);
 void *get_scp_ultra_base(void);
 void *get_ipi_recv_private(void);

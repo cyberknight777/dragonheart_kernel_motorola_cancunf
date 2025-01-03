@@ -154,7 +154,7 @@ static int mtk_scp_ultra_dump_set(struct snd_kcontrol *kcontrol,
 			snd_soc_component_get_drvdata(cmpnt);
 	struct mtk_base_scp_ultra_dump *ultra_dump = &scp_ultra->ultra_dump;
 	//struct mtk_base_scp_ultra_mem *ultra_mem = &scp_ultra->ultra_mem;
-	struct mtk_base_afe *afe = get_afe_base();
+	struct mtk_base_afe *afe = ultra_get_afe_base();
 	static int ctrl_val;
 	int timeout = 0;
 	int payload[3];
@@ -294,7 +294,7 @@ static int mtk_scp_ultra_engine_state_set(struct snd_kcontrol *kcontrol,
 					  struct snd_ctl_elem_value *ucontrol)
 {
 	struct mtk_base_scp_ultra *scp_ultra = get_scp_ultra_base();
-	struct mtk_base_afe *afe = get_afe_base();
+	struct mtk_base_afe *afe = ultra_get_afe_base();
 	struct mtk_base_scp_ultra_mem *ultra_mem = &scp_ultra->ultra_mem;
 	int scp_ultra_memif_dl_id;
 	int scp_ultra_memif_ul_id;
@@ -434,7 +434,7 @@ static int mtk_scp_ultra_pcm_open(struct snd_soc_component *component,
 	struct mtk_base_scp_ultra *scp_ultra =
 		snd_soc_component_get_drvdata(component);
 	struct mtk_base_scp_ultra_mem *ultra_mem = &scp_ultra->ultra_mem;
-	struct mtk_base_afe *afe = get_afe_base();
+	struct mtk_base_afe *afe = ultra_get_afe_base();
 	int scp_ultra_memif_dl_id =
 		scp_ultra->scp_ultra_dl_memif_id;
 	int scp_ultra_memif_ul_id =
@@ -474,7 +474,7 @@ static int mtk_scp_ultra_pcm_start(struct snd_soc_component *component,
 	struct mtk_base_scp_ultra *scp_ultra =
 		snd_soc_component_get_drvdata(component);
 	struct mtk_base_scp_ultra_mem *ultra_mem = &scp_ultra->ultra_mem;
-	struct mtk_base_afe *afe = get_afe_base();
+	struct mtk_base_afe *afe = ultra_get_afe_base();
 	struct mtk_base_afe_memif *memif =
 		&afe->memif[ultra_mem->ultra_dl_memif_id];
 	struct mtk_base_afe_memif *memiful =
@@ -552,7 +552,7 @@ static int mtk_scp_ultra_pcm_stop(struct snd_soc_component *component,
 	struct mtk_base_scp_ultra *scp_ultra =
 		snd_soc_component_get_drvdata(component);
 	struct mtk_base_scp_ultra_mem *ultra_mem = &scp_ultra->ultra_mem;
-	struct mtk_base_afe *afe = get_afe_base();
+	struct mtk_base_afe *afe = ultra_get_afe_base();
 	struct mtk_base_afe_memif *memif =
 		&afe->memif[ultra_mem->ultra_dl_memif_id];
 	struct mtk_base_afe_memif *memiful =
@@ -605,7 +605,7 @@ static int mtk_scp_ultra_pcm_stop(struct snd_soc_component *component,
 static int mtk_scp_ultra_pcm_close(struct snd_soc_component *component,
 				   struct snd_pcm_substream *substream)
 {
-	struct mtk_base_afe *afe = get_afe_base();
+	struct mtk_base_afe *afe = ultra_get_afe_base();
 	if (pcm_dump_on) {
 		/* scp ultra dump buffer use dram */
 		if (afe->release_dram_resource)
