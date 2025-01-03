@@ -114,7 +114,7 @@ struct mmi_charger_ops {
 #define mmi_chrg_name(x) (dev_name(&(x)->dev))
 
 extern struct mmi_charger_device *mmi_get_charger_by_name(const char *name);
-extern int is_charger_exist(const char *name);
+extern int mmi_is_charger_exist(const char *name);
 extern int mmi_charger_class_init(void);
 extern void mmi_charger_class_exit(void);
 extern int mmi_init_chip(struct mmi_charger_device *chrg);

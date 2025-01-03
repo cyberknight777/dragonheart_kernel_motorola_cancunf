@@ -151,19 +151,19 @@ static void chrg_dev_init(struct mmi_charger_manager *chip, struct mmi_cp_policy
 
 		switch (i) {
 		case PMIC_SW:
-			if (is_charger_exist(dev_ops[PMIC_SW].dev_name)) {
+			if (mmi_is_charger_exist(dev_ops[PMIC_SW].dev_name)) {
 				chrg_list->pmic_sw = true;
 				chrg_list->chrg_dev[PMIC_SW] = chip->chrg_list[PMIC_SW];
 				}
 			break;
 		case CP_MASTER:
-			if (is_charger_exist(dev_ops[CP_MASTER].dev_name)) {
+			if (mmi_is_charger_exist(dev_ops[CP_MASTER].dev_name)) {
 				chrg_list->cp_master = true;
 				chrg_list->chrg_dev[CP_MASTER] = chip->chrg_list[CP_MASTER];
 				}
 			break;
 		case CP_SLAVE:
-			if (is_charger_exist(dev_ops[CP_SLAVE].dev_name)) {
+			if (mmi_is_charger_exist(dev_ops[CP_SLAVE].dev_name)) {
 				chrg_list->cp_slave = true;
 				chrg_list->cp_clave_later = false;
 				chrg_list->chrg_dev[CP_SLAVE] = chip->chrg_list[CP_SLAVE];
@@ -200,7 +200,7 @@ static void clear_chrg_dev_error_cnt(struct mmi_charger_manager *chip, struct mm
 	chrg_num = chip->mmi_chrg_dev_num;
 
 	for (i = 0; i < chrg_num; i++) {
-		if (is_charger_exist(dev_ops[i].dev_name)) {
+		if (mmi_is_charger_exist(dev_ops[i].dev_name)) {
 			chrg_dev = chrg_list->chrg_dev[i];
 			chrg_dev->charger_error.chrg_err_type = 0;
 			chrg_dev->charger_error.bus_ucp_err_cnt = 0;
@@ -225,7 +225,7 @@ static void chrg_policy_error_recovery(struct mmi_charger_manager *chip,
 		case PMIC_SW:
 			break;
 		case CP_MASTER:
-		if (is_charger_exist(dev_ops[CP_MASTER].dev_name)) {
+		if (mmi_is_charger_exist(dev_ops[CP_MASTER].dev_name)) {
 				chrg_dev = chrg_list->chrg_dev[CP_MASTER];
 				chrg_error_type = chrg_dev->charger_error.chrg_err_type;
 			if (chrg_error_type & (1 << MMI_BUS_UCP_ALARM_BIT) ||
@@ -313,7 +313,7 @@ static void chrg_policy_error_clear(struct mmi_charger_manager *chip,
 				break;
 
 			case CP_MASTER:
-				if (is_charger_exist(dev_ops[CP_MASTER].dev_name)) {
+				if (mmi_is_charger_exist(dev_ops[CP_MASTER].dev_name)) {
 					chrg_dev = chrg_list->chrg_dev[CP_MASTER];
 					mmi_clear_charger_error(chrg_dev);
 				}
@@ -2364,7 +2364,7 @@ int mmi_chrg_policy_init(struct mmi_charger_manager *chip,
 				chrg_dts[i].psy_name, chip->dev, chip,
 				dev_ops[i].ops, mtk_chgdev);
 			if (IS_ERR_OR_NULL(chrg_dev)
-				|| !is_charger_exist(chrg_dts[i].chrg_name)) {
+				|| !mmi_is_charger_exist(chrg_dts[i].chrg_name)) {
 				mmi_chrg_err(chip,
 					"register mmi charger %s failed\n",
 					chrg_dts[i].chrg_name);

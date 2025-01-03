@@ -171,7 +171,7 @@ struct mmi_charger_device *mmi_get_charger_by_name(const char *name)
 	return dev ? to_mmi_charger_device(dev) : NULL;
 }
 
-int is_charger_exist(const char *name)
+int mmi_is_charger_exist(const char *name)
 {
 	if (mmi_get_charger_by_name(name) == NULL)
 		return 0;
