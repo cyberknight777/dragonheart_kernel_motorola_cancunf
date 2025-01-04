@@ -25,7 +25,7 @@ static u32 g_device_id = MC_DEVICE_ID_DEFAULT;
 static kmtciMessage_t *km_tci = NULL;
 static u32 km_session_counter = 0; /* Designed to be only one keymaster session.*/
 
-static int hwkm_open_session()
+static int hwkm_open_session(void)
 {
 	enum mc_result mc_ret = MC_DRV_ERR_UNKNOWN;
 
