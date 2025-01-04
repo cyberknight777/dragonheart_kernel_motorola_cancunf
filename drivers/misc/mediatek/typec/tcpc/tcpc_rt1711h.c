@@ -158,7 +158,7 @@ static int rt1711_read_device(void *client, u32 reg, int len, void *dst)
 {
 	struct i2c_client *i2c = client;
 	int ret = 0, count = 5;
-	u64 t1 = 0, t2 = 0;
+	u64 __maybe_unused t1 = 0, __maybe_unused t2 = 0;
 
 	while (1) {
 		t1 = local_clock();
@@ -179,7 +179,7 @@ static int rt1711_write_device(void *client, u32 reg, int len, const void *src)
 {
 	struct i2c_client *i2c = client;
 	int ret = 0, count = 5;
-	u64 t1 = 0, t2 = 0;
+	u64 __maybe_unused t1 = 0, __maybe_unused t2 = 0;
 
 	while (1) {
 		t1 = local_clock();
@@ -726,10 +726,8 @@ static inline int rt1711_fault_status_vconn_ov(struct tcpc_device *tcpc)
 
 int rt1711_fault_status_clear(struct tcpc_device *tcpc, uint8_t status)
 {
-	int ret;
-
 	if (status & TCPC_V10_REG_FAULT_STATUS_VCONN_OV)
-		ret = rt1711_fault_status_vconn_ov(tcpc);
+		rt1711_fault_status_vconn_ov(tcpc);
 
 	rt1711_i2c_write8(tcpc, TCPC_V10_REG_FAULT_STATUS, status);
 	return 0;
