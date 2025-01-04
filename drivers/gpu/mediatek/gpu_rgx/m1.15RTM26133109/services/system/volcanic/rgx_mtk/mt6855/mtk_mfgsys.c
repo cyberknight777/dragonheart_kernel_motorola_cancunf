@@ -369,8 +369,8 @@ int secgpu_gpueb_init(void)
 	g_secgpu_ipi_shared_mem_va = shared_mem_va;
 	g_secgpu_ipi_shared_mem_pa = shared_mem_pa;
 	g_secgpu_ipi_shared_mem_size = shared_mem_size;
-	g_secgpu_fw_reservd_mem_va = NULL;
-	g_secgpu_fw_reservd_mem_pa = NULL;
+	g_secgpu_fw_reservd_mem_va = 0;
+	g_secgpu_fw_reservd_mem_pa = 0;
 
 	ret = secgpu_ipi_to_gpueb(send_msg); // if (g_gpueb_support)
 	if (unlikely(ret)) {
@@ -380,7 +380,7 @@ int secgpu_gpueb_init(void)
 	return ret;
 }
 
-static void setPowerParams()
+static void setPowerParams(void)
 {
 	int i;
 	PVRSRV_DEVICE_NODE *psDevNode = MTKGetRGXDevNode();
@@ -444,8 +444,7 @@ PVRSRV_ERROR MTKTDSendFWImage(IMG_HANDLE hSysData, PVRSRV_TD_FW_PARAMS *psTDFWPa
 	bootParam.sMeta.sFWCorememDataDevVAddr.uiAddr = psTDFWParams->uFWP.sMeta.sFWCorememDataDevVAddr.uiAddr;
 	bootParam.sMeta.sFWCorememDataFWAddr.ui32Addr = psTDFWParams->uFWP.sMeta.sFWCorememDataFWAddr.ui32Addr;
 	bootParam.sMeta.ui32NumThreads = psTDFWParams->uFWP.sMeta.ui32NumThreads;
-	memcpy(g_secgpu_ipi_shared_mem_va + SECGPU_SHM_BOOTPAR_OFFSET, &bootParam, sizeof(MTK_RGX_FW_BOOT_PARAMS));
-
+	memcpy((void *)g_secgpu_ipi_shared_mem_va + SECGPU_SHM_BOOTPAR_OFFSET, &bootParam, sizeof(MTK_RGX_FW_BOOT_PARAMS));
 	psFWCodePMR = (PMR *)(psDevInfo->psRGXFWCodeMemDesc->psImport->hPMR);
 	psFWDataPMR = (PMR *)(psDevInfo->psRGXFWDataMemDesc->psImport->hPMR);
 	sPhyAddr.uiAddr = 0;
@@ -463,11 +462,11 @@ PVRSRV_ERROR MTKTDSendFWImage(IMG_HANDLE hSysData, PVRSRV_TD_FW_PARAMS *psTDFWPa
 	RGXGetPhyAddr(psFWCoreDataPMR, &sPhyAddr, 0, OSGetPageShift(), 1, &bValid);
 	fw_mem.core_data_addr_lo = (unsigned int)sPhyAddr.uiAddr;
 	fw_mem.core_data_addr_hi = (unsigned int)(sPhyAddr.uiAddr >> 32);
-	memcpy(g_secgpu_ipi_shared_mem_va + SECGPU_SHM_FW_MEM_OFFSET , &fw_mem, sizeof(MTK_TD_FW_MEM));
+	memcpy((void *)g_secgpu_ipi_shared_mem_va + SECGPU_SHM_FW_MEM_OFFSET , &fw_mem, sizeof(MTK_TD_FW_MEM));
 
 	IMG_UINT32 *pui32FirmwareSize = (IMG_UINT32 *) (g_secgpu_ipi_shared_mem_va + SECGPU_SHM_FW_BIN_OFFSET);
 	*pui32FirmwareSize = psTDFWParams->ui32FirmwareSize;
-	memcpy(g_secgpu_ipi_shared_mem_va + SECGPU_SHM_FW_BIN_OFFSET + sizeof(IMG_UINT32), (psTDFWParams->pvFirmware), psTDFWParams->ui32FirmwareSize);
+	memcpy((void *)g_secgpu_ipi_shared_mem_va + SECGPU_SHM_FW_BIN_OFFSET + sizeof(IMG_UINT32), (psTDFWParams->pvFirmware), psTDFWParams->ui32FirmwareSize);
 
 	setPowerParams();
 
