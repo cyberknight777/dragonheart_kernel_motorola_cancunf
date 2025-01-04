@@ -102,8 +102,8 @@ if [[ ${COMPILER} == gcc ]]; then
 
 elif [[ ${COMPILER} == clang ]]; then
 	if [ ! -f "${KDIR}/clang/bin/clang" ]; then
-		curl -sL https://gitlab.com/yaosp/prebuilts_clang_host_linux-x86_clang-r468909/-/archive/master/prebuilts_clang_host_linux-x86_clang-r468909-master.tar.gz | tar -xzf -
-		mv "${KDIR}"/prebuilts_clang_host_linux-x86_clang-r468909-master clang
+		curl -sL https://gitlab.com/yaosp/prebuilts_clang_host_linux-x86_clang-r475365/-/archive/master/prebuilts_clang_host_linux-x86_clang-r475365-master.tar.gz | tar -xzf -
+		mv "${KDIR}"/prebuilts_clang_host_linux-x86_clang-r475365-master clang
 	fi
 
 	KBUILD_COMPILER_STRING=$("${KDIR}"/clang/bin/clang -v 2>&1 | head -n 1 | sed 's/(https..*//' | sed 's/ version//')
