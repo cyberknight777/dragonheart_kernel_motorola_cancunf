@@ -90,28 +90,28 @@ struct mtk_raw_pipeline;
 #define v4l2_subdev_format_request_fd(x) x->reserved[0]
 #define v4l2_frame_interval_which(x) x->reserved[0]
 
-static inline raw_pipe_data_check(int a)
+static inline bool raw_pipe_data_check(int a)
 {
 	bool result;
 
 	result = (a >= 0 && a < (MTKCAM_SUBDEV_RAW_END - MTKCAM_SUBDEV_RAW_START)) ? true : false;
 	return result;
 }
-static inline p_data_check(int a)
+static inline bool p_data_check(int a)
 {
 	bool result;
 
 	result = (a >= 0 && a < MTKCAM_SUBDEV_MAX) ? true : false;
 	return result;
 }
-static inline sv_pipe_check(int a)
+static inline bool sv_pipe_check(int a)
 {
 	bool result;
 
 	result = (a >= 0 && a < CAMSV_PIPELINE_NUM) ? true : false;
 	return result;
 }
-static inline sv_devs_check(int a)
+static inline bool sv_devs_check(int a)
 {
 	bool result;
 
