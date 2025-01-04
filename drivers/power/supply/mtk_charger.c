@@ -3465,7 +3465,7 @@ static ssize_t charge_rate_show(struct device *dev,
 
 static DEVICE_ATTR(charge_rate, S_IRUGO, charge_rate_show, NULL);
 
-static mmi_get_battery_age(void)
+static int mmi_get_battery_age(void)
 {
 	union power_supply_propval val = {0};
 	struct mtk_gauge *gauge;
