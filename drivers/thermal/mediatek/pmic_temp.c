@@ -139,9 +139,10 @@ static int pmic_temp_parse_iio_channel(struct device *dev,
 		cali_data[i].iio_chan = devm_iio_channel_get(dev, cali_data[i].iio_chan_name);
 		ret = PTR_ERR_OR_ZERO(cali_data[i].iio_chan);
 		if (ret) {
-			if (ret != -EPROBE_DEFER)
+			if (ret != -EPROBE_DEFER) {
 				pr_info("pmic_chip_temp auxadc get fail, ret=%d\n", ret);
 				return ret;
+			}
 		}
 	}
 		return 0;
