@@ -537,7 +537,7 @@ static void mtk_chist_channel_config(unsigned int channel,
 	mtk_chist_channel_enabled(channel, 1, comp, handle);
 }
 
-static void ceil(int num, int divisor, int *result)
+static void mtk_chist_ceil(int num, int divisor, int *result)
 {
 	if (divisor > 0) {
 		if (num % divisor == 0)
@@ -635,7 +635,7 @@ static int mtk_chist_user_cmd(struct mtk_ddp_comp *comp,
 				? channel_config.blk_height
 				: channel_config.roi_end_y - channel_config.roi_start_y + 1;
 
-			ceil((channel_config.roi_end_x - channel_config.roi_start_x + 1),
+			mtk_chist_ceil((channel_config.roi_end_x - channel_config.roi_start_x + 1),
 				channel_config.blk_width, &blk_column);
 
 			spin_lock_irqsave(&g_chist_global_lock, flags);
