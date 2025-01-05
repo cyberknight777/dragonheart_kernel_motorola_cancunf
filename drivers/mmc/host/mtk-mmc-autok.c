@@ -3044,8 +3044,7 @@ int execute_cmd_online_tuning(struct msdc_host *host, u8 *res)
 		return -1;
 	}
 	memset(&autok_host_para, 0, sizeof(struct autok_host));
-	memset((void *)p_autok_tune_res, 0,
-		sizeof(p_autok_tune_res) / sizeof(u32));
+	memset((void *)p_autok_tune_res, 0, sizeof(p_autok_tune_res));
 
 	/* Tuning Cmd Path */
 	memset(pBdInfo, 0, sizeof(struct AUTOK_REF_INFO));
