@@ -26,6 +26,7 @@
 #define __TFA_DEVICE_H__
 
 #include "config.h"
+#include "tfa9912_tfafieldnames.h"
 
 struct tfa_device;
 
