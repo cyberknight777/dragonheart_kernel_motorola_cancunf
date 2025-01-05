@@ -10,7 +10,7 @@
 #include <mmprofile.h>
 #include <mmprofile_function.h>
 
-#define mmp_data2_fence(c, s)	((c & 0xff) << 24 | s & 0xffffff)
+#define mmp_data2_fence(c, s)	(((c & 0xff) << 24) | (s & 0xffffff))
 
 #define mml_mmp(event, flag, v1, v2) \
 	mmprofile_log_ex(mml_mmp_get_event()->event, flag, v1, v2)
