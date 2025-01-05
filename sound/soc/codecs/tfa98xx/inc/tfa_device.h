@@ -294,19 +294,19 @@ enum tfa_error tfa_dev_mtp_set(struct tfa_device *tfa, enum tfa_mtp item,
 /*
  * interrupt bit function to clear
  */
-int tfa_irq_clear(struct tfa_device *tfa, int bit);
+int tfa_irq_clear(struct tfa_device *tfa, enum tfa9912_irq bit);
 /*
  * return state of irq or -1 if illegal bit
  */
-int tfa_irq_get(struct tfa_device *tfa, int bit);
+int tfa_irq_get(struct tfa_device *tfa, enum tfa9912_irq bit);
 /*
  * interrupt bit function that operates on the shadow regs in the handle
  */
-int tfa_irq_ena(struct tfa_device *tfa, int bit, int state);
+int tfa_irq_ena(struct tfa_device *tfa, enum tfa9912_irq bit, int state);
 /*
  * interrupt bit function that sets the polarity
  */
-int tfa_irq_set_pol(struct tfa_device *tfa, int bit, int state);
+int tfa_irq_set_pol(struct tfa_device *tfa, enum tfa9912_irq bit, int state);
 
 /*
  * mask interrupts by disabling them
