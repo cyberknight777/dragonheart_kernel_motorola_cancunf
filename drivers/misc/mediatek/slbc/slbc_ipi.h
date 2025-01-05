@@ -49,7 +49,7 @@ struct slbc_ipi_ops {
 extern int slbc_scmi_set(void *buffer, int slot);
 extern int slbc_scmi_get(void *buffer, int slot, void *ptr);
 
-#define SLBC_IPI(x, y)			((x) & 0xffff | ((y) & 0xffff) << 16)
+#define SLBC_IPI(x, y)			(((x) & 0xffff) | ((y) & 0xffff) << 16)
 #define SLBC_IPI_CMD_GET(x)		((x) & 0xffff)
 #define SLBC_IPI_UID_GET(x)		((x) >> 16 & 0xffff)
 
