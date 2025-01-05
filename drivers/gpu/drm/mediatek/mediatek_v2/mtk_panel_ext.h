@@ -25,7 +25,7 @@
 
 #define DRM_DISPLAY_NAME_LEN 128
 
-static unsigned int hs_tx_flag_value = 0xd;
+static unsigned int __maybe_unused hs_tx_flag_value = 0xd;
 struct mtk_dsi;
 struct cmdq_pkt;
 struct mtk_panel_para_table {
