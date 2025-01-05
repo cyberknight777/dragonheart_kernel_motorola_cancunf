@@ -356,7 +356,7 @@ static struct reg_dump_info range_table_mt6885[] = {
 #define SEGMENT_COUNT_MT6885 \
 	(sizeof(range_table_mt6885) / sizeof(struct reg_dump_info))
 
-static struct dbg_hw_info hw_info_set[PLATFORM_COUNT] = {
+static struct dbg_hw_info __maybe_unused hw_info_set[PLATFORM_COUNT] = {
 	{MUX_SEL_COUNT_MT6853,
 	 TOTAL_MUX_COUNT_MT6853,
 	 SEGMENT_COUNT_MT6853,
