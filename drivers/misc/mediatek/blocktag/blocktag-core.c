@@ -418,7 +418,7 @@ void mtk_btag_earaio_boost(bool boost)
 		if ((sched_clock() - mictx->window_begin) > 1000000000)
 			mtk_btag_mictx_reset(mictx, 0);
 
-		mictx->pwd_top_r_pages = mictx->pwd_top_r_pages = 0;
+		mictx->pwd_top_r_pages = 0;
 	}
 	spin_unlock_irqrestore(&mictx->lock, flags);
 }
