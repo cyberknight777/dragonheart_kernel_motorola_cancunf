@@ -43,7 +43,7 @@ void apu_rproc_exit(void);
  * init function at other modulses
  * call init function in order at apusys.ko init stage
  */
-static int (*apusys_init_func[])(struct apusys_core_info *) = {
+static int __maybe_unused (*apusys_init_func[])(struct apusys_core_info *) = {
 	sw_logger_init,
 	hw_logger_init,
 //	apupwr_init_tags,
@@ -69,7 +69,7 @@ static int (*apusys_init_func[])(struct apusys_core_info *) = {
  * exit function at other modulses
  * call exit function in order at apusys.ko exit stage
  */
-static void (*apusys_exit_func[])(void) = {
+static void __maybe_unused (*apusys_exit_func[])(void) = {
 	apu_rproc_exit,
 #if IS_ENABLED(CONFIG_MTK_APUSYS_DEBUG)
 	mvpu_exit,
