@@ -562,12 +562,12 @@ static struct SV_LOG_STR gSvLog[DPE_IRQ_TYPE_AMOUNT];
 		} \
 	} \
 } while (0)
-//#else
-//#define IRQ_LOG_KEEPER(irq, ppb, logT, fmt, ...) \
-//	xlog_printk(ANDROID_LOG_DEBUG,\
-//"KEEPER", "[%s] " fmt, __func__, ##__VA_ARGS__)
-//#endif
-//#if 1
+/*#else
+#define IRQ_LOG_KEEPER(irq, ppb, logT, fmt, ...) \
+	xlog_printk(ANDROID_LOG_DEBUG,\
+"KEEPER", "[%s] " fmt, __func__, ##__VA_ARGS__)
+#endif
+#if 1 */
 #define IRQ_LOG_PRINTER(irq, ppb_in, logT_in) do {\
 	struct SV_LOG_STR *pSrc = &gSvLog[irq];\
 	char *ptr;\

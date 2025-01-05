@@ -2456,8 +2456,7 @@ static signed int fdvt_dump_reg(void)
 		fdvt_req_ring.read_idx);
 
 	for (i = 0; i < MAX_FDVT_REQUEST_RING_SIZE; i++) {
-		log_inf("FDVT Req:state:%d, procID:0x%08X, caller_id:0x%08X, enque_req_num:%d,
-			frame_wr_idx:%d, frame_rd_idx:%d\n",
+		log_inf("FDVT Req:state:%d, procID:0x%08X, caller_id:0x%08X, enque_req_num:%d, frame_wr_idx:%d, frame_rd_idx:%d\n",
 			request->state,
 			request->process_id,
 			request->caller_id,
@@ -2466,8 +2465,7 @@ static signed int fdvt_dump_reg(void)
 			request->frame_rd_idx);
 
 		for (j = 0; j < MAX_FDVT_FRAME_REQUEST;) {
-			log_inf("FDVT:FrameStatus[%d]:%d, FrameStatus[%d]:%d, FrameStatus[%d]:%d,
-				FrameStatus[%d]:%d\n",
+			log_inf("FDVT:FrameStatus[%d]:%d, FrameStatus[%d]:%d, FrameStatus[%d]:%d, FrameStatus[%d]:%d\n",
 				j, request->fdvt_frame_status[j],
 				j + 1, request->fdvt_frame_status[j + 1],
 				j + 2, request->fdvt_frame_status[j + 2],
@@ -3041,12 +3039,10 @@ static signed int fdvt_wait_irq(FDVT_WAIT_IRQ_STRUCT *wait_irq)
 	}
 
 #ifdef FDVT_WAITIRQ_LOG
-	log_inf("before wait_event:Tout(%d), clear(%d), type(%d), IrqStat(0x%08X),
-		WaitStat(0x%08X), usrKey(%d)\n",
+	log_inf("before wait_event:Tout(%d), clear(%d), type(%d), IrqStat(0x%08X), WaitStat(0x%08X), usrKey(%d)\n",
 		wait_irq->timeout, wait_irq->clear, wait_irq->type,
 	irqStatus, wait_irq->status, wait_irq->user_key);
-	log_inf("before wait_event:ProcID(%d), FdvtIrq(0x%08X), WriteReq(0x%08X),
-		ReadReq(0x%08X), which_req(%d)\n",
+	log_inf("before wait_event:ProcID(%d), FdvtIrq(0x%08X), WriteReq(0x%08X), ReadReq(0x%08X), which_req(%d)\n",
 		wait_irq->process_id, fdvt_info.irq_info.fdvt_irq_cnt,
 		fdvt_info.write_req_idx, fdvt_info.read_req_idx, which_req);
 #endif
@@ -3148,13 +3144,11 @@ static signed int fdvt_wait_irq(FDVT_WAIT_IRQ_STRUCT *wait_irq)
 		}
 
 #ifdef FDVT_WAITIRQ_LOG
-		log_inf("no timeout:Tout(%d), clr(%d), type(%d), IrqStat(0x%08X),
-			WaitStat(0x%08X), usrKey(%d)\n",
+		log_inf("no timeout:Tout(%d), clr(%d), type(%d), IrqStat(0x%08X), WaitStat(0x%08X), usrKey(%d)\n",
 			wait_irq->timeout, wait_irq->clear,
 			wait_irq->type, irqStatus, wait_irq->status,
 			wait_irq->user_key);
-		log_inf("no timeout:ProcID(%d),FdvtIrq(0x%08X), WriteReq(0x%08X),
-			ReadReq(0x%08X),which_req(%d)\n",
+		log_inf("no timeout:ProcID(%d),FdvtIrq(0x%08X), WriteReq(0x%08X), ReadReq(0x%08X),which_req(%d)\n",
 			wait_irq->process_id, fdvt_info.irq_info.fdvt_irq_cnt,
 			fdvt_info.write_req_idx, fdvt_info.read_req_idx,
 			which_req);
