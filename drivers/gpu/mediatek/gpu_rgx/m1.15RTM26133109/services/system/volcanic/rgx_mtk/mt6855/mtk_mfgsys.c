@@ -380,7 +380,7 @@ int secgpu_gpueb_init(void)
 	return ret;
 }
 
-static void setPowerParams()
+static void setPowerParams(void)
 {
 	int i;
 	PVRSRV_DEVICE_NODE *psDevNode = MTKGetRGXDevNode();
