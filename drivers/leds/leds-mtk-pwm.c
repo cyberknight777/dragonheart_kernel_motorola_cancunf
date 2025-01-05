@@ -173,9 +173,6 @@ static void __maybe_unused led_pwm_shutdown(struct platform_device *pdev)
 	pr_info("Turn off backlight\n");
 
 	for (i = 0; m_leds && i < m_leds->num_leds; i++) {
-		if (!&(m_leds->leds[i]))
-			continue;
-
 		led_pwm_set(&(m_leds->leds[i].m_led), 0);
 		mt_leds_call_notifier(LED_STATUS_SHUTDOWN, &(m_leds->leds[i].m_led.conf));
 	}

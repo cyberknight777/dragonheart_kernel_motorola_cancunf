@@ -110,9 +110,6 @@ static void __maybe_unused led_disp_shutdown(struct platform_device *pdev)
 	pr_info("Turn off backlight\n");
 
 	for (i = 0; m_leds && i < m_leds->num_leds; i++) {
-		if (!&(m_leds->leds[i]))
-			continue;
-
 		m_leds->leds[i].mtk_hw_brightness_set(&m_leds->leds[i], 0);
 		mt_leds_call_notifier(LED_STATUS_SHUTDOWN, &(m_leds->leds[i].conf));
 	}
