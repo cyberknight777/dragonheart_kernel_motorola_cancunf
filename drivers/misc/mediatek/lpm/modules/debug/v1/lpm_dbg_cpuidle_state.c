@@ -227,13 +227,14 @@ static ssize_t lpm_cpuidle_state_read(char *ToUserBuf,
 	struct LPM_CPUIDLE_STATE_NODE *node =
 			(struct LPM_CPUIDLE_STATE_NODE *)priv;
 
-	if (!p || !node)
+	if (!p || !node) {
 		return -EINVAL;
+	}
 
-		mtk_dbg_cpuidle_log("==== CPU idle state: %s ====\n",
-					node_string[node->type]);
-		cpuidle_state_read_param(&p, &sz, node->type);
-		idle_proc_state_uasge_print(&p, &sz, node->type);
+	mtk_dbg_cpuidle_log("==== CPU idle state: %s ====\n",
+			node_string[node->type]);
+	cpuidle_state_read_param(&p, &sz, node->type);
+	idle_proc_state_uasge_print(&p, &sz, node->type);
 
 	return p - ToUserBuf;
 }
