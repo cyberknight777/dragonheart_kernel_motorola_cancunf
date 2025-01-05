@@ -181,11 +181,12 @@ extern int mtk_vdec_sw_mem_sec;
 	char vcu_name[100];\
 	int ret;\
 	ret = snprintf(vcu_name, 100, "[MTK_V4L2] "string, ##args); \
-	if (ret > 0)\
+	if (ret > 0) { \
 		pr_notice("[MTK_V4L2] error:"string, ##args);  \
 		aee_kernel_warning_api(__FILE__, __LINE__, \
 			DB_OPT_MMPROFILE_BUFFER | DB_OPT_NE_JBT_TRACES, \
 			vcu_name, "[MTK_V4L2] error:"string, ##args); \
+		} \
 	} while (0)
 #else
 #define v4l2_aee_print(string, args...) \
