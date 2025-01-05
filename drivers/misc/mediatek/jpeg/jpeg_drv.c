@@ -945,7 +945,7 @@ static int jpeg_probe(struct platform_device *pdev)
 		gJpegqDev.pm_notifier.notifier_call = jpeg_drv_hybrid_dec_suspend_notifier;
 		register_pm_notifier(&gJpegqDev.pm_notifier);
 		gJpegqDev.is_suspending = 0;
-		memset(_jpeg_hybrid_dec_int_status, 0, HW_CORE_NUMBER);
+		memset(_jpeg_hybrid_dec_int_status, 0, HW_CORE_NUMBER * sizeof(unsigned int));
 		proc_create("mtk_jpeg", 0x644, NULL, &jpeg_fops);
 	}
 
