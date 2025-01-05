@@ -989,7 +989,7 @@ static struct imgsys_dvfs_group  dvfs_group[MTK_IMGSYS_DVFS_GROUP] = {
 			|IMGSYS_ENG_ADL_B)}
 };
 
-static struct imgsys_dvfs_group  qos_group[MTK_IMGSYS_QOS_GROUP] = {
+static struct imgsys_dvfs_group  __maybe_unused qos_group[MTK_IMGSYS_QOS_GROUP] = {
 	{0, (IMGSYS_ENG_WPE_EIS
 			|IMGSYS_ENG_WPE_LITE
 			|IMGSYS_ENG_TRAW
