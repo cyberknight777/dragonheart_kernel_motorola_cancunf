@@ -1648,17 +1648,20 @@ static void ISP_DumpDebugData(enum ISP_IRQ_TYPE_ENUM module, unsigned int debug_
 	case ISP_IRQ_TYPE_INT_CAM_A_ST:
 		innerRegModule = ISP_CAM_A_INNER_IDX;
 		outerRegModule = ISP_CAM_A_IDX;
-		strncpy(cam, "CAM_A", sizeof("CAM_A"));
+		strncpy(cam, "CAM_A", sizeof(cam) - 1);
+		cam[sizeof(cam) - 1] = '\0';
 		break;
 	case ISP_IRQ_TYPE_INT_CAM_B_ST:
 		innerRegModule = ISP_CAM_B_INNER_IDX;
 		outerRegModule = ISP_CAM_B_IDX;
-		strncpy(cam, "CAM_B", sizeof("CAM_B"));
+		strncpy(cam, "CAM_B", sizeof(cam));
+		cam[sizeof(cam) - 1] = '\0';
 		break;
 	case ISP_IRQ_TYPE_INT_CAM_C_ST:
 		innerRegModule = ISP_CAM_C_INNER_IDX;
 		outerRegModule = ISP_CAM_C_IDX;
-		strncpy(cam, "CAM_C", sizeof("CAM_C"));
+		strncpy(cam, "CAM_C", sizeof(cam) - 1);
+		cam[sizeof(cam) - 1] = '\0';
 		break;
 	default:
 		LOG_NOTICE("unsupported module:0x%x\n", module);
@@ -1895,17 +1898,20 @@ static void ISP_DumpDmaDeepDbg(enum ISP_IRQ_TYPE_ENUM module, unsigned int ErrSt
 	case ISP_IRQ_TYPE_INT_CAM_A_ST:
 		regModule = ISP_CAM_A_IDX;
 		innerRegModule = ISP_CAM_A_INNER_IDX;
-		strncpy(cam, "CAM_A", sizeof("CAM_A"));
+		strncpy(cam, "CAM_A", sizeof(cam) - 1);
+		cam[sizeof(cam) - 1] = '\0';
 		break;
 	case ISP_IRQ_TYPE_INT_CAM_B_ST:
 		regModule = ISP_CAM_B_IDX;
 		innerRegModule = ISP_CAM_B_INNER_IDX;
-		strncpy(cam, "CAM_B", sizeof("CAM_B"));
+		strncpy(cam, "CAM_B", sizeof(cam) - 1);
+		cam[sizeof(cam) - 1] = '\0';
 		break;
 	case ISP_IRQ_TYPE_INT_CAM_C_ST:
 		regModule = ISP_CAM_C_IDX;
 		innerRegModule = ISP_CAM_C_INNER_IDX;
-		strncpy(cam, "CAM_C", sizeof("CAM_C"));
+		strncpy(cam, "CAM_C", sizeof(cam) - 1);
+		cam[sizeof(cam) - 1] = '\0';
 		break;
 	default:
 		LOG_NOTICE("unsupported module:0x%x\n", module);
