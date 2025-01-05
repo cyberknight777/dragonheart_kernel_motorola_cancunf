@@ -643,7 +643,7 @@ struct mtk_cwb_info {
 
 #define MSYNC_MAX_RECORD 5
 #define MSYNC_LOWFRAME_THRESHOLD 3
-#define MSYNC_MIN_FPS 46.1
+#define MSYNC_MIN_FPS 46
 
 enum MSYNC_RECORD_TYPE {
 	INVALID,

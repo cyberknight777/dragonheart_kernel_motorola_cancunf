@@ -595,7 +595,7 @@ struct mtk_ddp_comp *mtk_ddp_comp_request_first(struct mtk_drm_crtc *mtk_crtc)
 	int i, j;
 
 	for_each_comp_in_cur_crtc_path(comp, mtk_crtc, i, j)
-		if (comp && mtk_ddp_comp_get_type(comp->id != MTK_DISP_VIRTUAL))
+		if (comp && mtk_ddp_comp_get_type(comp->id) != MTK_DISP_VIRTUAL)
 			return comp;
 
 	/* This CRTC does not contain output comp */
@@ -8014,7 +8014,7 @@ static void msync_add_frame_time(struct mtk_drm_crtc *mtk_crtc,
 		fps = drm_mode_vrefresh(mode);
 		time_diff = msync_dy->record[msync_dy->record_index].time -
 			msync_dy->record[last_msync_idx].time;
-		DDPDBG("[Msync] min fps:%f, fps:%d, time_diff:%d\n", MSYNC_MIN_FPS, fps, time_diff);
+		DDPDBG("[Msync] min fps:%d, fps:%d, time_diff:%d\n", MSYNC_MIN_FPS, fps, time_diff);
 		if (1000 * 1000 * 1000 / MSYNC_MIN_FPS < time_diff) {
 			msync_dy->record[msync_dy->record_index].low_frame = true;
 			DDPDBG("[Msync] low_frame = true\n");
