@@ -1742,7 +1742,7 @@ int mtk_execute_func_cmd(void *dev,
 					(struct mipi_dsi_device *)dev,
 					lcm_op->param.cmd_data.data,
 					lcm_op->size,
-					&input->data[index].data[lcm_op->param.cmd_data.start_id],
+					&((u8 *)input->data[index].data)[lcm_op->param.cmd_data.start_id],
 					lcm_op->param.cmd_data.data_len);
 		break;
 	}
@@ -1788,7 +1788,7 @@ int mtk_execute_func_cmd(void *dev,
 		ret = mtk_panel_dsi_dcs_read(
 					(struct mipi_dsi_device *)dev,
 					lcm_op->param.cmd_data.cmd,
-					&input->data[index].data[lcm_op->param.cmd_data.start_id],
+					&((u8 *)input->data[index].data)[lcm_op->param.cmd_data.start_id],
 					lcm_op->param.cmd_data.data_len);
 		break;
 	}
