@@ -159,7 +159,7 @@ enum MDLA_DEBUG_MASK {
 
 void mdla_dbg_show_klog_info(struct seq_file *s, char *prefix);
 
-#define ce_func_trace(ce, val) ((ce)->footprint = (((ce)->footprint << 8) | (val & 0xFF)))
+#define ce_func_trace(ce, val) ((ce)->footprint = (((ce)->footprint << 8) | ((val) & 0xFF)))
 
 #if IS_ENABLED(CONFIG_MTK_AEE_FEATURE)
 #include <mt-plat/aee.h>
