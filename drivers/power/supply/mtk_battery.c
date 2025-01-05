@@ -630,12 +630,13 @@ static int battery_psy_get_property(struct power_supply *psy,
 			if (ret == -EHOSTDOWN)
 				current_now = gm->ibat;
 
-			if (current_now != 0)
+			if (current_now != 0) {
 				time_to_full = remain_mah * 3600 / current_now;
 
 				bm_debug("time_to_full:%d, remain:ui:%d mah:%d, current_now:%d, qmax:%d\n",
 					time_to_full, remain_ui, remain_mah,
 					current_now, q_max_now);
+			}
 			val->intval = abs(time_to_full);
 		}
 		ret = 0;
@@ -2305,11 +2306,12 @@ void fg_custom_init_from_dts(struct platform_device *dev,
 
 		min_vol = fg_table_cust_data->fg_profile[0].pmic_min_vol;
 		if (!of_property_read_u32(np, "PMIC_MIN_VOL", &val)) {
-			for (i = 0; i < MAX_TABLE; i++)
+			for (i = 0; i < MAX_TABLE; i++) {
 				fg_table_cust_data->fg_profile[i].pmic_min_vol =
 				(int)val;
 				bm_debug("Get PMIC_MIN_VOL: %d\n",
 					min_vol);
+			}
 		} else {
 			bm_err("Get PMIC_MIN_VOL no data\n");
 		}
