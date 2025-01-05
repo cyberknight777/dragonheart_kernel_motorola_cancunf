@@ -61,7 +61,7 @@ PROCS=$(nproc --all)
 export PROCS
 
 # Compiler to use for builds.
-export COMPILER=clang
+export COMPILER=gcc
 
 # GitHub Token utilized with the gh binary to release kernel builds.
 GH_TOKEN="${PASSWORD}"
@@ -76,28 +76,12 @@ if [ "${CI}" == 0 ]; then
 fi
 
 if [[ ${COMPILER} == gcc ]]; then
-	if [ ! -d "${KDIR}/gcc64" ]; then
-		git clone https://github.com/cyberknight777/gcc-arm64 --depth=1 gcc64
-	fi
-
-	if [ ! -d "${KDIR}/gcc32" ]; then
-		git clone https://github.com/cyberknight777/gcc-arm --depth=1 gcc32
-	fi
-
-	KBUILD_COMPILER_STRING=$("${KDIR}"/gcc64/bin/aarch64-elf-gcc --version | head -n 1)
+	KBUILD_COMPILER_STRING=$(/usr/bin/aarch64-linux-gnu-gcc --version | head -n 1)
 	export KBUILD_COMPILER_STRING
-	export PATH="${KDIR}"/gcc32/bin:"${KDIR}"/gcc64/bin:/usr/bin/:${PATH}
 	MAKE+=(
 		O=out
-		CROSS_COMPILE=aarch64-elf-
-		CROSS_COMPILE_ARM32=arm-eabi-
-		LD="${KDIR}"/gcc64/bin/aarch64-elf-"${LINKER}"
-		AR=aarch64-elf-ar
-		AS=aarch64-elf-as
-		NM=aarch64-elf-nm
-		OBJDUMP=aarch64-elf-objdump
-		OBJCOPY=aarch64-elf-objcopy
-		CC=aarch64-elf-gcc
+		CROSS_COMPILE=aarch64-linux-gnu-
+		CROSS_COMPILE_COMPAT=arm-linux-gnueabi-
 	)
 
 elif [[ ${COMPILER} == clang ]]; then
