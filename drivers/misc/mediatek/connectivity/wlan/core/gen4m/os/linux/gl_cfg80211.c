@@ -3370,7 +3370,7 @@ mtk_cfg80211_testmode_get_link_detection(IN struct wiphy
 	uint8_t u1buf = 0;
 	uint32_t i = 0;
 #if IS_ENABLED(CONFIG_ARM64)
-	uint32_t arBugReport[sizeof(struct EVENT_BUG_REPORT)];
+	uint32_t arBugReport[sizeof(struct EVENT_BUG_REPORT) / sizeof(uint32_t)];
 #else
 	uint32_t *arBugReport;
 #endif
@@ -3416,7 +3416,7 @@ mtk_cfg80211_testmode_get_link_detection(IN struct wiphy
 	}
 
 	kalMemZero(&rStatistics, sizeof(rStatistics));
-	kalMemZero(prBugReport, sizeof(struct EVENT_BUG_REPORT));
+	kalMemZero(prBugReport, sizeof(arBugReport));
 	kalMemZero(arBugReport, sizeof(struct EVENT_BUG_REPORT));
 
 	rStatus = kalIoctl(prGlueInfo,
