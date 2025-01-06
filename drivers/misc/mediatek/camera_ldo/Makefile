@@ -4,4 +4,4 @@
 #imgsensor_isp6s-objs += \
 #	$(subdrv-rpath)/camera_ldo.o
 
-obj-$(CONFIG_MTK_DCM_MT6789)	+= camera_ldo.o
+obj-$(CONFIG_HQ_CAMERA_LDO)	+= camera_ldo.o
