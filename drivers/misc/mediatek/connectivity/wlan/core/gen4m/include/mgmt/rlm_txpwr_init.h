@@ -3162,7 +3162,11 @@ struct COUNTRY_POWER_LIMIT_TABLE_CONFIGURATION
 };
 #endif
 
-static struct COUNTRY_POWER_LIMIT_COUNTRY_CODE g_u2CountryLimitGrp0[] = {{'B', 'R'},{'M', 'X'},{'A', 'R'},{'C', 'L'},{'P', 'E'},{'C', 'O'},{'G', 'T'},{'D', 'O'},{'P', 'Y'},{'U', 'Y'},{'B', 'O'},{'U', 'S'}};
+static struct COUNTRY_POWER_LIMIT_COUNTRY_CODE g_u2CountryLimitGrp0[] = {
+{{'B', 'R'}}, {{'M', 'X'}}, {{'A', 'R'}}, {{'C', 'L'}}, {{'P', 'E'}},
+{{'C', 'O'}}, {{'G', 'T'}}, {{'D', 'O'}}, {{'P', 'Y'}}, {{'U', 'Y'}},
+{{'B', 'O'}}, {{'U', 'S'}}
+};
 
 static struct COUNTRY_POWER_LIMIT_COUNTRY_CODE g_u2CountryLimitGrp1[] = {};
 
