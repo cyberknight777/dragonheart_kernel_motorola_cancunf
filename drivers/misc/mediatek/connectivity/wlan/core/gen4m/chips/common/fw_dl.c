@@ -2039,7 +2039,7 @@ uint32_t wlanGetHarvardTailerInfo(IN struct ADAPTER
 
 		kalMemZero(aucBuf, 32);
 		kalStrnCpy(aucBuf, prTailers[u4SecIdx].ram_version,
-			   sizeof(prTailers[u4SecIdx].ram_version));
+			   strlen(prTailers[u4SecIdx].ram_version));
 		DBGLOG(INIT, INFO, "date[%s] version[%s]\n",
 		       prTailers[u4SecIdx].ram_built_date, aucBuf);
 	}
@@ -2068,7 +2068,7 @@ uint32_t wlanGetConnacTailerInfo(IN struct WIFI_VER_INFO *prVerInfo,
 
 	kalMemZero(aucBuf, 32);
 	kalStrnCpy(aucBuf, prComTailer->aucRamVersion,
-		   sizeof(prComTailer->aucRamVersion));
+		   strlen(prComTailer->aucRamVersion));
 
 	/* Dump image information */
 	DBGLOG(INIT, INFO,
