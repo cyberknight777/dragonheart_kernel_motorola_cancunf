@@ -633,14 +633,14 @@ int mtk_kick_CmdQ(struct musb *musb,
 				host_qmu_tx_max_number_of_pkts[hw_ep->epnum]
 				= urb->number_of_packets;
 
-				DBG_LIMIT(1,
-					"TXQ[%d], max_isoc gpd:%d, max_pkts:%d, active_dev:%d\n",
-					hw_ep->epnum,
-					host_qmu_tx_max_active_isoc_gpd
-					[hw_ep->epnum],
-					host_qmu_tx_max_number_of_pkts
-					[hw_ep->epnum],
-					mtk_host_active_dev_cnt);
+			DBG_LIMIT(1,
+				"TXQ[%d], max_isoc gpd:%d, max_pkts:%d, active_dev:%d\n",
+				hw_ep->epnum,
+				host_qmu_tx_max_active_isoc_gpd
+				[hw_ep->epnum],
+				host_qmu_tx_max_number_of_pkts
+				[hw_ep->epnum],
+				mtk_host_active_dev_cnt);
 
 #if IS_ENABLED(CONFIG_MTK_UAC_POWER_SAVING)
 			DBG(1,
