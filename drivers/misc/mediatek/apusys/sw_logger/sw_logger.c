@@ -267,7 +267,7 @@ static ssize_t set_debuglv(struct file *flip,
 	int ret;
 	unsigned int input = 0;
 
-	if (count + 1 >= 16)
+	if (count >= sizeof(tmp))
 		return -ENOMEM;
 
 	ret = copy_from_user(tmp, buffer, count);
@@ -345,7 +345,7 @@ static ssize_t set_debugAttr(struct file *flip,
 	int ret;
 	unsigned int input = 0;
 
-	if (count + 1 >= 16)
+	if (count >= sizeof(tmp))
 		return -ENOMEM;
 
 	ret = copy_from_user(tmp, buffer, count);

@@ -40,17 +40,17 @@
 
 //mvpu_algo.img
 //void * mvpu_algo_img;
-static dma_addr_t mvpu_algo_iova;
+static dma_addr_t __maybe_unused mvpu_algo_iova;
 
-static uint32_t *mvpu_algo_img;
-static uint32_t ker_img_offset;
+static uint32_t __maybe_unused *mvpu_algo_img;
+static uint32_t __maybe_unused ker_img_offset;
 
-static uint32_t ptn_img_size;
-static uint32_t knl_img_size;
+static uint32_t __maybe_unused ptn_img_size;
+static uint32_t __maybe_unused knl_img_size;
 
-static bool mvpu_algo_available;
+static bool __maybe_unused mvpu_algo_available;
 
-static int mvpu_loglvl_sec;
+static int __maybe_unused mvpu_loglvl_sec;
 
 //image headers
 #define IMG_HEADER_SIZE 4
@@ -77,11 +77,11 @@ enum buffer_attr {
 #define MAX_SAVE_SESSION  64
 #define MAX_SAVE_HASH    128
 
-static uint64_t saved_session[MAX_SAVE_SESSION];
-static uint32_t sess_oldest;
+static uint64_t __maybe_unused saved_session[MAX_SAVE_SESSION];
+static uint32_t __maybe_unused sess_oldest;
 
 // HASH
-static struct mvpu_hash_pool *hash_pool[MAX_SAVE_SESSION];
+static struct mvpu_hash_pool __maybe_unused *hash_pool[MAX_SAVE_SESSION];
 
 struct mvpu_hash_pool {
 	uint32_t buf_num[MAX_SAVE_HASH];

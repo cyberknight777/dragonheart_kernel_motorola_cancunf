@@ -12,7 +12,7 @@
 #include <linux/printk.h>
 #include <linux/seq_file.h>
 
-static int mvpu_loglvl_sys;
+static int __maybe_unused mvpu_loglvl_sys;
 
 enum {
 	APUSYS_MVPU_LOG_ERR  = 0,

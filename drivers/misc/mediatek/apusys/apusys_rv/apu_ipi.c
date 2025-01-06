@@ -181,7 +181,7 @@ int apu_ipi_send(struct mtk_apu *apu, u32 id, void *data, u32 len,
 	if (wait_ms) {
 		timeout = jiffies + msecs_to_jiffies(wait_ms);
 		ret = wait_event_timeout(apu->ack_wq,
-					 &apu->ipi_id_ack[id],
+					 apu->ipi_id_ack[id],
 					 timeout);
 
 		apu->ipi_id_ack[id] = false;

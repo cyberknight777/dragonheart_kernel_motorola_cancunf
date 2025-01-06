@@ -64,10 +64,10 @@ enum {
 	iowrite32(val, (void *) (vpu_reg_base(vd) + (vd_reg(vd)->r)))
 
 #define vpu_reg_clr(vd, r, mask) \
-	vpu_reg_write(vd, r, vpu_reg_read(vd, r) & ~mask)
+	vpu_reg_write(vd, r, ((vpu_reg_read(vd, r)) & (~mask)))
 
 #define vpu_reg_set(vd, r, mask) \
-	vpu_reg_write(vd, r, vpu_reg_read(vd, r) | mask)
+	vpu_reg_write(vd, r, ((vpu_reg_read(vd, r)) | (mask)))
 
 #define vpu_reg_read_ofs(vd, ofs) \
 	ioread32((void *) (vpu_reg_base(vd) + ofs))

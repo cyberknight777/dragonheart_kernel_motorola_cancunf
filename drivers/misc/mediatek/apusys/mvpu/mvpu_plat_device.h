@@ -15,14 +15,14 @@
 #define PREEMPT_L1_BUFFER (512 * 1024)
 #define PREEMPT_ITCM_BUFFER (128 * 1024)
 
-static u32 nr_core_ids;
-static u32 mvpu_ver;
-static u32 sw_preemption_level;
+static u32 __maybe_unused nr_core_ids;
+static u32 __maybe_unused mvpu_ver;
+static u32 __maybe_unused sw_preemption_level;
 
-static uint32_t *itcm_kernel_addr_core_0[5];
-static uint32_t *l1_kernel_addr_core_0[5];
-static uint32_t *itcm_kernel_addr_core_1[5];
-static uint32_t *l1_kernel_addr_core_1[5];
+static uint32_t __maybe_unused *itcm_kernel_addr_core_0[5];
+static uint32_t __maybe_unused *l1_kernel_addr_core_0[5];
+static uint32_t __maybe_unused *itcm_kernel_addr_core_1[5];
+static uint32_t __maybe_unused *l1_kernel_addr_core_1[5];
 
 struct mvpu_plat_drv {
 	unsigned int sw_preemption_level;
