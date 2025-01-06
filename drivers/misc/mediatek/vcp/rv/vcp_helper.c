@@ -152,12 +152,13 @@ static unsigned int vcp_timeout_times;
 	char vcp_name[100];\
 	int ret;\
 	ret = snprintf(vcp_name, 100, "[VCP] "string, ##args); \
-	if (ret > 0)\
+	if (ret > 0) { \
 		aee_kernel_warning_api(__FILE__, __LINE__, \
 			DB_OPT_MMPROFILE_BUFFER | DB_OPT_NE_JBT_TRACES, \
 			vcp_name, "[VCP] error:"string, ##args); \
 		pr_info("[VCP] error:"string, ##args);  \
-	} while (0)
+	} \
+} while (0)
 #else
 #define vcp_aee_print(string, args...) \
 	pr_info("[VCP] error:"string, ##args)
