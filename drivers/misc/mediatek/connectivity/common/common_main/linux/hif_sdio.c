@@ -500,11 +500,11 @@ static INT32 _hif_sdio_wake_up_ctrl(MTK_WCN_HIF_SDIO_CLTCTX ctx)
 			HIF_SDIO_INFO_FUNC("read cccr info !\n");
 			for (i = 0; i < 8; i++) {
 				ret = mtk_wcn_hif_sdio_f0_readb(ctx, CCCR_F8 + i, &cccr_value);
-			if (ret)
-				HIF_SDIO_ERR_FUNC("read CCCR fail(%d), address(0x%x)\n", ret, CCCR_F8 + i);
-			else
-				HIF_SDIO_INFO_FUNC("read CCCR value(0x%x), address(0x%x)\n",
-						   cccr_value, CCCR_F8 + i);
+				if (ret)
+					HIF_SDIO_ERR_FUNC("read CCCR fail(%d), address(0x%x)\n", ret, CCCR_F8 + i);
+				else
+					HIF_SDIO_INFO_FUNC("read CCCR value(0x%x), address(0x%x)\n",
+							cccr_value, CCCR_F8 + i);
 				cccr_value = 0x0;
 			}
 
@@ -514,7 +514,7 @@ static INT32 _hif_sdio_wake_up_ctrl(MTK_WCN_HIF_SDIO_CLTCTX ctx)
 				if (ret)
 					HIF_SDIO_ERR_FUNC("read cpupcr fail, ret(%d)\n", ret);
 				else
-				HIF_SDIO_ERR_FUNC("read cpupcr value (0x%x)\n", cpupcr_value);
+					HIF_SDIO_ERR_FUNC("read cpupcr value (0x%x)\n", cpupcr_value);
 				msleep(20);
 			}
 			_wmt_dump_gpio_regs(gpio_state_list[0].gpio_num);
