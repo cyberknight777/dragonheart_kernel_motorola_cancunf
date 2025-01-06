@@ -6,7 +6,7 @@
 #ifndef __VCP_RESERVEDMEM_DEFINE_H__
 #define __VCP_RESERVEDMEM_DEFINE_H__
 
-static struct vcp_reserve_mblock vcp_reserve_mblock[] = {
+static struct vcp_reserve_mblock __maybe_unused vcp_reserve_mblock[] = {
 	{
 		.num = VDEC_MEM_ID,
 		.start_phys = 0x0,
