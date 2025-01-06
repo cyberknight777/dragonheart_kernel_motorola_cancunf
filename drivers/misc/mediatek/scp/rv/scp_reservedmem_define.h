@@ -6,7 +6,7 @@
 #ifndef __SCP_RESERVEDMEM_DEFINE_H__
 #define __SCP_RESERVEDMEM_DEFINE_H__
 
-static struct scp_reserve_mblock scp_reserve_mblock[] = {
+static struct scp_reserve_mblock __maybe_unused scp_reserve_mblock[] = {
 	{
 		.num = SCP_A_SECDUMP_MEM_ID,
 		.alignment = 0,
