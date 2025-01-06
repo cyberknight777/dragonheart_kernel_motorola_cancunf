@@ -274,11 +274,11 @@ extern void init_version_check(u32 *share_mem);
 extern unsigned int get_md1_status_reg(void);
 extern unsigned int get_md1_scenario(u32 share_reg,
 	enum mdpm_power_type power_type);
-extern int get_md1_scenario_power(unsigned int scenario,
+extern int get_md1_scenario_power(enum md_scenario scenario,
 	enum mdpm_power_type power_type, struct md_power_status *mdpm_pwr_sta);
 extern int get_md1_tx_power(enum md_scenario scenario, u32 *share_mem,
 	enum mdpm_power_type power_type, struct md_power_status *mdpm_pwr_sta);
 #ifdef GET_MD_SCEANRIO_BY_SHARE_MEMORY
-extern unsigned int get_md1_scenario_by_shm(u32 *share_mem);
+extern enum md_scenario get_md1_scenario_by_shm(u32 *share_mem);
 #endif
 #endif /* _MTK_MDPM_PLATFORM_H_ */
