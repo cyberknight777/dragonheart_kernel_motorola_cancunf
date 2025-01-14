@@ -1392,7 +1392,7 @@ struct CMD_ACCESS_RX_STAT {
 struct EVENT_ACCESS_RX_STAT {
 	uint32_t u4SeqNum;
 	uint32_t u4TotalNum;
-	uint32_t au4Buffer[1];
+	uint32_t au4Buffer[];
 };
 
 #if CFG_SUPPORT_TX_BF
