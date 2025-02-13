@@ -2671,7 +2671,7 @@ int mtk_cfg80211_vendor_dfs_capability(struct wiphy *wiphy,
 	ASSERT(wiphy);
 	ASSERT(wdev);
 
-	dfs_capability = 1;
+	dfs_capability = 0;
 
 	reply_skb = cfg80211_vendor_cmd_alloc_reply_skb(wiphy,
 			sizeof(uint32_t) + NLMSG_HDRLEN);
