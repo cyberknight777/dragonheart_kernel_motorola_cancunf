@@ -1227,6 +1227,7 @@ wlanoidSetConnect(IN struct ADAPTER *prAdapter,
 	uint8_t ucBssIndex = 0;
 	struct PARAM_BSSID_EX *prCurrBssid;
 	struct ROAMING_INFO *roam;
+	struct AIS_FSM_INFO *prAisFsmInfo;
 
 	ASSERT(prAdapter);
 	ASSERT(pu4SetInfoLen);
@@ -1246,6 +1247,13 @@ wlanoidSetConnect(IN struct ADAPTER *prAdapter,
 		       prAdapter->rAcpiState, prAdapter->fgIsRadioOff);
 		return WLAN_STATUS_ADAPTER_NOT_READY;
 	}
+
+	pParamConn = (struct PARAM_CONNECT *) pvSetBuffer;
+	ucBssIndex = pParamConn->ucBssIdx;
+	prAisFsmInfo = aisGetAisFsmInfo(prAdapter, ucBssIndex);
+	if(timerPendingTimer(&prAisFsmInfo->rJoinTimeoutTimer))
+		return WLAN_STATUS_FAILURE;
+
 	prAisAbortMsg = (struct MSG_AIS_ABORT *) cnmMemAlloc(
 			prAdapter, RAM_TYPE_MSG, sizeof(struct MSG_AIS_ABORT));
 	if (!prAisAbortMsg) {
@@ -1253,10 +1261,6 @@ wlanoidSetConnect(IN struct ADAPTER *prAdapter,
 		return WLAN_STATUS_FAILURE;
 	}
 	prAisAbortMsg->rMsgHdr.eMsgId = MID_OID_AIS_FSM_JOIN_REQ;
-
-	pParamConn = (struct PARAM_CONNECT *) pvSetBuffer;
-
-	ucBssIndex = pParamConn->ucBssIdx;
 
 	prConnSettings = aisGetConnSettings(prAdapter, ucBssIndex);
 	prCurrBssid = aisGetCurrBssId(prAdapter,
