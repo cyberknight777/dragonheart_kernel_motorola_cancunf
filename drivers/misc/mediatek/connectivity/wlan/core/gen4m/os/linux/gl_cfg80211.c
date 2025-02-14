@@ -1073,7 +1073,7 @@ int mtk_cfg80211_scan(struct wiphy *wiphy,
 		return -EBUSY;
 	}
 
-#if CFG_SUPPORT_LOWLATENCY_MODE
+#if (0 && CFG_SUPPORT_LOWLATENCY_MODE) // IKSWV-97835, always allow cfg80211_scan in LowLatency mode
 	if (!prGlueInfo->prAdapter->fgEnCfg80211Scan
 	    && MEDIA_STATE_CONNECTED
 	    == kalGetMediaStateIndicated(prGlueInfo, ucBssIndex)) {
