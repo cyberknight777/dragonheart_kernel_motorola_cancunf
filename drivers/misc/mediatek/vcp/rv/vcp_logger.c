@@ -45,12 +45,6 @@
 #define VCP_LOGGER_DRAM_OFF (VCP_LOGGER_OFF_CTRL_BIT | VCP_LOGGER_DRAM_ON_BIT)
 #define VCP_LOGGER_UT (1)
 
-#undef pr_debug
-#define pr_debug(fmt, arg...) do { \
-		if (vcp_dbg_log) \
-			pr_info(fmt, ##arg); \
-	} while (0)
-
 struct log_ctrl_s {
 	unsigned int base;
 	unsigned int size;
