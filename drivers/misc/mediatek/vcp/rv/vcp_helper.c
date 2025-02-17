@@ -205,12 +205,6 @@ struct vcp_status_fp vcp_helper_fp = {
 	.vcp_A_unregister_notify	= vcp_A_unregister_notify,
 };
 
-#undef pr_debug
-#define pr_debug(fmt, arg...) do { \
-		if (vcp_dbg_log) \
-			pr_info(fmt, ##arg); \
-	} while (0)
-
 static void vcp_enable_dapc(void)
 {
 	struct arm_smccc_res res;
