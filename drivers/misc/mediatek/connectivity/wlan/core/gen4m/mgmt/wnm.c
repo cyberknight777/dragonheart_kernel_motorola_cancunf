@@ -135,6 +135,10 @@ static void wnmTimingMeasRequest(IN struct ADAPTER *prAdapter,
 void wnmWNMAction(IN struct ADAPTER *prAdapter, IN struct SW_RFB *prSwRfb)
 {
 	struct WLAN_ACTION_FRAME *prRxFrame;
+#if CFG_SUPPORT_DRIVER_ROAMING
+	struct ROAMING_INFO *prRoamingFsmInfo;
+	uint8_t ucBssIndex = 0;
+#endif
 
 	prRxFrame = (struct WLAN_ACTION_FRAME *)prSwRfb->pvHeader;
 
@@ -160,6 +164,15 @@ void wnmWNMAction(IN struct ADAPTER *prAdapter, IN struct SW_RFB *prSwRfb)
 		DBGLOG(RX, INFO,
 		       "WNM: action frame %d, try to send to supplicant\n",
 		       prRxFrame->ucAction);
+#if CFG_SUPPORT_DRIVER_ROAMING
+		if (prSwRfb->prStaRec) {
+			ucBssIndex = prSwRfb->prStaRec->ucBssIndex;
+			prRoamingFsmInfo =
+				aisGetRoamingInfo(prAdapter, ucBssIndex);
+			GET_CURRENT_SYSTIME(
+				&prRoamingFsmInfo->rRoamingLastDecisionTime);
+		}
+#endif
 		aisFuncValidateRxActionFrame(prAdapter, prSwRfb);
 #endif
 #endif /* CFG_SUPPORT_802_11V_BSS_TRANSITION_MGT */
