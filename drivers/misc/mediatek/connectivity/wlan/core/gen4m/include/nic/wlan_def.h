@@ -959,17 +959,12 @@ enum ENUM_PARAM_NAN_MODE_T {
 /* Macros for obtaining the Network Type
  * or the Station Role, given the ENUM_STA_TYPE_T
  */
-
-#define IS_STA_INDEX_VALID(_ucBssIndex)     ((_ucBssIndex) <= 4)
-
 #define IS_STA_IN_AIS(_prStaRec) \
-	(IS_STA_INDEX_VALID((_prStaRec)->ucBssIndex) ? \
 	(prAdapter->aprBssInfo[(_prStaRec)->ucBssIndex]->eNetworkType \
-	== NETWORK_TYPE_AIS):FALSE)
+	== NETWORK_TYPE_AIS)
 #define IS_STA_IN_P2P(_prStaRec) \
-	(IS_STA_INDEX_VALID((_prStaRec)->ucBssIndex) ? \
 	(prAdapter->aprBssInfo[(_prStaRec)->ucBssIndex]->eNetworkType \
-	== NETWORK_TYPE_P2P):FALSE)
+	== NETWORK_TYPE_P2P)
 #define IS_STA_LEGACY_TYPE(_prStaRec) \
 	((_prStaRec->eStaType) & STA_TYPE_LEGACY_MASK)
 #define IS_STA_P2P_TYPE(_prStaRec) \

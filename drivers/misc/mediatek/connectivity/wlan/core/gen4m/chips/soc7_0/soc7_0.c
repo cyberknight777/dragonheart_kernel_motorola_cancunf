@@ -102,9 +102,6 @@ static void soc7_0configWfDmaIntMask(struct GLUE_INFO *prGlueInfo,
 	uint8_t ucType,
 	u_int8_t enable);
 
-static void soc7_0clearEvtRingTillCmdRingEmpty(
-	struct ADAPTER *prAdapter);
-
 static void soc7_0asicConnac2xWpdmaConfig(struct GLUE_INFO *prGlueInfo,
 		u_int8_t enable, bool fgResetHif);
 
@@ -419,8 +416,6 @@ struct BUS_INFO soc7_0_bus_info = {
 	.wfdmaAllocRxRing = soc7_0WfdmaAllocRxRing,
 	.enableFwDlMode = soc7_0EnableFwDlMode,
 	.setDmaIntMask = soc7_0configWfDmaIntMask,
-	.clearEvtRingTillCmdRingEmpty =
-		soc7_0clearEvtRingTillCmdRingEmpty,
 #endif /*_HIF_PCIE || _HIF_AXI */
 };
 
@@ -1047,40 +1042,6 @@ static void soc7_0configWfDmaIntMask(struct GLUE_INFO *prGlueInfo,
 	       enable,
 	       ucType,
 	       IntMask.word);
-}
-
-static void soc7_0clearEvtRingTillCmdRingEmpty(
-	struct ADAPTER *prAdapter)
-{
-	struct GL_HIF_INFO *prHifInfo = NULL;
-	struct BUS_INFO *prBusInfo = NULL;
-	uint32_t u4Retry = 0;
-	struct RTMP_TX_RING *prTxRing;
-	uint32_t u4CpuIdx = 0, u4DmaIdx = 0;
-
-	prHifInfo = &prAdapter->prGlueInfo->rHifInfo;
-	prBusInfo = prAdapter->chip_info->bus_info;
-
-	u4Retry = 0;
-#if CFG_TRI_TX_RING
-	prTxRing = &prHifInfo->TxRing[TX_RING_CMD_IDX_4];
-#else
-	prTxRing = &prHifInfo->TxRing[TX_RING_CMD_IDX_3];
-#endif
-	kalDevRegRead(prAdapter->prGlueInfo, prTxRing->hw_cidx_addr, &u4CpuIdx);
-	kalDevRegRead(prAdapter->prGlueInfo, prTxRing->hw_didx_addr, &u4DmaIdx);
-	while (u4CpuIdx != u4DmaIdx) {
-		if (u4Retry >= HIF_CMD_POWER_OFF_RETRY_COUNT)
-			break;
-		kalMsleep(HIF_CMD_POWER_OFF_RETRY_TIME);
-		u4Retry++;
-		nicProcessISTWithSpecifiedCount(prAdapter, 1);
-		DBGLOG_LIMITED(INIT, INFO,
-		       "cmd ring cidx[%lu] != didx[%lu] try to clear event ring, retry: %lu\n",
-		       u4CpuIdx, u4DmaIdx, u4Retry);
-		kalDevRegRead(prAdapter->prGlueInfo,
-			      prTxRing->hw_didx_addr, &u4DmaIdx);
-	}
 }
 
 static void soc7_0asicConnac2xWpdmaConfig(struct GLUE_INFO *prGlueInfo,

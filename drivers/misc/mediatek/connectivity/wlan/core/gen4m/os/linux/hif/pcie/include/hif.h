@@ -315,7 +315,6 @@ struct BUS_INFO {
 	void (*enableTxDataRingPrefetch)(
 		struct GLUE_INFO *prGlueInfo, uint32_t u4Port);
 	void (*resetTxDataRingPrefetch)(struct GLUE_INFO *prGlueInfo);
-	void (*clearEvtRingTillCmdRingEmpty)(struct ADAPTER *prAdapter);
 
 	struct SW_WFDMA_INFO rSwWfdmaInfo;
 };

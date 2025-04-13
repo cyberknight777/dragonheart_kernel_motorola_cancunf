@@ -986,7 +986,10 @@ struct CMD_PEER_UPDATE_HT_CAP_MCS_INFO {
 };
 
 struct CMD_PEER_UPDATE_VHT_CAP_MCS_INFO {
-	uint8_t arRxMask[SUP_MCS_RX_BITMASK_OCTET_NUM];
+	uint16_t u2RxMcsMap;
+	uint16_t u2RxHighest;
+	uint16_t u2TxMcsMap;
+	uint16_t u2TxHighest;
 };
 
 struct CMD_PEER_UPDATE_HT_CAP {
@@ -1002,7 +1005,7 @@ struct CMD_PEER_UPDATE_HT_CAP {
 };
 
 struct CMD_PEER_UPDATE_VHT_CAP {
-	uint16_t u2CapInfo;
+	uint32_t u4CapInfo;
 	/* 16 bytes MCS information */
 	struct CMD_PEER_UPDATE_VHT_CAP_MCS_INFO rVMCS;
 
@@ -1033,6 +1036,7 @@ struct CMD_PEER_UPDATE {
 	struct CMD_PEER_UPDATE_VHT_CAP rVHtCap;
 
 	u_int8_t fgIsSupHt;
+	u_int8_t fgIsSupVht;
 	enum ENUM_STA_TYPE eStaType;
 	uint8_t ucBssIdx;
 

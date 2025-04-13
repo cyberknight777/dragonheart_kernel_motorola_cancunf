@@ -563,11 +563,6 @@ nanRangingFrameCompose(struct ADAPTER *prAdapter, struct MSDU_INFO *prMsduInfo,
 	prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter,
 					  prNanSpecificBssInfo->ucBssIndex);
 
-	if (prBssInfo == NULL) {
-		DBGLOG(NAN, ERROR, "[%s] prBssInfo is NULL\n", __func__);
-		return;
-	}
-
 	prActionFrame = (struct _NAN_ACTION_FRAME_T *)prMsduInfo->prPacket;
 
 	/* MAC Header */

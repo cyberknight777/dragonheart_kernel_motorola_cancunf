@@ -958,9 +958,6 @@ u_int8_t p2pNetRegister(struct GLUE_INFO *prGlueInfo,
 		if (fgRollbackRtnlLock)
 			rtnl_unlock();
 
-		DBGLOG(P2P, INFO, "Register net_dev=%p, wdev=%px\n",
-			prDevHandler, prDevHandler->ieee80211_ptr);
-
 		/* register for net device */
 		if (register_netdev(prDevHandler) < 0) {
 			DBGLOG(INIT, WARN,
@@ -1090,10 +1087,7 @@ u_int8_t p2pNetUnregister(struct GLUE_INFO *prGlueInfo,
 
 		/* Here are the functions which need rtnl_lock */
 		if ((prRoleDev) && (prP2PInfo->prDevHandler != prRoleDev)) {
-			DBGLOG(INIT, INFO,
-				"unregister p2p[%d], net_dev=%p, wdev=%px\n",
-				ucRoleIdx, prRoleDev,
-				prRoleDev->ieee80211_ptr);
+			DBGLOG(INIT, INFO, "unregister p2p[%d]\n", ucRoleIdx);
 			if (prRoleDev->reg_state == NETREG_REGISTERED)
 				unregister_netdev(prRoleDev);
 
@@ -1102,9 +1096,7 @@ u_int8_t p2pNetUnregister(struct GLUE_INFO *prGlueInfo,
 			 */
 		}
 
-		DBGLOG(INIT, INFO, "unregister p2pdev[%d], net_dev=%p, wdev=%px\n",
-			ucRoleIdx, prP2PInfo->prDevHandler,
-			prP2PInfo->prDevHandler->ieee80211_ptr);
+		DBGLOG(INIT, INFO, "unregister p2pdev[%d]\n", ucRoleIdx);
 		if (prP2PInfo->prDevHandler->reg_state == NETREG_REGISTERED)
 			unregister_netdev(prP2PInfo->prDevHandler);
 
@@ -2051,8 +2043,6 @@ netdev_tx_t p2pHardStartXmit(IN struct sk_buff *prSkb,
 
 	kalHardStartXmit(prSkb, prDev, prGlueInfo, ucBssIndex);
 	prP2pBssInfo = GET_BSS_INFO_BY_INDEX(prGlueInfo->prAdapter, ucBssIndex);
-	if (!prP2pBssInfo)
-		return NETDEV_TX_BUSY;
 	if ((prP2pBssInfo->eConnectionState == MEDIA_STATE_CONNECTED) ||
 		(prP2pBssInfo->rStaRecOfClientList.u4NumElem > 0))
 		kalPerMonStart(prGlueInfo);

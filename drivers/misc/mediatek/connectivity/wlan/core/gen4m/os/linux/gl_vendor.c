@@ -2886,8 +2886,8 @@ int mtk_cfg80211_vendor_read_packet_filter(struct wiphy *wiphy,
 	uint32_t u4SetInfoLen = 0;
 	struct sk_buff *skb = NULL;
 
-	uint8_t *prProg = NULL;
-	uint32_t u4ProgLen = 0, u4RecvLen = 0;
+	uint8_t prProg[APF_MAX_PROGRAM_LEN];
+	uint32_t u4ProgLen = 0, u4RecvLen = 0, u4BufLen = 0;
 	uint8_t ucFragNum = 0, ucCurrSeq = 0;
 
 
@@ -2905,23 +2905,7 @@ int mtk_cfg80211_vendor_read_packet_filter(struct wiphy *wiphy,
 		return -EFAULT;
 	}
 
-	prProg = kalMemAlloc(APF_MAX_PROGRAM_LEN, VIR_MEM_TYPE);
-
-	if (prProg == NULL) {
-		DBGLOG(REQ, ERROR, "Can not allocate memory.\n");
-		 goto query_apf_failure;
-	}
-
-	skb = cfg80211_vendor_cmd_alloc_reply_skb(wiphy,
-		APF_MAX_PROGRAM_LEN);
-
-	if (skb == NULL) {
-		DBGLOG(REQ, ERROR, "Allocate skb failed\n");
-		goto query_apf_failure;
-	}
-
 	kalMemZero(&rInfo, sizeof(struct PARAM_OFLD_INFO));
-	kalMemZero(prProg, APF_MAX_PROGRAM_LEN);
 
 	/* Init OFLD description */
 	rInfo.ucType = PKT_OFLD_TYPE_APF;
@@ -2945,47 +2929,45 @@ int mtk_cfg80211_vendor_read_packet_filter(struct wiphy *wiphy,
 			if (u4ProgLen == 0) {
 				DBGLOG(REQ, ERROR,
 					"Failed to query APF from firmware.\n");
-				 goto query_apf_failure;
+				return -EFAULT;
 			}
-		} else if (rInfo.ucFragSeq != ucCurrSeq) {
+			skb = cfg80211_vendor_cmd_alloc_reply_skb(wiphy,
+				u4ProgLen);
+			if (!skb) {
+				DBGLOG(REQ, ERROR, "Allocate skb failed\n");
+				return -ENOMEM;
+			}
+		} else if (rInfo.ucFragSeq <= ucCurrSeq) {
 			DBGLOG(REQ, ERROR, "Wrong frag seq (%d, %d)\n",
 				ucCurrSeq, rInfo.ucFragSeq);
 			goto query_apf_failure;
-		} else if (rInfo.u4BufLen > PKT_OFLD_BUF_SIZE ||
-				(u4RecvLen + rInfo.u4BufLen) > u4ProgLen) {
+		} else if (u4RecvLen + rInfo.u4BufLen > u4ProgLen) {
 			DBGLOG(REQ, ERROR,
 				"Buffer overflow, got wrong size %d\n",
 				(u4RecvLen + rInfo.u4BufLen));
 			goto query_apf_failure;
 		}
-
+		ucCurrSeq = rInfo.ucFragSeq;
+		u4BufLen = rInfo.u4BufLen;
 		kalMemCopy((prProg + u4RecvLen), &rInfo.aucBuf[0],
 					rInfo.u4BufLen);
 
-		u4RecvLen += rInfo.u4BufLen;
-		DBGLOG(REQ, INFO, "Get APF size(%d, %d) frag(%d, %d).\n",
+		u4RecvLen = u4BufLen;
+		DBGLOG(REQ, TRACE, "Get APF size(%d, %d) frag(%d, %d).\n",
 					u4ProgLen, u4RecvLen,
-					ucFragNum, rInfo.ucFragSeq);
-		ucCurrSeq++;
-		rInfo.ucFragSeq = ucCurrSeq;
+					ucFragNum, ucCurrSeq);
+		rInfo.ucFragSeq++;
 	} while (rInfo.ucFragSeq < ucFragNum);
 
 	if (unlikely(nla_put(skb, APF_ATTRIBUTE_PROGRAM,
 				u4ProgLen, prProg) < 0))
 		goto query_apf_failure;
 
-	if (prProg != NULL)
-		kalMemFree(prProg, VIR_MEM_TYPE, APF_MAX_PROGRAM_LEN);
-
 	return cfg80211_vendor_cmd_reply(skb);
 
 query_apf_failure:
 	if (skb != NULL)
 		kfree_skb(skb);
-
-	if (prProg != NULL)
-		kalMemFree(prProg, VIR_MEM_TYPE, APF_MAX_PROGRAM_LEN);
-
 	return -EFAULT;
 }
 #endif /* CFG_SUPPORT_APF */

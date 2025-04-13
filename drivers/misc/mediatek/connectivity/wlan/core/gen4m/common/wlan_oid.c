@@ -9014,11 +9014,6 @@ wlanoidSet802dot11PowerSaveProfile(IN struct ADAPTER *
 
 	prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter,
 					  prPowerMode->ucBssIdx);
-	if (prBssInfo == NULL) {
-		DBGLOG(REQ, WARN, "prBssInfo %d is NULL\n",
-		       prPowerMode->ucBssIdx);
-		return WLAN_STATUS_FAILURE;
-	}
 
 	if (prAdapter->fgEnCtiaPowerMode) {
 		if (prPowerMode->ePowerMode != Param_PowerModeCAM) {
@@ -11457,11 +11452,6 @@ wlanoidSetWiFiWmmPsTest(IN struct ADAPTER *prAdapter,
 
 	prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter,
 					  rSetWmmPsTestParam.ucBssIndex);
-	if (prBssInfo == NULL) {
-		DBGLOG(REQ, ERROR, "prBssInfo %d is NULL\n",
-			rSetWmmPsTestParam.ucBssIndex);
-		return WLAN_STATUS_FAILURE;
-	}
 	prPmProfSetupInfo = &prBssInfo->rPmProfSetupInfo;
 	prPmProfSetupInfo->ucBmpDeliveryAC =
 		(rSetWmmPsTestParam.bmfgApsdEnAc >> 4) & BITS(0, 3);
@@ -13871,7 +13861,68 @@ wlanoidSetFwLog2Host(
 				   (uint8_t *)prFwLog2HostCtrl,
 				   pvSetBuffer, u4SetBufferLen);
 }
+#if CFG_SUPPORT_RSSI_DISCONNECT
+/*----------------------------------------------------------------------------*/
+/*!
+ * \brief This routine is called to query the latest RSSI
+ * \value before disconnecting.
+ *
+ * \param[in] prAdapter Pointer to the Adapter structure.
+ * \param[in] pvQueryBuffer Pointer to the buffer that holds
+ * \the result of the query.
+ * \param[in] u4QueryBufferLen The length of the query buffer.
+ * \param[out] pu4QueryInfoLen If the call is successful,
+ * \returns the number of
+ *   bytes written into the query buffer. If the call
+ * \failed due to invalid length of
+ *   the query buffer, returns the amount of storage needed.
+ *
+ * \retval WLAN_STATUS_SUCCESS
+ * \retval WLAN_STATUS_BUFFER_TOO_SHORT
+ * \retval WLAN_STATUS_NOT_SUPPORTED
+ */
+/*----------------------------------------------------------------------------*/
+uint32_t
+wlanoidQueryRssiDisconnect(
+	IN struct ADAPTER *prAdapter,
+	IN void *pvSetBuffer,
+	IN uint32_t u4SetBufferLen,
+	OUT uint32_t *pu4SetInfoLen) {
 
+	int32_t i4cRssi;
+	uint8_t ucBssIndex = 0;
+
+	DEBUGFUNC("wlanoidQueryRssiDisconnect");
+
+	if (!prAdapter || !u4SetBufferLen)
+		return -EPERM;
+	if (u4SetBufferLen && !pvSetBuffer)
+		return -EPERM;
+
+	*pu4SetInfoLen = sizeof(int32_t);
+
+	ucBssIndex = GET_IOCTL_BSSIDX(prAdapter);
+
+	/* Check for query buffer length */
+	if (u4SetBufferLen < *pu4SetInfoLen) {
+		DBGLOG(OID, WARN, "Too short length %u\n", u4SetBufferLen);
+		return WLAN_STATUS_BUFFER_TOO_SHORT;
+	}
+	if (kalGetMediaStateIndicated(prAdapter->prGlueInfo,
+					ucBssIndex) == MEDIA_STATE_CONNECTED)
+		return WLAN_STATUS_NOT_SUPPORTED;
+
+	i4cRssi = (int32_t) prAdapter->rLinkQuality.rLq[ucBssIndex].cRssi;
+	if (i4cRssi > PARAM_WHQL_RSSI_MAX_DBM)
+		i4cRssi = PARAM_WHQL_RSSI_MAX_DBM;
+	else if (i4cRssi < PARAM_WHQL_RSSI_MIN_DBM)
+		i4cRssi = PARAM_WHQL_RSSI_MIN_DBM;
+	DBGLOG(OID, INFO, "i4cRssi = %d\n", i4cRssi);
+	kalMemCopy(pvSetBuffer, &i4cRssi, sizeof(int32_t));
+	return WLAN_STATUS_SUCCESS;
+
+}
+#endif
 uint32_t
 wlanoidNotifyFwSuspend(
 	IN struct ADAPTER *prAdapter,

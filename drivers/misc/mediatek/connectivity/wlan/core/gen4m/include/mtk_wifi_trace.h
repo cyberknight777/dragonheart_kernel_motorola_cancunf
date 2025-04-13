@@ -3,7 +3,7 @@
 /*
  * Copyright (c) 2020 MediaTek Inc.
  */
-
+#if CFG_SUPPORT_SA_LOG
 #undef TRACE_SYSTEM
 #define TRACE_SYSTEM mtk_wifi_trace
 
@@ -39,3 +39,4 @@ TRACE_EVENT(wifi_standalone_log,
 #undef TRACE_INCLUDE_FILE
 #define TRACE_INCLUDE_FILE mtk_wifi_trace
 #include <trace/define_trace.h>
+#endif

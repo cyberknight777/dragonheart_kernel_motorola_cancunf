@@ -1524,16 +1524,10 @@ void nicTxMsduQueueByPrio(struct ADAPTER *prAdapter)
 #else
 		i = 0;
 #endif
-		if (i >= MAX_BSSID_NUM)
-			continue;
-
-		for (k = 0; k < MAX_BSSID_NUM; k++) {
+		for (k = 0; k < BSS_DEFAULT_NUM; k++) {
 			prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter, i);
-			if (prBssInfo == NULL)
-				continue;
-			while (!prBssInfo->fgIsNetAbsent &&
-			       QUEUE_IS_NOT_EMPTY(
-				       &(prAdapter->rTxPQueue[i][j]))) {
+			while (!prBssInfo->fgIsNetAbsent && QUEUE_IS_NOT_EMPTY(
+				&(prAdapter->rTxPQueue[i][j]))) {
 				KAL_ACQUIRE_SPIN_LOCK(prAdapter,
 					SPIN_LOCK_TX_PORT_QUE);
 				QUEUE_MOVE_ALL(prDataPort[i][j],
@@ -1682,20 +1676,13 @@ void nicTxMsduQueueByRR(struct ADAPTER *prAdapter)
 #else
 	i = 0;
 #endif
-
-	i %= MAX_BSSID_NUM;
-
-	for (j = 0; j < MAX_BSSID_NUM; j++) {
+	for (j = 0; j < BSS_DEFAULT_NUM; j++) {
 		prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter, i);
-
-		if (prBssInfo == NULL)
-			continue;
 		/* Dequeue each TCQ to dataQ by round-robin  */
 		/* Check each TCQ is empty or not */
 		u4IsNotAllQueneEmpty = BITS(0, TC_NUM - 1);
 		while (!prBssInfo->fgIsNetAbsent && u4IsNotAllQueneEmpty) {
 			u4Idx = prAdapter->u4TxHifResCtlIdx;
-			u4Idx %= TC_NUM;
 			prTxQue = &(prAdapter->rTxPQueue[i][u4Idx]);
 			if (QUEUE_IS_NOT_EMPTY(prTxQue)) {
 				QUEUE_REMOVE_HEAD(prTxQue, prMsduInfo,
@@ -1936,7 +1923,7 @@ nicTxFillDesc(IN struct ADAPTER *prAdapter,
 #endif
 	struct TX_DESC_OPS_T *prTxDescOps = prChipInfo->prTxDescOps;
 	struct BSS_INFO *prBssInfo;
-	uint8_t ucWmmQueSet = 0;
+	uint8_t ucWmmQueSet;
 
 	/*
 	 * -------------------------------------------------------------------
@@ -1954,10 +1941,7 @@ nicTxFillDesc(IN struct ADAPTER *prAdapter,
 	if (prTxDescTemplate) {
 		prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter,
 			prMsduInfo->ucBssIndex);
-		if (prBssInfo)
-			ucWmmQueSet = prBssInfo->ucWmmQueSet;
-		else
-			DBGLOG(TX, ERROR, "prBssInfo is NULL\n");
+		ucWmmQueSet = prBssInfo->ucWmmQueSet;
 		prMsduInfo->ucWlanIndex = nicTxGetWlanIdx(prAdapter,
 			prMsduInfo->ucBssIndex, prMsduInfo->ucStaRecIndex);
 		if (prMsduInfo->ucPacketType == TX_PACKET_TYPE_DATA)
@@ -1969,19 +1953,17 @@ nicTxFillDesc(IN struct ADAPTER *prAdapter,
 		nicTxFillDescByPktOption(prAdapter, prMsduInfo, prTxDesc);
 
 #if CFG_SUPPORT_DROP_INVALID_MSDUINFO
-		if (prBssInfo) {
-			if (unlikely(prMsduInfo->ucPacketType
-				== TX_PACKET_TYPE_DATA &&
-				prBssInfo->ucWmmQueSet !=
-				prMsduInfo->ucWmmQueSet)) {
-				prMsduInfo->fgDrop = TRUE;
-				DBGLOG(RSN, ERROR,
-					"WmmQueSet mismatch[%u,%u,%u,%u]\n",
-					prMsduInfo->ucBssIndex,
-					prMsduInfo->ucStaRecIndex,
-					ucWmmQueSet,
-					prMsduInfo->ucWmmQueSet);
-			}
+		if (unlikely(prMsduInfo->ucPacketType
+			== TX_PACKET_TYPE_DATA &&
+			prBssInfo->ucWmmQueSet !=
+			prMsduInfo->ucWmmQueSet)) {
+			prMsduInfo->fgDrop = TRUE;
+			DBGLOG(RSN, ERROR,
+				"WmmQueSet mismatch[%u,%u,%u,%u]\n",
+				prMsduInfo->ucBssIndex,
+				prMsduInfo->ucStaRecIndex,
+				ucWmmQueSet,
+				prMsduInfo->ucWmmQueSet);
 		}
 #endif
 	} else { /* Compose TXD by Msdu info */
@@ -3951,7 +3933,7 @@ uint8_t nicTxGetWlanIdx(struct ADAPTER *prAdapter,
 	if (prStaRec)
 		ucWlanIndex = prStaRec->ucWlanIndex;
 	else if ((ucStaRecIdx == STA_REC_INDEX_BMCAST)
-		 && prBssInfo && prBssInfo->fgIsInUse) {
+		 && prBssInfo->fgIsInUse) {
 		if (prBssInfo->fgBcDefaultKeyExist) {
 			if (prBssInfo->wepkeyUsed[prBssInfo->ucBcDefaultKeyIdx]
 				&& prBssInfo->wepkeyWlanIdx
@@ -4101,7 +4083,7 @@ void nicTxSetMngPacket(struct ADAPTER *prAdapter,
 #if CFG_SUPPORT_NAN
 	prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter, ucBssIndex);
 
-	if (prBssInfo && prBssInfo->eNetworkType == NETWORK_TYPE_NAN) {
+	if (prBssInfo->eNetworkType == NETWORK_TYPE_NAN) {
 		prWifiHdr =
 			(struct WLAN_MAC_HEADER *)
 			((uint8_t *)(prMsduInfo->prPacket) +
@@ -4311,7 +4293,7 @@ void nicTxSetPktLowestFixedRate(IN struct ADAPTER
 	struct STA_RECORD *prStaRec = cnmGetStaRecByIndex(prAdapter,
 				      prMsduInfo->ucStaRecIndex);
 	uint8_t ucRateSwIndex, ucRateIndex, ucRatePreamble;
-	uint16_t u2RateCode = 0, u2RateCodeLimit, u2OperationalRateSet;
+	uint16_t u2RateCode, u2RateCodeLimit, u2OperationalRateSet;
 	uint32_t u4CurrentPhyRate, u4Status;
 
 	/* Not to use TxD template for fixed rate */
@@ -4324,15 +4306,12 @@ void nicTxSetPktLowestFixedRate(IN struct ADAPTER
 		u2RateCode = prStaRec->u2HwDefaultFixedRateCode;
 		u2OperationalRateSet = prStaRec->u2OperationalRateSet;
 	} else {
-		if (prBssInfo) {
-			u2RateCode = prBssInfo->u2HwDefaultFixedRateCode;
-			u2OperationalRateSet = prBssInfo->u2OperationalRateSet;
-		} else
-			DBGLOG(NIC, INFO, "prStaRec & prBssInfo are NULL\n");
+		u2RateCode = prBssInfo->u2HwDefaultFixedRateCode;
+		u2OperationalRateSet = prBssInfo->u2OperationalRateSet;
 	}
 
 	/* CoexPhyRateLimit is 0 means phy rate is unlimited */
-	if (prBssInfo && prBssInfo->u4CoexPhyRateLimit != 0) {
+	if (prBssInfo->u4CoexPhyRateLimit != 0) {
 
 		u4CurrentPhyRate = nicRateCode2PhyRate(u2RateCode,
 			FIX_BW_NO_FIXED, MAC_GI_NORMAL, AR_SS_NULL);
@@ -4546,13 +4525,12 @@ void nicTxUpdateStaRecDefaultRate(struct ADAPTER *prAdapter, struct STA_RECORD
 		prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter,
 			prStaRec->ucBssIndex);
 
-		if (prBssInfo && prBssInfo->ucErMode == RA_DCM) {
+		if (prBssInfo->ucErMode == RA_DCM) {
 			prBssInfo->u2HwDefaultFixedRateCode =
 				RATE_HE_ER_DCM_MCS_0;
 			DBGLOG_LIMITED(TX, WARN,
 			"nicTxUpdateStaRecDefaultRate:HE_ER DCM\n");
-		} else if (prBssInfo &&
-				prBssInfo->ucErMode == RA_ER_106) {
+		} else if (prBssInfo->ucErMode == RA_ER_106) {
 			prBssInfo->u2HwDefaultFixedRateCode =
 				RATE_HE_ER_TONE_106_MCS_0;
 			DBGLOG_LIMITED(TX, WARN,
@@ -4849,16 +4827,7 @@ static void nicTxDirectCheckBssAbsentQ(IN struct ADAPTER
 	struct QUE_ENTRY *prQueueEntry = (struct QUE_ENTRY *) NULL;
 	u_int8_t fgReturnBssAbsentQ = FALSE;
 
-	if (ucBssIndex > MAX_BSSID_NUM) {
-		DBGLOG(TX, INFO, "ucBssIndex is out of range!\n");
-		return;
-	}
-
 	prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter, ucBssIndex);
-	if (prBssInfo == NULL) {
-		DBGLOG(TX, INFO, "prBssInfo is NULL\n");
-		return;
-	}
 
 	QUEUE_CONCATENATE_QUEUES(
 		&prAdapter->rBssAbsentQueue[ucBssIndex], prQue);
@@ -4888,8 +4857,7 @@ static void nicTxDirectCheckBssAbsentQ(IN struct ADAPTER
 				DBGLOG(TX, INFO, "fgIsNetAbsent NoQuota\n");
 				break;
 			}
-			if ((ucBssIndex <= MAX_BSSID_NUM) &&
-				QUEUE_IS_NOT_EMPTY(
+			if (QUEUE_IS_NOT_EMPTY(
 				    &prAdapter->rBssAbsentQueue[ucBssIndex])) {
 				QUEUE_REMOVE_HEAD(
 					&prAdapter->rBssAbsentQueue[ucBssIndex],

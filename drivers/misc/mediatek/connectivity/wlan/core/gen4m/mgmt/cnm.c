@@ -722,14 +722,6 @@ void cnmChMngrRequestPrivilege(struct ADAPTER
 	/* Activate network if it's not activated yet */
 	prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter, prMsgChReq->ucBssIndex);
 
-	if (!prBssInfo) {
-		log_dbg(CNM, ERROR,
-		       "warning,invalid prBssInfo\n");
-		cnmMemFree(prAdapter, prCmdBody);
-		cnmMemFree(prAdapter, prMsgHdr);
-		return;
-	}
-
 	if (!IS_BSS_ACTIVE(prBssInfo)) {
 		SET_NET_ACTIVE(prAdapter, prBssInfo->ucBssIndex);
 		/* Don't reset 40mbw flag. Otherwise, ucHtOpInfo1 will be reset
@@ -1330,8 +1322,6 @@ uint8_t cnmIdcCsaReq(IN struct ADAPTER *prAdapter,
 
 	ASSERT(ucCh);
 
-	kalMemZero(&rRfChnlInfo, sizeof(struct RF_CHANNEL_INFO));
-
 	if (p2pFuncRoleToBssIdx(
 		prAdapter, ucRoleIdx, &ucBssIdx) !=
 		WLAN_STATUS_SUCCESS)
@@ -1833,10 +1823,7 @@ static uint8_t cnmGetAPBwPermitted(struct ADAPTER
 
 	prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter,
 					  ucBssIndex);
-	if (!prBssInfo) {
-		DBGLOG(CNM, ERROR, "Warning,invalid prBssInfo\n");
-		return ucAPBandwidth;
-	}
+
 
 	if (IS_BSS_AIS(prBssInfo)) {
 		/*AIS station mode*/
@@ -1984,7 +1971,8 @@ uint8_t cnmGetBssMaxBw(struct ADAPTER *prAdapter,
 		       uint8_t ucBssIndex)
 {
 	struct BSS_INFO *prBssInfo;
-	uint8_t ucMaxBandwidth = MAX_BW_80_80_MHZ; /*chip capability*/
+	uint8_t ucMaxBandwidth =
+		MAX_BW_80_80_MHZ; /*chip capability*/
 	struct BSS_DESC *prBssDesc = NULL;
 	enum ENUM_BAND eBand = BAND_NULL;
 	struct P2P_ROLE_FSM_INFO *prP2pRoleFsmInfo =
@@ -1997,19 +1985,17 @@ uint8_t cnmGetBssMaxBw(struct ADAPTER *prAdapter,
 
 	prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter,
 					  ucBssIndex);
-	if (!prBssInfo) {
-		DBGLOG(CNM, ERROR, "warning,invalid prBssInfo\n");
-		return ucMaxBandwidth;
-	}
 
 	if (IS_BSS_AIS(prBssInfo)) {
 		/* STA mode */
 
+
 		/* should check Bss_info could be used or not
-		 * the info might not be trustable before state3
+		 *the info might not be trustable before state3
 		 */
 
-		prBssDesc = aisGetTargetBssDesc(prAdapter, ucBssIndex);
+		prBssDesc =
+			aisGetTargetBssDesc(prAdapter, ucBssIndex);
 		if (prBssDesc)
 			eBand = prBssDesc->eBand;
 		else

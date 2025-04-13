@@ -1129,11 +1129,7 @@ nicMediaStateChange(IN struct ADAPTER *prAdapter,
 
 	ASSERT(prAdapter);
 	prGlueInfo = prAdapter->prGlueInfo;
-	if (ucBssIndex >= MAX_BSS_INDEX) {
-		DBGLOG(TX, ERROR, "ucBssIndex = %d is abnormal\n",
-			ucBssIndex);
-		return WLAN_STATUS_FAILURE;
-	}
+
 	switch (GET_BSS_INFO_BY_INDEX(prAdapter,
 				      ucBssIndex)->eNetworkType) {
 	case NETWORK_TYPE_AIS:
@@ -1217,9 +1213,8 @@ nicMediaStateChange(IN struct ADAPTER *prAdapter,
 			prCurrBssid->
 				rConfiguration.u4DSConfig =
 				prConnectionStatus->u4FreqInKHz;
-			if (ucBssIndex < KAL_AIS_NUM)
-				prAdapter->rWlanInfo.ucNetworkType[ucBssIndex]
-					= prConnectionStatus->ucNetworkType;
+			prAdapter->rWlanInfo.ucNetworkType[ucBssIndex] =
+				prConnectionStatus->ucNetworkType;
 			prCurrBssid->eOpMode
 				= (enum ENUM_PARAM_OP_MODE)
 					prConnectionStatus->ucInfraMode;
@@ -1309,12 +1304,9 @@ uint32_t nicChannelNum2Freq(uint32_t u4ChannelNum, enum ENUM_BAND eBand)
 
 #if (CFG_SUPPORT_WIFI_6G == 1)
 	if (eBand == BAND_6G) {
-		if (u4ChannelNum >= 1 && u4ChannelNum <= 233) {
-			if (u4ChannelNum == 2)
-				u4ChannelInMHz = 5935;
-			else
-				u4ChannelInMHz = 5950 + u4ChannelNum * 5;
-		} else
+		if (u4ChannelNum >= 1 && u4ChannelNum <= 233)
+			u4ChannelInMHz = 5950 + u4ChannelNum * 5;
+		else
 			u4ChannelInMHz = 0;
 	} else
 #endif
@@ -1510,8 +1502,6 @@ uint32_t nicFreq2ChannelNum(uint32_t u4FreqInKHz)
 			u4FreqInMHz = u4FreqInKHz / 1000;
 			if ((u4FreqInMHz > 5950) && (u4FreqInMHz <= 7115))
 				return ((u4FreqInMHz - 5950) / 5);
-			else if (u4FreqInMHz == 5935)
-				return 2;
 		}
 #endif
 		DBGLOG(BSS, INFO, "Return Invalid Channelnum = 0.\n");
@@ -1701,10 +1691,6 @@ uint32_t nicActivateNetworkEx(IN struct ADAPTER *prAdapter,
 	ASSERT(ucBssIndex <= prAdapter->ucHwBssIdNum);
 
 	prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter, ucBssIndex);
-	if (!prBssInfo) {
-		DBGLOG(NIC, INFO, "prBssInfo is NULL\n");
-		return WLAN_STATUS_FAILURE;
-	}
 
 	if (fgReset40mBw) {
 		prBssInfo->fg40mBwAllowed = FALSE;
@@ -1783,11 +1769,6 @@ uint32_t nicDeactivateNetworkEx(IN struct ADAPTER *prAdapter,
 	ASSERT(ucBssIndex <= prAdapter->ucHwBssIdNum);
 
 	prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter, ucBssIndex);
-	if (prBssInfo == NULL) {
-		DBGLOG(RSN, WARN, "prBssInfo %d is NULL\n",
-			ucBssIndex);
-		return WLAN_STATUS_FAILURE;
-	}
 
 	/* FW only supports BMCWlan index 0 ~ 31.
 	 * it always checks BMCWlan index validity and triggers
@@ -2198,10 +2179,6 @@ uint32_t nicPmIndicateBssCreated(IN struct ADAPTER
 	ASSERT(ucBssIndex <= prAdapter->ucHwBssIdNum);
 
 	prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter, ucBssIndex);
-	if (!prBssInfo) {
-		DBGLOG(INIT, ERROR, "ucBssIndex:%d not found\n", ucBssIndex);
-		return WLAN_STATUS_FAILURE;
-	}
 
 	rCmdIndicatePmBssCreated.ucBssIndex = ucBssIndex;
 	rCmdIndicatePmBssCreated.ucDtimPeriod =
@@ -2243,10 +2220,6 @@ uint32_t nicPmIndicateBssConnected(IN struct ADAPTER
 	ASSERT(ucBssIndex <= prAdapter->ucHwBssIdNum);
 
 	prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter, ucBssIndex);
-	if (!prBssInfo) {
-		DBGLOG(INIT, ERROR, "ucBssIndex:%d not found\n", ucBssIndex);
-		return WLAN_STATUS_FAILURE;
-	}
 
 	rCmdIndicatePmBssConnected.ucBssIndex = ucBssIndex;
 	rCmdIndicatePmBssConnected.ucDtimPeriod =
@@ -2883,7 +2856,7 @@ uint32_t nicEnterTPTestMode(IN struct ADAPTER *prAdapter,
 				prBssInfo =
 					GET_BSS_INFO_BY_INDEX(prAdapter,
 						ucBssIdx);
-				if (prBssInfo && prBssInfo->fgIsInUse
+				if (prBssInfo->fgIsInUse
 				    && (prBssInfo->eCurrentOPMode
 				    == OP_MODE_INFRASTRUCTURE))
 					nicConfigPowerSaveProfile(prAdapter,
@@ -2910,7 +2883,7 @@ uint32_t nicEnterTPTestMode(IN struct ADAPTER *prAdapter,
 		for (ucBssIdx = 0; ucBssIdx < prAdapter->ucHwBssIdNum;
 		     ucBssIdx++) {
 			prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter, ucBssIdx);
-			if (prBssInfo && prBssInfo->fgIsInUse
+			if (prBssInfo->fgIsInUse
 			    && (prBssInfo->eCurrentOPMode
 						== OP_MODE_INFRASTRUCTURE))
 				nicConfigPowerSaveProfile(prAdapter, ucBssIdx,
@@ -3042,8 +3015,7 @@ void nicSetAvailablePhyTypeSet(IN struct ADAPTER *prAdapter)
 {
 	ASSERT(prAdapter);
 
-	if (prAdapter->rWifiVar.eDesiredPhyConfig
-		>= PHY_CONFIG_NUM) {
+	if (prAdapter->rWifiVar.eDesiredPhyConfig >= PHY_CONFIG_NUM) {
 		ASSERT(0);
 		return;
 	}
@@ -3209,10 +3181,6 @@ uint32_t nicRlmUpdateSRParams(IN struct ADAPTER *prAdapter,
 			sizeof(struct _CMD_RLM_UPDATE_SR_PARMS_T));
 
 	prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter, ucBssIndex);
-	if (!prBssInfo) {
-		DBGLOG(INIT, ERROR, "ucBssIndex:%d not found\n", ucBssIndex);
-		return WLAN_STATUS_FAILURE;
-	}
 	rCmdUpdateSRParms.ucBssIndex = ucBssIndex;
 	rCmdUpdateSRParms.ucSRControl = prBssInfo->ucSRControl;
 	rCmdUpdateSRParms.ucNonSRGObssPdMaxOffset =
@@ -4712,11 +4680,6 @@ void nicUpdateLinkQuality(IN struct ADAPTER *prAdapter,
 	ASSERT(ucBssIndex <= prAdapter->ucHwBssIdNum);
 	ASSERT(prEventLinkQuality);
 
-	if (ucBssIndex >= BSSID_NUM) {
-		DBGLOG(NIC, ERROR, "ucBssIndex out of range!\n");
-		return;
-	}
-
 	prLq = &prAdapter->rLinkQuality.rLq[ucBssIndex];
 	switch (GET_BSS_INFO_BY_INDEX(prAdapter,
 				      ucBssIndex)->eNetworkType) {
@@ -4905,11 +4868,6 @@ void nicUpdateRSSI(IN struct ADAPTER *prAdapter,
 	ASSERT(prAdapter);
 	ASSERT(ucBssIndex <= prAdapter->ucHwBssIdNum);
 
-	if (ucBssIndex >= BSSID_NUM) {
-		DBGLOG(NIC, ERROR, "ucBssIndex out of range!\n");
-		return;
-	}
-
 	switch (GET_BSS_INFO_BY_INDEX(prAdapter,
 				      ucBssIndex)->eNetworkType) {
 	case NETWORK_TYPE_AIS:
@@ -4968,11 +4926,6 @@ void nicUpdateLinkSpeed(IN struct ADAPTER *prAdapter,
 {
 	ASSERT(prAdapter);
 	ASSERT(ucBssIndex <= prAdapter->ucHwBssIdNum);
-
-	if (ucBssIndex >= BSSID_NUM) {
-		DBGLOG(NIC, ERROR, "ucBssIndex out of range!\n");
-		return;
-	}
 
 	switch (GET_BSS_INFO_BY_INDEX(prAdapter,
 				      ucBssIndex)->eNetworkType) {
@@ -5409,12 +5362,7 @@ void nicRxdChNumTranslate(
 {
 #if (CFG_SUPPORT_WIFI_6G == 1)
 	if ((eBand == BAND_6G) && (pucHwChannelNum != NULL))
-		if (*pucHwChannelNum != 15)
-			*pucHwChannelNum =
-				(((*pucHwChannelNum - 181) << 2) + 1);
-		/* 6 GHz channel 2, RXV channel will assign to 15 */
-		else
-			*pucHwChannelNum = 2;
+		*pucHwChannelNum = (((*pucHwChannelNum-181) << 2) + 1);
 #endif
 }
 void nicDumpMsduInfo(IN struct MSDU_INFO *prMsduInfo)

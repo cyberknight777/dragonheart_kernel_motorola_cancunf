@@ -487,6 +487,12 @@ priv_ate_set(IN struct net_device *prNetDev,
 	     IN struct iw_request_info *prIwReqInfo,
 	     IN union iwreq_data *prIwReqData, IN char *pcExtra);
 #endif
+#if 1
+int priv_driver_set_ce_or_fcc_country(struct GLUE_INFO *prGlueInfo,   uint16_t u2CountryCode);
+uint32_t country_code_is_in_fcc_group(uint16_t country_code);
+uint32_t country_code_is_in_ce_group(uint16_t country_code);
+extern uint16_t priCountryCode;
+#endif
 
 #if CFG_SUPPORT_NAN
 int priv_nan_struct(IN struct net_device *prNetDev,

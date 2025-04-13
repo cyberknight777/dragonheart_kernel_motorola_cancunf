@@ -446,8 +446,6 @@ void scnSendScanReqV2(IN struct ADAPTER *prAdapter)
 	scanLogCacheFlushAll(prAdapter, &(prScanInfo->rScanLogCache),
 		LOG_SCAN_REQ_D2F);
 	scanReqLog(prCmdScanReq);
-	if (prCmdScanReq->ucBssIndex == KAL_NETWORK_TYPE_AIS_INDEX)
-		scanInitEssResult(prAdapter);
 
 	wlanSendSetQueryCmd(prAdapter,
 		CMD_ID_SCAN_REQ_V2,
@@ -843,11 +841,9 @@ void scnFsmRemovePendingMsg(IN struct ADAPTER *prAdapter, IN uint8_t ucSeqNum,
 			}
 
 			/* remove from pending list */
-			if (!LINK_IS_EMPTY(&(prScanInfo->rPendingMsgList))) {
-				LINK_REMOVE_KNOWN_ENTRY(&(prScanInfo->
-					rPendingMsgList), prRemoveLinkEntry);
-				cnmMemFree(prAdapter, prRemoveMsgHdr);
-			}
+			LINK_REMOVE_KNOWN_ENTRY(&(prScanInfo->rPendingMsgList),
+				prRemoveLinkEntry);
+			cnmMemFree(prAdapter, prRemoveMsgHdr);
 
 			break;
 		}
@@ -935,6 +931,27 @@ void scnEventScanDone(IN struct ADAPTER *prAdapter,
 
 	if (prScanInfo->eCurrentState == SCAN_STATE_SCANNING
 		&& prScanDone->ucSeqNum == prScanParam->ucSeqNum) {
+#if (CFG_SUPPORT_WIFI_RNR == 1)
+		struct NEIGHBOR_AP_INFO *prNeighborAPInfo;
+
+		if (!LINK_IS_EMPTY(&prScanInfo->rNeighborAPInfoList)) {
+			LINK_REMOVE_HEAD(&prScanInfo->rNeighborAPInfoList,
+				prNeighborAPInfo, struct NEIGHBOR_AP_INFO *);
+
+			kalMemCopy(prScanParam, &prNeighborAPInfo->rScanParam,
+				sizeof(prScanInfo->rScanParam));
+
+			/* restore for later scan done event */
+			prScanParam->ucSeqNum = prScanDone->ucSeqNum;
+
+			cnmMemFree(prAdapter, prNeighborAPInfo);
+
+			/* go for next scan */
+			scnFsmSteps(prAdapter, SCAN_STATE_SCANNING);
+			return;
+		}
+#endif
+
 		scanRemoveBssDescsByPolicy(prAdapter,
 		       SCN_RM_POLICY_EXCLUDE_CONNECTED | SCN_RM_POLICY_TIMEOUT);
 
@@ -1395,6 +1412,13 @@ scnFsmSchedScanRequest(IN struct ADAPTER *prAdapter,
 	}
 
 	prSchedScanCmd->ucScnFuncMask |= prRequest->ucScnFuncMask;
+
+	if (kalIsValidMacAddr(prRequest->aucRandomMac)) {
+		prSchedScanCmd->ucScnFuncMask |=
+			(ENUM_SCN_RANDOM_MAC_EN | ENUM_SCN_RANDOM_SN_EN);
+		kalMemCopy(prSchedScanCmd->aucRandomMac,
+			prRequest->aucRandomMac, MAC_ADDR_LEN);
+	}
 
 	scnSetSchedScanPlan(prAdapter, prSchedScanCmd);
 

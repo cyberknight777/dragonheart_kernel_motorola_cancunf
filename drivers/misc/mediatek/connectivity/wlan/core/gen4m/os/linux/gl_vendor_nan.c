@@ -389,7 +389,7 @@ wlanoidGetNANCapabilitiesRsp(IN struct ADAPTER *prAdapter, IN void *pvSetBuffer,
 			     IN uint32_t u4SetBufferLen,
 			     OUT uint32_t *pu4SetInfoLen)
 {
-	struct NanCapabilitiesRspMsg nanCapabilitiesRsp = {0};
+	struct NanCapabilitiesRspMsg nanCapabilitiesRsp;
 	struct NanCapabilitiesRspMsg *pNanCapabilitiesRsp =
 		(struct NanCapabilitiesRspMsg *)pvSetBuffer;
 	struct sk_buff *skb = NULL;
@@ -453,7 +453,7 @@ u32
 wlanoidNANEnableRsp(IN struct ADAPTER *prAdapter, IN void *pvSetBuffer,
 		    IN uint32_t u4SetBufferLen, OUT uint32_t *pu4SetInfoLen)
 {
-	struct NanEnableRspMsg nanEnableRsp = {0};
+	struct NanEnableRspMsg nanEnableRsp;
 	struct NanEnableRspMsg *pNanEnableRsp =
 		(struct NanEnableRspMsg *)pvSetBuffer;
 	struct sk_buff *skb = NULL;
@@ -499,7 +499,7 @@ u32
 wlanoidNANDisableRsp(IN struct ADAPTER *prAdapter, IN void *pvSetBuffer,
 		     IN uint32_t u4SetBufferLen, OUT uint32_t *pu4SetInfoLen)
 {
-	struct NanDisableRspMsg nanDisableRsp = {0};
+	struct NanDisableRspMsg nanDisableRsp;
 	struct NanDisableRspMsg *pNanDisableRsp =
 		(struct NanDisableRspMsg *)pvSetBuffer;
 	struct sk_buff *skb = NULL;
@@ -543,7 +543,7 @@ wlanoidNANConfigRsp(IN struct ADAPTER *prAdapter,
 			      IN void *pvSetBuffer, IN uint32_t u4SetBufferLen,
 			      OUT uint32_t *pu4SetInfoLen)
 {
-	struct NanConfigRspMsg nanConfigRsp = {0};
+	struct NanConfigRspMsg nanConfigRsp;
 	struct NanConfigRspMsg *pNanConfigRsp =
 		(struct NanConfigRspMsg *)pvSetBuffer;
 	struct sk_buff *skb = NULL;
@@ -2543,7 +2543,6 @@ mtk_cfg80211_vendor_event_nan_replied_indication(IN struct ADAPTER *prAdapter,
 	if (unlikely(nla_put(skb, MTK_WLAN_VENDOR_ATTR_NAN, message_len,
 			     prNanPubRepliedInd) < 0)) {
 		DBGLOG(REQ, ERROR, "nla_put_nohdr failed\n");
-		kfree(prNanPubRepliedInd);
 		kfree_skb(skb);
 		return -EFAULT;
 	}
@@ -2648,7 +2647,6 @@ mtk_cfg80211_vendor_event_nan_match_indication(IN struct ADAPTER *prAdapter,
 	if (unlikely(nla_put(skb, MTK_WLAN_VENDOR_ATTR_NAN, message_len,
 			     prNanMatchInd) < 0)) {
 		DBGLOG(REQ, ERROR, "nla_put_nohdr failed\n");
-		kfree(prNanMatchInd);
 		kfree_skb(skb);
 		return -EFAULT;
 	}

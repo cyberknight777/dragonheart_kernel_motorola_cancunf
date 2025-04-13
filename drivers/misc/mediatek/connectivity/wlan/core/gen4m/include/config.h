@@ -579,6 +579,9 @@
 /*! Maximum size of Header buffer of each SCAN record */
 #define CFG_RAW_BUFFER_SIZE                      1024
 
+/*! Maximum size of IE buffer of each SCAN record */
+#define CFG_IE_BUFFER_SIZE                      512
+
 /*------------------------------------------------------------------------------
  * Flags and Parameters for Power management
  *------------------------------------------------------------------------------
@@ -620,12 +623,12 @@
 
 #if (CFG_SUPPORT_WIFI_6G == 1)
 #define MAX_2G_BAND_CHN_NUM		14
-#define MAX_5G_BAND_CHN_NUM		28
-#define MAX_6G_BAND_CHN_NUM		60 /* will be 60 for full channel set */
-#define MAX_PER_BAND_CHN_NUM		60
+#define MAX_5G_BAND_CHN_NUM		25
+#define MAX_6G_BAND_CHN_NUM		59 /* will be 59 for full channel set */
+#define MAX_PER_BAND_CHN_NUM		59
 #else
 #define MAX_2G_BAND_CHN_NUM		14
-#define MAX_5G_BAND_CHN_NUM		28
+#define MAX_5G_BAND_CHN_NUM		25
 #define MAX_6G_BAND_CHN_NUM		0
 #define MAX_PER_BAND_CHN_NUM		25
 #endif
@@ -946,6 +949,8 @@
 
 #define CFG_SUPPORT_P2P_RSSI_QUERY		0
 
+#define CFG_SUPPORT_RSSI_DISCONNECT		1
+
 #define CFG_SUPPORT_P2P_GO_OFFLOAD_PROBE_RSP	0
 
 #define CFG_SHOW_MACADDR_SOURCE			1
@@ -954,8 +959,8 @@
 #define CFG_SHOW_FULL_MACADDR     1
 #define CFG_SHOW_FULL_IPADDR			1
 #else
-#define CFG_SHOW_FULL_MACADDR     0
-#define CFG_SHOW_FULL_IPADDR			0
+#define CFG_SHOW_FULL_MACADDR     1      /*IKSWT-168467 */
+#define CFG_SHOW_FULL_IPADDR			1      /*IKSWT-168467 */
 #endif
 
 #ifndef CFG_SUPPORT_VO_ENTERPRISE
@@ -1123,7 +1128,7 @@
 #define SCHED_SCAN_CMD_VERSION             (1)
 
 /* this value should be aligned to auSsid in struct CMD_SCHED_SCAN_REQ */
-#define CFG_SCAN_HIDDEN_SSID_MAX_NUM       (10)
+#define CFG_SCAN_HIDDEN_SSID_MAX_NUM       (16)
 /* this value should be aligned to auMatchSsid in struct CMD_SCHED_SCAN_REQ */
 #define CFG_SCAN_SSID_MATCH_MAX_NUM        (16)
 
@@ -1550,7 +1555,11 @@
  *       COUNTRY_CHANNEL_TXPOWER_LIMIT_TYPE_COMP_11AC_V2
  *------------------------------------------------------------------------------
  */
+#ifdef MOTO_MT6855_DEVONN
+#define CFG_SUPPORT_DYNA_TX_PWR_CTRL_11AC_V2_SETTING 1
+#else
 #define CFG_SUPPORT_DYNA_TX_PWR_CTRL_11AC_V2_SETTING 0
+#endif
 
 /*------------------------------------------------------------------------------
  * tx power control:
@@ -1675,6 +1684,18 @@
 #define CFG_SUPPORT_ANDROID_DUAL_STA 0
 
 #define CFG_SUPPORT_LIMITED_PKT_PID  1
+
+/*------------------------------------------------------------------------------
+ * Flag of Wifi Standalone Log Support.
+ * 1: Enable. Could be supported only if (CFG_MTK_ANDROID_WMT == 1).
+ * 0: Disable.
+ *------------------------------------------------------------------------------
+ */
+#if CFG_MTK_ANDROID_WMT
+#define CFG_SUPPORT_SA_LOG 0
+#else
+#define CFG_SUPPORT_SA_LOG 0
+#endif
 
 /*******************************************************************************
  *                             D A T A   T Y P E S

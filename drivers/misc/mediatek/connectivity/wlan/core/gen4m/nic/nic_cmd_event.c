@@ -3979,12 +3979,6 @@ bool nicBeaconTimeoutFilterPolicy(IN struct ADAPTER *prAdapter,
 
 	GET_BOOT_SYSTIME(&u4CurrentTime);
 
-	if (ucBssIdx >= MAX_BSS_INDEX) {
-		DBGLOG(NIC, ERROR, "ucBssIdx = %d is abnormal\n",
-			ucBssIdx);
-		return FALSE;
-	}
-
 	DBGLOG(NIC, INFO,
 			"u4MonitorWindow: %d, u4CurrentTime: %d, u4LastRxTime: %d, u4LastTxTime: %d",
 			u4MonitorWindow, u4CurrentTime,
@@ -3992,11 +3986,6 @@ bool nicBeaconTimeoutFilterPolicy(IN struct ADAPTER *prAdapter,
 			prTxCtrl->u4LastTxTime[ucBssIdx]);
 
 	prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter, ucBssIdx);
-	if (prBssInfo == NULL) {
-		DBGLOG(NIC, ERROR, "prBssInfo %d is NULL\n",
-			ucBssIdx);
-		return FALSE;
-	}
 
 	if (IS_BSS_AIS(prBssInfo)) {
 		if (ucBcnTimeoutReason == BEACON_TIMEOUT_REASON_HIGH_PER) {
@@ -4066,11 +4055,6 @@ void nicEventBeaconTimeout(IN struct ADAPTER *prAdapter,
 
 		prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter,
 			prEventBssBeaconTimeout->ucBssIndex);
-		if (prBssInfo == NULL) {
-			DBGLOG(NIC, ERROR, "prBssInfo %d is NULL\n",
-				prEventBssBeaconTimeout->ucBssIndex);
-			return;
-		}
 
 		if (IS_BSS_AIS(prBssInfo)) {
 			uint8_t ucDisconnectReason =
@@ -4162,11 +4146,6 @@ void nicEventStaAgingTimeout(IN struct ADAPTER *prAdapter,
 
 		prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter,
 						  prStaRec->ucBssIndex);
-		if (prBssInfo == NULL) {
-			DBGLOG(NIC, ERROR, "prBssInfo %d is NULL",
-				prStaRec->ucBssIndex);
-			return;
-		}
 
 		bssRemoveClient(prAdapter, prBssInfo, prStaRec);
 

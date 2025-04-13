@@ -84,6 +84,28 @@
 #define PWR_LIMIT_UNII3_IN_MW_MHZ  BIT(4)
 
 #if CFG_SUPPORT_PWR_LIMIT_COUNTRY
+#ifdef MOTO_DYNAMIC_TX_PWR
+#if (CFG_SUPPORT_WIFI_6G == 1)
+struct COUNTRY_POWER_LIMIT_TABLE_DEFAULT
+	/*Default*/
+	g_rRlmPowerLimitDefault[] = {
+	{	{0, 0}
+		, {63, 63, 63, 63, 63, 63, 63, 63, 63}
+		, 0
+	}
+};
+#else
+struct COUNTRY_POWER_LIMIT_TABLE_DEFAULT
+	g_rRlmPowerLimitDefault[] = {
+
+	/*Default*/
+	{	{0, 0}
+		, {63, 63, 63, 63, 63}
+		, 0
+	}
+};
+#endif
+#else
 #if (CFG_SUPPORT_WIFI_6G == 1)
 /*Set to MAX_TX_PWR = 63dBm if larger than it*/
 struct COUNTRY_POWER_LIMIT_TABLE_DEFAULT
@@ -1245,11 +1267,6 @@ struct COUNTRY_POWER_LIMIT_TABLE_DEFAULT
 	}
 	,
 	{	{'S', 'Y'}
-		, {63, 63, 63, 63, 63, 63, 63, 63, 63}
-		, 0
-	}
-	,
-	{	{'G', '0'}
 		, {63, 63, 63, 63, 63, 63, 63, 63, 63}
 		, 0
 	}
@@ -2437,11 +2454,6 @@ struct COUNTRY_POWER_LIMIT_TABLE_DEFAULT
 		, 0
 	}
 	,
-	{	{'G', '0'}
-		, {63, 63, 63, 63, 63}
-		, 0
-	}
-	,
 #if 1 /* Temp define as 6630 */
 	{	{'E', 'H'}
 		, {40, 46, 46, 63, 63}
@@ -2462,6 +2474,7 @@ struct COUNTRY_POWER_LIMIT_TABLE_DEFAULT
 	}
 };
 #endif
+#endif	//MOTO_DYNAMIC_TX_PWR
 
 struct COUNTRY_POWER_LIMIT_TABLE_CONFIGURATION_HE
 	g_rRlmPowerLimitConfigurationHE[] = {
@@ -2510,6 +2523,26 @@ struct COUNTRY_POWER_LIMIT_TABLE_CONFIGURATION_6E
 };
 #endif
 
+#ifdef MOTO_DYNAMIC_TX_PWR
+#if (CFG_SUPPORT_DYNA_TX_PWR_CTRL_11AC_V2_SETTING == 1)
+struct COUNTRY_POWER_LIMIT_TABLE_CONFIGURATION
+	g_rRlmPowerLimitConfiguration[] = {
+	/* Default */
+	{	{0, 0}
+		, 165, {63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63}
+	}
+};
+#else
+struct COUNTRY_POWER_LIMIT_TABLE_CONFIGURATION
+	g_rRlmPowerLimitConfiguration[] = {
+
+	/*Default*/
+	{	{0, 0}
+		, 165, {63, 63, 63, 63, 63, 63, 63, 63, 63}
+	}
+};
+#endif
+#else
 #if (CFG_SUPPORT_DYNA_TX_PWR_CTRL_11AC_V2_SETTING == 1)
 struct COUNTRY_POWER_LIMIT_TABLE_CONFIGURATION
 	g_rRlmPowerLimitConfiguration[] = {
@@ -3106,63 +3139,16 @@ struct COUNTRY_POWER_LIMIT_TABLE_CONFIGURATION
 		, 114, {48, 48, 48, 48, 48, 48, 48, 24, 24}
 	}
 	,
-	{	{'G', '0'}
-		, 1, {27, 27, 48, 48, 48, 48, 48, 48, 48}
-	}
-	,
-        {       {'G', '0'}
-                , 2, {36, 36, 48, 48, 48, 48, 48, 48, 48}
-        }
-	,
-	{	{'G', '0'}
-		, 3, {48, 48, 48, 23, 48, 48, 48, 48, 48}
-	}
-	,
-	{	{'G', '0'}
-		, 9, {48, 48, 48, 25, 48, 48, 48, 48, 48}
-	}
-	,
-	{	{'G', '0'}
-		, 11, {30, 30, 48, 48, 48, 48, 48, 48, 48}
-	}
-	,
-	{	{'G', '0'}
-		, 36, {33, 33, 48, 48, 48, 48, 48, 48, 48}
-	}
-	,
-	{	{'G', '0'}
-		, 42, {48, 48, 48, 48, 48, 30, 48, 48, 48}
-	}
-	,
-	{	{'G', '0'}
-		, 58, {48, 48, 48, 48, 48, 29, 48, 48, 48}
-	}
-	,
-	{	{'G', '0'}
-		, 62, {48, 48, 48, 32, 48, 48, 48, 48, 48}
-	}
-	,
-        {       {'G', '0'}
-                , 64, {35, 35, 48, 48, 48, 48, 48, 48, 48}
-        }
-	,
-        {       {'G', '0'}
-                , 106, {48, 48, 48, 48, 48, 32, 48, 48, 48}
-        }
-	,
-	{	{'G', '0'}
-		, 140, {33, 33, 48, 48, 48, 48, 48, 48, 48}
-	}
-	,
 
 	/*Default*/
 	{	{0, 0}
 		, 165, {63, 63, 63, 63, 63, 63, 63, 63, 63}
 	}
 };
-#endif
+#endif // CFG_SUPPORT_DYNA_TX_PWR_CTRL_11AC_V2_SETTING == 1
+#endif // MOTO_DYNAMIC_TX_PWR
 
-static struct COUNTRY_POWER_LIMIT_COUNTRY_CODE g_u2CountryLimitGrp0[] = {{'B', 'R'},{'M', 'X'},{'A', 'R'},{'C', 'L'},{'P', 'E'},{'C', 'O'},{'G', 'T'},{'D', 'O'},{'P', 'Y'},{'U', 'Y'},{'B', 'O'},{'U', 'S'}};
+static struct COUNTRY_POWER_LIMIT_COUNTRY_CODE g_u2CountryLimitGrp0[] = {};
 
 static struct COUNTRY_POWER_LIMIT_COUNTRY_CODE g_u2CountryLimitGrp1[] = {};
 
@@ -3201,7 +3187,7 @@ struct COUNTRY_POWER_LIMIT_GROUP_TABLE arSupportCountryPowerLmtGrps[] = {
 			/ sizeof(struct COUNTRY_POWER_LIMIT_GROUP_TABLE))
 };
 #endif
-
+// #endif
 /*******************************************************************************
  *                            P U B L I C   D A T A
  *******************************************************************************

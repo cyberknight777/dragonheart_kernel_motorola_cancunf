@@ -595,14 +595,9 @@ void saaFsmRunEventStart(IN struct ADAPTER *prAdapter,
 	/* cnmStaRecChangeState(prStaRec, STA_STATE_1); */
 
 	/* 4 <6> Decide if this BSS 20/40M bandwidth is allowed */
-	if (prStaRec->ucBssIndex < MAX_BSS_INDEX) {
+	if (prStaRec->ucBssIndex < prAdapter->ucHwBssIdNum) {
 		prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter,
 						  prStaRec->ucBssIndex);
-		if (prBssInfo == NULL) {
-			DBGLOG(RLM, ERROR, "prBssInfo is %d null\n",
-				prStaRec->ucBssIndex);
-			return;
-		}
 
 		if ((prAdapter->rWifiVar.ucAvailablePhyTypeSet &
 		     PHY_TYPE_SET_802_11N) &&

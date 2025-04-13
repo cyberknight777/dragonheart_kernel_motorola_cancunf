@@ -70,6 +70,9 @@
 #include "precomp.h"
 #include "mgmt/ais_fsm.h"
 #include "mddp.h"
+//Moto, read MACs from boot params
+#include <linux/of.h>
+#include <linux/of_address.h>
 
 /*******************************************************************************
  *                              C O N S T A N T S
@@ -3923,6 +3926,25 @@ void wlanoidClearTimeoutCheck(IN struct ADAPTER *prAdapter)
 	cnmTimerStopTimer(prAdapter, &(prAdapter->rOidTimeoutTimer));
 }
 
+#ifdef MOTO_UTAGS_MAC
+/* moto, reed wifi mac add from bootargs */
+#define MACSTRLEN 17
+extern int mmi_get_bootarg(char *key, char **value);
+extern void mmi_free_bootarg_res(void);
+
+static inline void strtomac(char * buf, unsigned char macaddr[6]) {
+        if (strchr(buf, ':'))
+                sscanf(buf, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
+                        &macaddr[0],&macaddr[1], &macaddr[2], &macaddr[3], &macaddr[4], &macaddr[5]);
+        else if (strchr(buf, '-'))
+                sscanf(buf, "%hhx-%hhx-%hhx-%hhx-%hhx-%hhx",
+                        &macaddr[0],&macaddr[1], &macaddr[2], &macaddr[3], &macaddr[4], &macaddr[5]);
+        else
+                DBGLOG(INIT, ERROR, "%s,Can not parse mac address: %s", __func__,buf);
+}
+#endif
+
+
 /*----------------------------------------------------------------------------*/
 /*!
  * @brief This function is called to override network address
@@ -3942,10 +3964,35 @@ uint32_t wlanUpdateNetworkAddress(IN struct ADAPTER
 	const uint8_t aucZeroMacAddr[] = NULL_MAC_ADDR;
 	uint8_t rMacAddr[PARAM_MAC_ADDR_LEN];
 	uint32_t u4SysTime;
+#ifdef MOTO_UTAGS_MAC
+	char *s;
+	char macStr[MACSTRLEN+1] ={0};
+	bool utagMac = FALSE;
+#endif
 
 	DEBUGFUNC("wlanUpdateNetworkAddress");
 
 	ASSERT(prAdapter);
+
+#ifdef MOTO_UTAGS_MAC
+        //Moto, read MACs from bootparams
+        if (mmi_get_bootarg("androidboot.wifimacaddr=", &s) == 0) {
+            DBGLOG(INIT, ERROR, "%s: get wlan MACs bootargs = %s \n", __func__, s);
+            memcpy(macStr, s, MACSTRLEN);
+            utagMac = TRUE;
+            mmi_free_bootarg_res();
+        }
+        else {
+            DBGLOG(INIT, ERROR, "%s: WIFI_MAC_BOOTARG not present in bootargs", __func__);
+        }
+
+        if (utagMac == TRUE) {
+#if CFG_SHOW_MACADDR_SOURCE
+                DBGLOG(INIT, INFO, " Using MAC from boot params=%s\n", macStr);
+#endif
+                strtomac(macStr,rMacAddr);
+        } else
+#endif
 
 	if (kalRetrieveNetworkAddress(prAdapter->prGlueInfo, rMacAddr) == FALSE
 	    || IS_BMCAST_MAC_ADDR(rMacAddr)
@@ -3964,9 +4011,9 @@ uint32_t wlanUpdateNetworkAddress(IN struct ADAPTER
 		/* dynamic generate */
 		u4SysTime = (uint32_t) kalGetTimeTick();
 
-		rMacAddr[0] = 0x00;
-		rMacAddr[1] = 0x08;
-		rMacAddr[2] = 0x22;
+		rMacAddr[0] = 0xF0;
+		rMacAddr[1] = 0xD7;
+		rMacAddr[2] = 0xAA;
 
 		kalMemCopy(&rMacAddr[3], &u4SysTime, 3);
 
@@ -5336,16 +5383,6 @@ uint32_t wlanLoadManufactureData(IN struct ADAPTER
 			   index, u4NvramStartOffset,
 			   u1TypeID, u4NvramFragmentSize);
 
-			if (u4NvramFragmentSize >
-				sizeof(struct CMD_NVRAM_FRAGMENT)) {
-				DBGLOG(INIT, ERROR,
-				"ID[%d]copy size[%d]bigger than buf size[%d]\n",
-				u1TypeID,
-				u4NvramFragmentSize,
-				sizeof(struct CMD_NVRAM_FRAGMENT));
-				return WLAN_STATUS_FAILURE;
-			}
-
 			kalMemCopy(prCmdNvramFragment,
 					   (pu1Addr + u4NvramStartOffset),
 					   u4NvramFragmentSize);
@@ -5809,12 +5846,6 @@ uint8_t wlanGetChannelNumberByNetwork(IN struct ADAPTER
 
 	prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter, ucBssIndex);
 
-	if (prBssInfo == NULL) {
-		DBGLOG(INIT, ERROR,
-		"ucBssIndex= %d prBssInfo is Null\n", ucBssIndex);
-		return 0;
-	}
-
 	return prBssInfo->ucPrimaryChannel;
 }
 
@@ -5839,11 +5870,6 @@ uint32_t wlanGetBandIndexByNetwork(IN struct ADAPTER
 
 	prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter, ucBssIndex);
 
-	if (prBssInfo == NULL) {
-		DBGLOG(INIT, ERROR,
-		"ucBssIndex= %d prBssInfo is Null\n", ucBssIndex);
-		return BAND_NUM;
-	}
 	return prBssInfo->eBand;
 }
 
@@ -6256,12 +6282,6 @@ void wlanDumpAllBssStatistics(IN struct ADAPTER *prAdapter)
 
 	for (ucIdx = 0; ucIdx < prAdapter->ucHwBssIdNum; ucIdx++) {
 		prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter, ucIdx);
-
-		if (prBssInfo == NULL) {
-			DBGLOG(INIT, ERROR,
-			"ucIdx = %d prBssInfo is Null\n", ucIdx);
-			continue;
-		}
 		if (!IS_BSS_ACTIVE(prBssInfo)) {
 			DBGLOG(SW4, TRACE,
 			       "Invalid BssInfo index[%u], skip dump!\n",
@@ -7862,10 +7882,6 @@ void wlanInitFeatureOption(IN struct ADAPTER *prAdapter)
 					prAdapter, "DbdcMode",
 					ENUM_DBDC_MODE_DYNAMIC);
 #endif /*CFG_SUPPORT_DBDC*/
-	prWifiVar->ucCsaDeauthClient = (uint8_t) wlanCfgGetUint32(
-					prAdapter, "CsaDeauthClient",
-					FEATURE_ENABLED);
-
 #if (CFG_EFUSE_BUFFER_MODE_DELAY_CAL == 1)
 	prWifiVar->ucEfuseBufferModeCal = (uint8_t) wlanCfgGetUint32(
 					prAdapter, "EfuseBufferModeCal", 0);
@@ -8276,7 +8292,7 @@ void wlanInitFeatureOption(IN struct ADAPTER *prAdapter)
 
 	prWifiVar->fgSapChannelSwitchPolicy = (uint32_t) wlanCfgGetUint32(
 		prAdapter, "SapChannelSwitchPolicy",
-		P2P_CHANNEL_SWITCH_POLICY_SCC);
+		P2P_CHANNEL_SWITCH_POLICY_SKIP_DFS_USER); //MOTO IKSWT-58657 avoid starting SAP on DFS channels
 
 	prWifiVar->fgSapConcurrencyPolicy = (uint32_t) wlanCfgGetUint32(
 		prAdapter, "SapConcurrencyPolicy",
@@ -8308,9 +8324,7 @@ void wlanInitFeatureOption(IN struct ADAPTER *prAdapter)
 		prAdapter, "CC2Region", FEATURE_ENABLED);
 
 	prWifiVar->u4ApChnlHoldTime = (uint32_t) wlanCfgGetUint32(
-		prAdapter, "ApChnlHoldTime", SAP_CHNL_HOLD_TIME_MS);
-	prWifiVar->u4P2pChnlHoldTime = (uint32_t) wlanCfgGetUint32(
-		prAdapter, "P2pChnlHoldTime", P2P_CHNL_HOLD_TIME_MS);
+		prAdapter, "ApChnlHoldTime", P2P_AP_CHNL_HOLD_TIME_MS);
 
 	prWifiVar->fgAllowSameBandDualSta = (uint8_t) wlanCfgGetUint32(
 		prAdapter, "AllowSameBandDualSta", FEATURE_ENABLED);
@@ -11614,11 +11628,6 @@ wlanGetSpeIdx(IN struct ADAPTER *prAdapter,
 		return ucRetValSpeIdx;
 	}
 	prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter, ucBssIndex);
-	if (prBssInfo == NULL) {
-		DBGLOG(INIT, ERROR,
-		"ucBssIndex = %d prBssInfo is Null\n", ucBssIndex);
-		return ucRetValSpeIdx;
-	}
 	/*
 	 * if DBDC enable return 0, else depend 2.4G/5G & support WF path
 	 * retrun accurate value
@@ -11716,13 +11725,6 @@ wlanGetSupportNss(IN struct ADAPTER *prAdapter,
 #endif
 	prAisFsmInfo = aisGetAisFsmInfo(prAdapter, ucBssIndex);
 	prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter, ucBssIndex);
-
-	if (prBssInfo == NULL) {
-		DBGLOG(INIT, ERROR,
-		"ucBssIndex = %d prBssInfo is Null\n", ucBssIndex);
-		return ucRetValNss;
-	}
-
 	if (IS_BSS_APGO(prBssInfo)) {
 		if (p2pFuncIsAPMode(
 			prAdapter->rWifiVar.prP2PConnSettings

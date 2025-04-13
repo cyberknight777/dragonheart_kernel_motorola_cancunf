@@ -342,7 +342,6 @@ struct BUS_INFO {
 	void (*setDmaIntMask)(struct GLUE_INFO *prGlueInfo,
 		uint8_t ucType, u_int8_t fgEnable);
 	void (*enableFwDlMode)(struct ADAPTER *prAdapter);
-	void (*clearEvtRingTillCmdRingEmpty)(struct ADAPTER *prAdapter);
 
 	void (*enableTxDataRingPrefetch)(
 		struct GLUE_INFO *prGlueInfo, uint32_t u4Port);

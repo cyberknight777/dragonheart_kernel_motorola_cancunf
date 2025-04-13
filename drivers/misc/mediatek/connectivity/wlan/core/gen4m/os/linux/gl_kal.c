@@ -106,11 +106,13 @@
 #include <linux/kobject.h>
 
 /* for wifi standalone log */
+#if CFG_SUPPORT_SA_LOG
 #define CREATE_TRACE_POINTS
 #include "mtk_wifi_trace.h"
 #include <linux/jiffies.h>
 #include <linux/ratelimit.h>
 #include <linux/rtc.h>
+#endif
 
 /*******************************************************************************
  *                              C O N S T A N T S
@@ -227,7 +229,10 @@ static struct notifier_block wlan_fb_notifier = {
 
 static struct miscdevice wlan_object;
 
+#if CFG_SUPPORT_SA_LOG
 static unsigned long rtc_update;
+#endif
+
 /*******************************************************************************
  *                                 M A C R O S
  *******************************************************************************
@@ -1745,7 +1750,7 @@ kalIndicateStatusAndComplete(IN struct GLUE_INFO
 			0, /* TSF */
 			prBssDesc->u2CapInfo,
 			prBssDesc->u2BeaconInterval, /* beacon interval */
-			prBssDesc->pucIeBuf, /* IE */
+			prBssDesc->aucIEBuf, /* IE */
 			prBssDesc->u2IELength, /* IE Length */
 			RCPI_TO_dBm(prBssDesc->ucRCPI) * 100, /* MBM */
 			GFP_KERNEL);
@@ -1757,7 +1762,7 @@ kalIndicateStatusAndComplete(IN struct GLUE_INFO
 			0, /* TSF */
 			prBssDesc->u2CapInfo,
 			prBssDesc->u2BeaconInterval, /* beacon interval */
-			prBssDesc->pucIeBuf, /* IE */
+			prBssDesc->aucIEBuf, /* IE */
 			prBssDesc->u2IELength, /* IE Length */
 			RCPI_TO_dBm(prBssDesc->ucRCPI) * 100, /* MBM */
 			GFP_KERNEL);
@@ -2499,12 +2504,6 @@ kalHardStartXmit(struct sk_buff *prOrgSkb,
 		DBGLOG(INIT, INFO, "GLUE_FLAG_HALT skip tx\n");
 		dev_kfree_skb(prOrgSkb);
 		return WLAN_STATUS_ADAPTER_NOT_READY;
-	}
-
-	if (unlikely(ucBssIndex >= MAX_BSSID_NUM)) {
-		DBGLOG(INIT, INFO, "Invalid ucBssIndex:%u\n", ucBssIndex);
-		dev_kfree_skb(prOrgSkb);
-		return WLAN_STATUS_NOT_ACCEPTED;
 	}
 
 	if (prGlueInfo->prAdapter->fgIsEnableLpdvt) {
@@ -3595,7 +3594,6 @@ kalIoctlByBssIdx(IN struct GLUE_INFO *prGlueInfo,
 
 	if (down_interruptible(&prGlueInfo->ioctl_sem)) {
 		up(&g_halt_sem);
-		DBGLOG(OID, WARN, "down_interrupt failed\n");
 		return WLAN_STATUS_FAILURE;
 	}
 
@@ -4689,7 +4687,9 @@ int main_thread(void *data)
 	DBGLOG(INIT, INFO, "%s:%u starts running...\n",
 	       KAL_GET_CURRENT_THREAD_NAME(), KAL_GET_CURRENT_THREAD_ID());
 
+#if CFG_SUPPORT_SA_LOG
 	rtc_update = jiffies;	/* update rtc_update time base */
+#endif
 
 	while (TRUE) {
 #ifdef UT_TEST_MODE
@@ -4733,10 +4733,6 @@ int main_thread(void *data)
 				      prTxThreadWakeLock);
 #endif
 		kalTraceBegin("main_thread");
-
-		if (test_and_clear_bit(GLUE_FLAG_DISABLE_PERF_BIT,
-			&prGlueInfo->ulFlag))
-			kalPerMonDisable(prGlueInfo);
 
 #if CFG_ENABLE_WIFI_DIRECT
 		/*run p2p multicast list work. */
@@ -8037,24 +8033,6 @@ inline int32_t kalPerMonEnable(IN struct GLUE_INFO
 	return 0;
 }
 
-inline int32_t kalSetPerMonEnable(struct GLUE_INFO *prGlueInfo)
-{
-	DBGLOG(SW4, INFO, "enter %s\n", __func__);
-	clear_bit(GLUE_FLAG_DISABLE_PERF_BIT, &prGlueInfo->ulFlag);
-	kalPerMonEnable(prGlueInfo);
-	DBGLOG(SW4, LOUD, "exit %s\n", __func__);
-	return 0;
-}
-
-inline int32_t kalSetPerMonDisable(struct GLUE_INFO *prGlueInfo)
-{
-	DBGLOG(SW4, INFO, "enter %s\n", __func__);
-	set_bit(GLUE_FLAG_DISABLE_PERF_BIT, &prGlueInfo->ulFlag);
-	wake_up_interruptible(&prGlueInfo->waitq);
-	DBGLOG(SW4, LOUD, "exit %s\n", __func__);
-	return 0;
-}
-
 inline int32_t kalPerMonStart(IN struct GLUE_INFO
 			      *prGlueInfo)
 {
@@ -8766,73 +8744,40 @@ int32_t kalPerMonSetForceEnableFlag(uint8_t uFlag)
 static int wlan_fb_notifier_callback(struct notifier_block
 				     *self, unsigned long event, void *data)
 {
-#if KERNEL_VERSION(5, 4, 0) <= CFG80211_VERSION_CODE
-	int32_t *pData = (int32_t *)data;
-#else
 	struct fb_event *evdata = data;
-#endif
 	int32_t blank = 0;
 	struct GLUE_INFO *prGlueInfo = (struct GLUE_INFO *)
 				       wlan_fb_notifier_priv_data;
 
-	/* If we aren't interested in this event, skip it immediately */
-	if ((event !=
-#if KERNEL_VERSION(5, 4, 0) <= CFG80211_VERSION_CODE
-		MTK_DISP_EARLY_EVENT_BLANK
-#else
-		FB_EVENT_BLANK
-#endif
-		) || !prGlueInfo)
-		goto end;
-
-	if (!wlanIsDriverReady(prGlueInfo)) {
-		DBGLOG(REQ, WARN, "driver is not ready\n");
+	/* If we aren't interested in this event, skip it immediately ... */
+	if ((event != FB_EVENT_BLANK) || !prGlueInfo)
 		return 0;
-	}
-
-
-#if KERNEL_VERSION(5, 4, 0) <= CFG80211_VERSION_CODE
-	blank = *pData;
-#else
-	blank = *(int32_t *)evdata->data;
-#endif
-
-	DBGLOG(SW4, INFO, "%s: event[%ld], blank[%d]\n", __func__,
-			event, blank);
 
 	if (kalHaltTryLock())
-		goto end;
+		return 0;
 
 	if (kalIsHalted()) {
 		kalHaltUnlock();
-		goto end;
+		return 0;
 	}
 
+	blank = *(int32_t *)evdata->data;
+
 	switch (blank) {
-#if KERNEL_VERSION(5, 4, 0) <= CFG80211_VERSION_CODE
-	case MTK_DISP_BLANK_UNBLANK:
-#else
 	case FB_BLANK_UNBLANK:
-#endif
-		kalSetPerMonEnable(prGlueInfo);
+		kalPerMonEnable(prGlueInfo);
 		wlan_fb_power_down = FALSE;
 		break;
-#if KERNEL_VERSION(5, 4, 0) <= CFG80211_VERSION_CODE
-	case MTK_DISP_BLANK_POWERDOWN:
-#else
 	case FB_BLANK_POWERDOWN:
-#endif
 		wlan_fb_power_down = TRUE;
 		if (!wlan_perf_monitor_force_enable)
-			kalSetPerMonDisable(prGlueInfo);
+			kalPerMonDisable(prGlueInfo);
 		break;
 	default:
 		break;
 	}
 
 	kalHaltUnlock();
-	DBGLOG(SW4, INFO, "%s: end\n", __func__);
-end:
 	return 0;
 }
 
@@ -8842,12 +8787,7 @@ int32_t kalFbNotifierReg(IN struct GLUE_INFO *prGlueInfo)
 
 	wlan_fb_notifier_priv_data = prGlueInfo;
 
-#if KERNEL_VERSION(5, 4, 0) <= CFG80211_VERSION_CODE
-	i4Ret = mtk_disp_notifier_register("wlan_fb_notifier",
-			&wlan_fb_notifier);
-#else
 	i4Ret = fb_register_client(&wlan_fb_notifier);
-#endif
 	if (i4Ret)
 		DBGLOG(SW4, WARN, "Register wlan_fb_notifier failed:%d\n",
 		       i4Ret);
@@ -8858,11 +8798,7 @@ int32_t kalFbNotifierReg(IN struct GLUE_INFO *prGlueInfo)
 
 void kalFbNotifierUnReg(void)
 {
-#if KERNEL_VERSION(5, 4, 0) <= CFG80211_VERSION_CODE
-	mtk_disp_notifier_unregister(&wlan_fb_notifier);
-#else
 	fb_unregister_client(&wlan_fb_notifier);
-#endif
 	wlan_fb_notifier_priv_data = NULL;
 }
 
@@ -9930,6 +9866,7 @@ void kalUpdateCompHdlrRec(IN struct ADAPTER *prAdapter,
 					% OID_HDLR_REC_NUM;
 }
 
+#if CFG_SUPPORT_SA_LOG
 void kalPrintUTC(char *msg_buf, int msg_buf_size)
 {
 	int ret = 0;
@@ -9955,7 +9892,7 @@ void kalPrintUTC(char *msg_buf, int msg_buf_size)
 			tm_android.tm_min, tm_android.tm_sec,
 			(unsigned int)(tv_android.tv_nsec/1000));
 		if (ret < 0) {
-			kalPrintLog("[%u] snprintf failed, ret: %d",
+			kalPrintSALog("[%u] snprintf failed, ret: %d",
 				__LINE__, ret);
 		} else {
 			trace_wifi_standalone_log(msg_buf);
@@ -9963,12 +9900,24 @@ void kalPrintUTC(char *msg_buf, int msg_buf_size)
 	}
 }
 
-void kalPrintTrace(char *buffer, const int len)
+void kalPrintSALog(const char *fmt, ...)
 {
-	if (buffer[len - 1] == '\n')
-		buffer[len - 1] = '\0';
+	char buffer[WIFI_LOG_MSG_BUFFER] = {0};
+	int ret = 0;
+	va_list args;
 
-	if (len < WIFI_LOG_MSG_MAX) {
+	va_start(args, fmt);
+	ret = vsnprintf(buffer, WIFI_LOG_MSG_BUFFER, fmt, args);
+	if (ret < 0) {
+		kalPrintSALog("[%u] vsnprintf failed, ret: %d",
+			__LINE__, ret);
+	}
+	va_end(args);
+
+	if (buffer[strlen(buffer) - 1] == '\n')
+		buffer[strlen(buffer) - 1] = '\0';
+
+	if (strlen(buffer) < WIFI_LOG_MSG_MAX) {
 		trace_wifi_standalone_log(buffer);
 	} else {
 		char sub_buffer[WIFI_LOG_MSG_MAX];
@@ -9989,30 +9938,7 @@ void kalPrintTrace(char *buffer, const int len)
 		kalPrintUTC(buffer, WIFI_LOG_MSG_BUFFER);
 	}
 }
-
-void kalPrintLog(const char *fmt, ...)
-{
-	char buffer[WIFI_LOG_MSG_BUFFER];
-	int ret = 0;
-	struct va_format vaf;
-	va_list args;
-
-	va_start(args, fmt);
-	vaf.fmt = fmt;
-	vaf.va = &args;
-	ret = vsnprintf(buffer, sizeof(buffer), fmt, args);
-	if (ret < 0) {
-		kalPrintLog("[%u] vsnprintf failed, ret: %d",
-			__LINE__, ret);
-	} else if (get_wifi_standalone_log_mode() == 1) {
-		kalPrintTrace(buffer, strlen(buffer));
-	} else {
-		pr_info("%s%s", WLAN_TAG, buffer);
-	}
-
-	va_end(args);
-}
-
+#endif /* CFG_SUPPORT_SA_LOG */
 
 #if (CFG_SUPPORT_POWER_THROTTLING == 1)
 void kalPwrLevelHdlrRegister(IN struct ADAPTER *prAdapter,

@@ -1677,9 +1677,9 @@ void halRxReceiveRFBs(IN struct ADAPTER *prAdapter, uint32_t u4Port,
 
 		QUEUE_INSERT_TAIL(&rReceivedRfbList, &prSwRfb->rQueEntry);
 		RX_INC_CNT(prRxCtrl, RX_MPDU_TOTAL_COUNT);
-		DBGLOG(RX, TEMP, "Recv p=%p total:%llu\n",
+		DBGLOG(RX, TEMP, "Recv p=%p total:%lu\n",
 			prSwRfb, RX_GET_CNT(prRxCtrl, RX_MPDU_TOTAL_COUNT));
-		kalTraceEvent("Recv p=%p total:%llu",
+		kalTraceEvent("Recv p=%p total:%lu",
 			prSwRfb, RX_GET_CNT(prRxCtrl, RX_MPDU_TOTAL_COUNT));
 	}
 
@@ -3419,9 +3419,6 @@ uint32_t halHifPowerOffWifi(IN struct ADAPTER *prAdapter)
 			u4Retry++;
 		}
 	}
-
-	if (prBusInfo->clearEvtRingTillCmdRingEmpty)
-		prBusInfo->clearEvtRingTillCmdRingEmpty(prAdapter);
 
 	prHifInfo->fgIsPowerOff = true;
 

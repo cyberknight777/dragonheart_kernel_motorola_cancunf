@@ -229,9 +229,7 @@
 /* HE PHY Capablilites byte9 */
 #define HE_PHY_CAP9_LT_16_SIGB_OFDM_SYMBOL_SHFT        0
 #define HE_PHY_CAP9_NON_TRIGGER_CQI_FB_SHFT            1
-#define HE_PHY_CAP9_TX_1024_QAM_LESS_242_RU            BIT(2)
 #define HE_PHY_CAP9_TX_1024_QAM_LESS_242_RU_SHFT       2
-#define HE_PHY_CAP9_RX_1024_QAM_LESS_242_RU            BIT(3)
 #define HE_PHY_CAP9_RX_1024_QAM_LESS_242_RU_SHFT       3
 #define HE_PHY_CAP9_RX_FULL_BW_COMPRESS_SIGB_SHFT      4
 #define HE_PHY_CAP9_RX_FULL_BW_NONCOMPRESS_SIGB_SHFT   5
@@ -625,12 +623,6 @@ enum ENUM_HEBA_TYPE {
 #define HE_GET_PHY_CAP_ER_SU_PPDU_1X_HE_LTF(_aucHePhyCapInfo) \
 	((_aucHePhyCapInfo[8] & HE_PHY_CAP8_ER_SU_PPDU_1X_HE_LTF) \
 		>> HE_PHY_CAP8_ER_SU_PPDU_1X_HE_LTF_SHFT)
-
-#define HE_SET_PHY_CAP_TX_1KQAM_242_TONE_RU(_aucHePhyCapInfo) \
-	(_aucHePhyCapInfo[9] |= HE_PHY_CAP9_TX_1024_QAM_LESS_242_RU)
-
-#define HE_SET_PHY_CAP_RX_1KQAM_242_TONE_RU(_aucHePhyCapInfo) \
-	(_aucHePhyCapInfo[9] |= HE_PHY_CAP9_RX_1024_QAM_LESS_242_RU)
 
 /* should use macro to access field of HE OP*/
 #define HE_IS_VHT_OP_INFO_PRESENT(_aucHeOpParams) \

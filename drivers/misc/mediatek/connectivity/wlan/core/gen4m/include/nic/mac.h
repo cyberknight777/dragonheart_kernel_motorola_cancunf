@@ -870,8 +870,6 @@
 #define STATUS_CODE_ASSOC_DENIED_LARGE_LIS_INTERVAL 51
 /* Invalid pairwise master key identifier (PMKID) */
 #define STATUS_INVALID_PMKID                        53
-/* not support DH group */
-#define STATUS_FINITE_CYCLIC_GROUP_NOT_SUPPORTED    77
 
 /* proprietary definition of reserved field of Status Code */
 /* Join failure */
@@ -2979,12 +2977,6 @@ struct _IE_TWT_T {
 } __KAL_ATTRIB_PACKED__;
 #endif
 
-struct IE_HT_TPE {
-	uint8_t ucId;
-	uint8_t ucLength;
-	uint8_t u8TxPowerInfo;
-} __KAL_ATTRIB_PACKED__;
-
 struct IE_VHT_TPE {
 	uint8_t ucId;
 	uint8_t ucLength;
@@ -3785,6 +3777,12 @@ struct IE_OCE_SUPPRESSION_BSSID {
 } __KAL_ATTRIB_PACKED__;
 
 /* 9.4.2.170 Reduced Neighbor Report element */
+struct IE_RNR {
+	uint8_t      ucId;
+	uint8_t      ucLength;
+	uint8_t      aucInfoField[0];
+} __KAL_ATTRIB_PACKED__;
+
 struct NEIGHBOR_AP_INFO_FIELD {
 	uint16_t     u2TbttInfoHdr;
 	uint8_t      ucOpClass;

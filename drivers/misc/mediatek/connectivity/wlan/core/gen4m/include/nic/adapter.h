@@ -1272,7 +1272,6 @@ struct WIFI_VAR {
 	uint32_t u4ByPassCacTime;
 	uint32_t u4CC2Region;
 	uint32_t u4ApChnlHoldTime;
-	uint32_t u4P2pChnlHoldTime;
 	uint8_t fgAllowSameBandDualSta;
 
 #if CFG_SUPPORT_NAN
@@ -1352,7 +1351,6 @@ struct WIFI_VAR {
 	/* Only scan all 6g channels, including PSC and non-PSC */
 	u_int8_t fgEnOnlyScan6g;
 #endif
-	uint8_t ucCsaDeauthClient;
 #if CFG_SUPPORT_802_11V_BTM_OFFLOAD
 	uint8_t fgAggressiveLoadBanalancing;
 	uint16_t u2DisallowBtmTimeout;
@@ -2109,10 +2107,6 @@ struct ADAPTER {
 	bool fgANTCtrl;
 	u_int8_t ucANTCtrlReason;
 	u_int8_t ucANTCtrlPendingCount;
-#endif
-
-#if (CFG_SUPPORT_WIFI_RNR == 1)
-	struct LINK rNeighborAPInfoList;
 #endif
 
 #ifdef CFG_MSCS_SUPPORT

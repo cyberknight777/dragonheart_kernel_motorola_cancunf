@@ -22,7 +22,6 @@
 #define DOMAIN_CONN	2
 #endif
 
-#define DEFAULT_CPU_FREQ (0)
 #define MAX_CPU_FREQ (3 * 1024 * 1024) /* in kHZ */
 #define CPU_ALL_CORE (0xff)
 #define CPU_BIG_CORE (0xc0)
@@ -65,7 +64,6 @@ static LIST_HEAD(wlan_policy_list);
 struct wlan_policy {
 	struct freq_qos_request	qos_req;
 	struct list_head	list;
-	int cpu;
 };
 
 void kalSetTaskUtilMinPct(IN int pid, IN unsigned int min)
@@ -115,9 +113,6 @@ void kalSetCpuFreq(IN int32_t freq)
 	struct cpufreq_policy *policy;
 	struct wlan_policy *wReq;
 
-	if (freq < 0)
-		freq = DEFAULT_CPU_FREQ;
-
 	if (list_empty(&wlan_policy_list)) {
 		for_each_possible_cpu(cpu) {
 			policy = cpufreq_cpu_get(cpu);
@@ -127,14 +122,12 @@ void kalSetCpuFreq(IN int32_t freq)
 			wReq = kzalloc(sizeof(struct wlan_policy), GFP_KERNEL);
 			if (!wReq)
 				break;
-			wReq->cpu = cpu;
 
 			ret = freq_qos_add_request(&policy->constraints,
-				&wReq->qos_req, FREQ_QOS_MIN, DEFAULT_CPU_FREQ);
+				&wReq->qos_req, FREQ_QOS_MIN, 0);
 			if (ret < 0) {
-				DBGLOG(INIT, INFO,
-					"freq_qos_add_request fail cpu%d ret=%d\n",
-					wReq->cpu, ret);
+				pr_info("%s: freq_qos_add_request fail cpu%d\n",
+					__func__, cpu);
 				kfree(wReq);
 				break;
 			}
@@ -145,12 +138,7 @@ void kalSetCpuFreq(IN int32_t freq)
 	}
 
 	list_for_each_entry(wReq, &wlan_policy_list, list) {
-		ret = freq_qos_update_request(&wReq->qos_req, freq);
-		if (ret < 0) {
-			DBGLOG(INIT, INFO,
-				"freq_qos_update_request fail cpu%d freq=%d ret=%d\n",
-				wReq->cpu, freq, ret);
-		}
+		freq_qos_update_request(&wReq->qos_req, freq);
 	}
 }
 

@@ -123,8 +123,7 @@ uint8_t *p2pBuildReAssocReqFrameCommonIEs(IN struct ADAPTER *prAdapter,
 	struct BSS_INFO *prP2pBssInfo = (struct BSS_INFO *) NULL;
 
 	prP2pBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter, prMsduInfo->ucBssIndex);
-	if (!prP2pBssInfo)
-		return NULL;
+
 	/* Fill the SSID element. */
 	SSID_IE(pucBuffer)->ucId = ELEM_ID_SSID;
 

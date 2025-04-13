@@ -744,6 +744,33 @@ int priv_support_ioctl(IN struct net_device *prNetDev,
 
 }				/* priv_support_ioctl */
 
+#if CFG_SUPPORT_RSSI_DISCONNECT
+int priv_driver_get_rssiDisconnect(IN struct net_device *prNetDev,
+				IN char *pcCommand, IN int i4TotalLen) {
+	struct GLUE_INFO *prGlueInfo;
+	uint32_t rStatus = WLAN_STATUS_SUCCESS;
+	uint32_t u4BufLen = 0;
+	int32_t i4Rssi = 0;
+	int32_t i4BytesWritten = 0;
+
+	if (!prNetDev)
+		return -EPERM;
+	if (GLUE_CHK_PR2(prNetDev, pcCommand) == FALSE)
+		return -EPERM;
+	prGlueInfo = *((struct GLUE_INFO **) netdev_priv(prNetDev));
+
+	rStatus = kalIoctl(prGlueInfo, wlanoidQueryRssiDisconnect, &i4Rssi,
+			sizeof(i4Rssi), TRUE, TRUE, TRUE, &u4BufLen);
+	if (rStatus != WLAN_STATUS_SUCCESS)
+		return -EPERM;
+
+	DBGLOG(REQ, INFO, "i4Rssi = %d\n", i4Rssi);
+	i4BytesWritten = snprintf(pcCommand, i4TotalLen,
+				 "DISCONRSSI %d", i4Rssi);
+	DBGLOG(REQ, INFO, "%s: Command result is %s\n", __func__, pcCommand);
+	return i4BytesWritten;
+}
+#endif
 #if CFG_SUPPORT_BATCH_SCAN
 
 struct EVENT_BATCH_RESULT
@@ -4005,6 +4032,7 @@ reqExtSetAcpiDevicePowerState(IN struct GLUE_INFO
 
 #if CFG_SUPPORT_EASY_DEBUG
 #define CMD_FW_PARAM				"set_fw_param"
+#define CMD_RSSI_DISCONNECT    "DISCONRSSI"
 #endif /* CFG_SUPPORT_EASY_DEBUG */
 
 #define CMD_SET_WHOLE_CHIP_RESET "SET_WHOLE_CHIP_RESET"
@@ -9443,6 +9471,9 @@ int priv_driver_set_country(IN struct net_device *prNetDev,
 	int32_t i4Argc = 0;
 	int8_t *apcArgv[WLAN_CFG_ARGV_MAX] = {0};
 	uint8_t aucCountry[2];
+	uint16_t u2CountryCode = 0;
+	uint8_t aucCountry_code[4] = {0, 0, 0, 0};
+	uint8_t i, count;
 
 	ASSERT(prNetDev);
 	if (GLUE_CHK_PR2(prNetDev, pcCommand) == FALSE)
@@ -9460,8 +9491,6 @@ int priv_driver_set_country(IN struct net_device *prNetDev,
 	}
 
 	if (regd_is_single_sku_en()) {
-		uint8_t aucCountry_code[4] = {0, 0, 0, 0};
-		uint8_t i, count;
 
 		/* command like "COUNTRY US", "COUNTRY US1" and
 		 * "COUNTRY US01"
@@ -9470,8 +9499,11 @@ int priv_driver_set_country(IN struct net_device *prNetDev,
 		for (i = 0; i < count; i++)
 			aucCountry_code[i] = apcArgv[1][i];
 
-
-		rStatus = kalIoctl(prGlueInfo, wlanoidSetCountryCode,
+		u2CountryCode = (((uint16_t) aucCountry_code[0]) << 8) |
+			((uint16_t) aucCountry_code[1]);
+		rStatus = priv_driver_set_ce_or_fcc_country(prGlueInfo,
+			u2CountryCode);
+		rStatus |= kalIoctl(prGlueInfo, wlanoidSetCountryCode,
 				   &aucCountry_code[0], count,
 				   FALSE, FALSE, TRUE, &u4BufLen);
 		if (rStatus != WLAN_STATUS_SUCCESS)
@@ -9484,8 +9516,13 @@ int priv_driver_set_country(IN struct net_device *prNetDev,
 	/* command like "COUNTRY US", "COUNTRY EU" and "COUNTRY JP" */
 	aucCountry[0] = apcArgv[1][0];
 	aucCountry[1] = apcArgv[1][1];
-
-	rStatus = kalIoctl(prGlueInfo, wlanoidSetCountryCode,
+		u2CountryCode = (((uint16_t) aucCountry[0]) << 8) |
+			((uint16_t) aucCountry[1]);
+		DBGLOG(REQ, INFO,
+			"i4Argc >= 2 enters aucCountry[0]=%u, aucCountry[1]=%u\n", aucCountry[0], aucCountry[1]);
+		rStatus = priv_driver_set_ce_or_fcc_country(prGlueInfo,
+			u2CountryCode);
+		rStatus |= kalIoctl(prGlueInfo, wlanoidSetCountryCode,
 			   &aucCountry[0], 2, FALSE, FALSE, TRUE,
 			   &u4BufLen);
 
@@ -15687,6 +15724,15 @@ int32_t priv_driver_cmds(IN struct net_device *prNetDev, IN int8_t *pcCommand,
 				 wlanoidShowDmaschInfo,
 				 (void *) pcCommand, i4TotalLen,
 				 FALSE, FALSE, TRUE, &i4BytesWritten);
+
+#if CFG_SUPPORT_RSSI_DISCONNECT
+		} else if (strnicmp(pcCommand, CMD_RSSI_DISCONNECT,
+				strlen(CMD_RSSI_DISCONNECT)) == 0) {
+			i4BytesWritten = priv_driver_get_rssiDisconnect(prNetDev,
+				pcCommand, i4TotalLen);
+
+#endif
+
 #if CFG_SUPPORT_EASY_DEBUG
 		} else if (strnicmp(pcCommand, CMD_FW_PARAM,
 				strlen(CMD_FW_PARAM)) == 0) {

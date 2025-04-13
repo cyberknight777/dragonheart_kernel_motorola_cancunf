@@ -580,6 +580,7 @@ u_int8_t rrmFillScanMsg(struct ADAPTER *prAdapter,
 	struct RM_BCN_REQ *prBeaconReq = NULL;
 	uint16_t u2RemainLen = 0;
 	uint8_t *pucSubIE = NULL, i, ucOpClass;
+
 	static struct PARAM_SSID rBcnReqSsid;
 
 	if (!prMsg)
@@ -641,7 +642,7 @@ u_int8_t rrmFillScanMsg(struct ADAPTER *prAdapter,
 			uint16_t u2IELength = 0;
 			uint16_t u2Offset = 0;
 
-			pucIE = prBssDesc->pucIeBuf;
+			pucIE = prBssDesc->aucIEBuf;
 			u2IELength = prBssDesc->u2IELength;
 			IE_FOR_EACH(pucIE, u2IELength, u2Offset)
 			{
@@ -1571,7 +1572,7 @@ void rrmCollectBeaconReport(IN struct ADAPTER *prAdapter,
 	     (struct RM_BCN_REQ *)&rmReq->prCurrMeasElem->aucRequestFields[0];
 	struct BCN_RM_PARAMS *data = &rmReq->rBcnRmParam;
 	uint8_t *bssid = prBssDesc->aucBSSID;
-	uint8_t *pos = prBssDesc->pucIeBuf;
+	uint8_t *pos = prBssDesc->aucIEBuf;
 	uint32_t ies_len = prBssDesc->u2IELength;
 	struct RM_BCN_REPORT rep;
 	struct RM_MEASURE_REPORT_ENTRY *reportEntry = NULL;

@@ -188,7 +188,7 @@
 
 #define SCN_CTRL_DEFAULT_SCAN_CTRL		SCN_CTRL_IGNORE_AIS_FIX_CHANNEL
 
-#define SCN_SCAN_DONE_PRINT_BUFFER_LENGTH	350
+#define SCN_SCAN_DONE_PRINT_BUFFER_LENGTH	500
 /*******************************************************************************
  *                             D A T A   T Y P E S
  *******************************************************************************
@@ -446,6 +446,9 @@ struct BSS_DESC {
 	 */
 	uint8_t ucIsAdaptive11r;
 
+	/* The received IE length exceed the maximum IE buffer size */
+	u_int8_t fgIsIEOverflow;
+
 	uint16_t u2RawLength;		/* The byte count of aucRawBuf[] */
 	uint16_t u2IELength;		/* The byte count of aucIEBuf[] */
 
@@ -453,7 +456,7 @@ struct BSS_DESC {
 	union ULARGE_INTEGER u8TimeStamp;
 
 	uint8_t aucRawBuf[CFG_RAW_BUFFER_SIZE];
-	uint8_t *pucIeBuf;
+	uint8_t aucIEBuf[CFG_IE_BUFFER_SIZE];
 	uint16_t u2JoinStatus;
 	OS_SYSTIME rJoinFailTime;
 
@@ -637,6 +640,10 @@ struct SCAN_INFO {
 	u_int8_t	fgSkipDFS;
 	uint8_t		fgIsScanTimeout;
 	OS_SYSTIME rLastScanStartTime;
+
+#if (CFG_SUPPORT_WIFI_RNR == 1)
+	struct LINK rNeighborAPInfoList;
+#endif
 };
 
 /* Incoming Mailbox Messages */
@@ -742,8 +749,7 @@ struct AGPS_AP_LIST {
 #if (CFG_SUPPORT_WIFI_RNR == 1)
 struct NEIGHBOR_AP_INFO {
 	struct LINK_ENTRY rLinkEntry;
-	struct PARAM_SCAN_REQUEST_ADV rScanRequest;
-	uint8_t aucScanIEBuf[MAX_IE_LENGTH];
+	struct SCAN_PARAM rScanParam;
 };
 #endif
 

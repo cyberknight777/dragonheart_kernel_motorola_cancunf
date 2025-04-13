@@ -838,7 +838,7 @@ void cnmStaFreeAllStaByNetwork(struct ADAPTER *prAdapter, uint8_t ucBssIndex,
 	 * Update system operation parameters for AP mode
 	 */
 	prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter, ucBssIndex);
-	if (prAdapter->fgIsP2PRegistered && prBssInfo
+	if (prAdapter->fgIsP2PRegistered
 		&& prBssInfo->eCurrentOPMode == OP_MODE_ACCESS_POINT) {
 		rlmUpdateParamsForAP(prAdapter, prBssInfo, FALSE);
 	}
@@ -986,8 +986,7 @@ void cnmStaRecChangeState(struct ADAPTER *prAdapter, struct STA_RECORD *prStaRec
 		prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter,
 			prStaRec->ucBssIndex);
 
-		if (prBssInfo && prBssInfo->eCurrentOPMode ==
-				OP_MODE_ACCESS_POINT)
+		if (prBssInfo->eCurrentOPMode == OP_MODE_ACCESS_POINT)
 			rlmUpdateParamsForAP(prAdapter, prBssInfo, FALSE);
 	}
 #endif
@@ -1679,6 +1678,11 @@ cnmPeerUpdate(struct ADAPTER *prAdapter, void *pvSetBuffer,
 	uint8_t ucRate;
 	uint16_t i, j;
 
+#if CFG_SUPPORT_802_11AC
+	uint8_t ucRxNss = 1;
+	struct WIFI_VAR *prWifiVar;
+#endif /* CFG_SUPPORT_802_11AC */
+
 	/* sanity check */
 	if ((!prAdapter) || (!pvSetBuffer) || (!pu4SetInfoLen))
 		return TDLS_STATUS_FAIL;
@@ -1778,7 +1782,7 @@ cnmPeerUpdate(struct ADAPTER *prAdapter, void *pvSetBuffer,
 				}
 			}
 		} else {
-			if (prCmd->rVHtCap.u2CapInfo)
+			if (prCmd->fgIsSupVht)
 				prStaRec->ucPhyTypeSet |= PHY_TYPE_BIT_VHT;
 
 			if (prCmd->fgIsSupHt)
@@ -1846,9 +1850,7 @@ cnmPeerUpdate(struct ADAPTER *prAdapter, void *pvSetBuffer,
 	}
 
 	/* ++HT capability */
-
 	if (prCmd->fgIsSupHt) {
-		prAdapter->rWifiVar.eRateSetting = FIXED_RATE_NONE;
 		prStaRec->ucDesiredPhyTypeSet |= PHY_TYPE_BIT_HT;
 		prStaRec->ucPhyTypeSet |= PHY_TYPE_BIT_HT;
 		prStaRec->u2HtCapInfo = prCmd->rHtCap.u2CapInfo;
@@ -1867,7 +1869,83 @@ cnmPeerUpdate(struct ADAPTER *prAdapter, void *pvSetBuffer,
 			prCmd->rHtCap.rMCS.arRxMask,
 			sizeof(prStaRec->aucRxMcsBitmask));
 	}
-	/* TODO ++VHT */
+
+#if CFG_SUPPORT_802_11AC
+	prWifiVar = &prAdapter->rWifiVar;
+	/* ++VHT capability */
+	if (prCmd->fgIsSupVht) {
+		prStaRec->u4VhtCapInfo = prCmd->rVHtCap.u4CapInfo;
+
+		/* Set Tx LDPC capability */
+		if (IS_FEATURE_FORCE_ENABLED(prWifiVar->ucTxLdpc))
+			prStaRec->u4VhtCapInfo |= VHT_CAP_INFO_RX_LDPC;
+		else if (IS_FEATURE_DISABLED(prWifiVar->ucTxLdpc))
+			prStaRec->u4VhtCapInfo &= ~VHT_CAP_INFO_RX_LDPC;
+
+		/* Set Tx STBC capability */
+		if (IS_FEATURE_FORCE_ENABLED(prWifiVar->ucTxStbc))
+			prStaRec->u4VhtCapInfo |=
+				VHT_CAP_INFO_RX_STBC_MASK;
+		else if (IS_FEATURE_DISABLED(prWifiVar->ucTxStbc))
+			prStaRec->u4VhtCapInfo &=
+				~VHT_CAP_INFO_RX_STBC_MASK;
+
+		/* Set Tx TXOP PS capability */
+		if (IS_FEATURE_FORCE_ENABLED(prWifiVar->ucTxopPsTx))
+			prStaRec->u4VhtCapInfo |=
+				VHT_CAP_INFO_VHT_TXOP_PS;
+		else if (IS_FEATURE_DISABLED(prWifiVar->ucTxopPsTx))
+			prStaRec->u4VhtCapInfo &=
+				~VHT_CAP_INFO_VHT_TXOP_PS;
+
+		/* Set Tx Short GI capability */
+		if (IS_FEATURE_FORCE_ENABLED(prWifiVar->ucTxShortGI)) {
+			prStaRec->u4VhtCapInfo |=
+				VHT_CAP_INFO_SHORT_GI_80;
+			prStaRec->u4VhtCapInfo |=
+				VHT_CAP_INFO_SHORT_GI_160_80P80;
+		} else if (IS_FEATURE_DISABLED(
+					prWifiVar->ucTxShortGI)) {
+			prStaRec->u4VhtCapInfo &=
+				~VHT_CAP_INFO_SHORT_GI_80;
+			prStaRec->u4VhtCapInfo &=
+				~VHT_CAP_INFO_SHORT_GI_160_80P80;
+		}
+
+		prStaRec->u2VhtRxMcsMap = prCmd->rVHtCap.rVMCS.u2RxMcsMap;
+		prStaRec->u2VhtRxHighestSupportedDataRate =
+					prCmd->rVHtCap.rVMCS.u2RxHighest;
+
+		prStaRec->u2VhtTxMcsMap = prCmd->rVHtCap.rVMCS.u2TxMcsMap;
+		prStaRec->u2VhtTxHighestSupportedDataRate =
+					prCmd->rVHtCap.rVMCS.u2TxHighest;
+
+		prStaRec->ucVhtOpMode =
+			VHT_OP_MODE_CHANNEL_WIDTH_20 |
+			VHT_OP_MODE_CHANNEL_WIDTH_80;
+		/* no op mode IE, use HT/VHT cap to check BW */
+		if (prCmd->fgIsSupHt &&
+			prBssInfo->fg40mBwAllowed &&
+			(prCmd->rHtCap.u2CapInfo & HT_CAP_INFO_SUP_CHNL_WIDTH))
+			prStaRec->ucVhtOpMode |= VHT_OP_MODE_CHANNEL_WIDTH_40;
+		if ((prCmd->rVHtCap.u4CapInfo &
+			VHT_CAP_INFO_MAX_SUP_CHANNEL_WIDTH_SET_160) ||
+		    (prCmd->rVHtCap.u4CapInfo &
+			VHT_CAP_INFO_MAX_SUP_CHANNEL_WIDTH_SET_160_80P80))
+			prStaRec->ucVhtOpMode |=
+				VHT_OP_MODE_CHANNEL_WIDTH_160_80P80;
+
+		/* no op mode IE, use MCS set to check NSS */
+		if (((prCmd->rVHtCap.rVMCS.u2RxMcsMap &
+			VHT_CAP_INFO_MCS_2SS_MASK) >>
+			VHT_CAP_INFO_MCS_2SS_OFFSET)
+			!= VHT_CAP_INFO_MCS_NOT_SUPPORTED)
+			ucRxNss = 2;
+		prStaRec->ucVhtOpMode |=
+			((ucRxNss - 1)	<< VHT_OP_MODE_RX_NSS_OFFSET) &
+			VHT_OP_MODE_RX_NSS;
+	}
+#endif /* CFG_SUPPORT_802_11AC */
 
 	cnmStaRecChangeState(prAdapter, prStaRec, STA_STATE_3);
 

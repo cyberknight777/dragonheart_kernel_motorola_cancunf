@@ -404,8 +404,7 @@ void p2pFsmRunEventScanDone(IN struct ADAPTER *prAdapter,
 	prP2pBssInfo =
 		GET_BSS_INFO_BY_INDEX(prAdapter, prScanDoneMsg->ucBssIndex);
 
-	if (!prP2pBssInfo ||
-		prAdapter->fgIsP2PRegistered == FALSE) {
+	if (prAdapter->fgIsP2PRegistered == FALSE) {
 		DBGLOG(P2P, TRACE,
 			"P2P BSS Info is removed, break p2pFsmRunEventScanDone\n");
 

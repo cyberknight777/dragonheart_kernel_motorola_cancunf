@@ -322,35 +322,3 @@ void sortAssocReqIE(IN struct ADAPTER *prAdapter,
 	cnmMgtPktFree(prAdapter, prMsduInfoInOrder);
 
 }
-
-int sortGetPayloadOffset(struct ADAPTER *prAdapter,
-		    uint8_t *pucFrame)
-{
-	struct WLAN_MAC_MGMT_HEADER *prMgmtFrame;
-	uint16_t u2TxFrameCtrl;
-
-	if (!pucFrame)
-		return -1;
-
-	prMgmtFrame = (struct WLAN_MAC_MGMT_HEADER *)(pucFrame);
-	u2TxFrameCtrl = prMgmtFrame->u2FrameCtrl & MASK_FRAME_TYPE;
-	switch (u2TxFrameCtrl) {
-	case MAC_FRAME_AUTH:
-		return OFFSET_OF(struct WLAN_AUTH_FRAME, aucInfoElem[0]);
-	case MAC_FRAME_ASSOC_REQ:
-		return OFFSET_OF(struct WLAN_ASSOC_REQ_FRAME, aucInfoElem[0]);
-	case MAC_FRAME_ASSOC_RSP:
-		return OFFSET_OF(struct WLAN_ASSOC_RSP_FRAME, aucInfoElem[0]);
-	case MAC_FRAME_REASSOC_REQ:
-		return OFFSET_OF(struct WLAN_REASSOC_REQ_FRAME, aucInfoElem[0]);
-	case MAC_FRAME_REASSOC_RSP:
-		return OFFSET_OF(struct WLAN_ASSOC_RSP_FRAME, aucInfoElem[0]);
-	case MAC_FRAME_PROBE_RSP:
-		return OFFSET_OF(struct WLAN_BEACON_FRAME, aucInfoElem[0]);
-	case MAC_FRAME_BEACON:
-		return OFFSET_OF(struct WLAN_BEACON_FRAME, aucInfoElem[0]);
-	}
-
-	return -1;
-}
-

@@ -1478,8 +1478,6 @@ wlanoidSetUApsdParam(IN struct ADAPTER *prAdapter,
 	prUapsdParam = (struct PARAM_CUSTOM_UAPSD_PARAM_STRUCT *) pvSetBuffer;
 
 	prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter, prUapsdParam->ucBssIdx);
-	if (!prBssInfo)
-		return WLAN_STATUS_NOT_SUPPORTED;
 	prPmProfSetupInfo = &prBssInfo->rPmProfSetupInfo;
 
 	kalMemZero(&rCmdUapsdParam,

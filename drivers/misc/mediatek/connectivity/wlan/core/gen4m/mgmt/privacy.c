@@ -130,11 +130,6 @@ void secInit(IN struct ADAPTER *prAdapter, IN uint8_t ucBssIndex)
 
 	prConnSettings = aisGetConnSettings(prAdapter, ucBssIndex);
 	prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter, ucBssIndex);
-	if (prBssInfo == NULL) {
-		DBGLOG(RSN, ERROR, "prBssInfo is %d NULL\n",
-			ucBssIndex);
-		return;
-	}
 	prAisSpecBssInfo =
 		aisGetAisSpecBssInfo(prAdapter, ucBssIndex);
 	prMib = aisGetMib(prAdapter, ucBssIndex);
@@ -832,11 +827,6 @@ u_int8_t secPrivacySeekForEntry(
 	}
 
 	prP2pBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter, prSta->ucBssIndex);
-	if (prP2pBssInfo == NULL) {
-		DBGLOG(RSN, ERROR, "prP2pBssInfo is &d null\n",
-			prSta->ucBssIndex);
-		return FALSE;
-	}
 	ucRoleIdx = prP2pBssInfo->u4PrivateData;
 
 	prWtbl = prAdapter->rWifiVar.arWtbl;
@@ -1091,12 +1081,6 @@ secPrivacySeekForBcEntry(IN struct ADAPTER *prAdapter,
 	struct WLAN_TABLE *prWtbl;
 	struct BSS_INFO *prBSSInfo =
 	    GET_BSS_INFO_BY_INDEX(prAdapter, ucBssIndex);
-
-	if (prBSSInfo == NULL) {
-		DBGLOG(RSN, ERROR, "prBSSInfo is %d null\n",
-			ucBssIndex);
-		return WTBL_ALLOC_FAIL;
-	}
 
 	prWtbl = prAdapter->rWifiVar.arWtbl;
 

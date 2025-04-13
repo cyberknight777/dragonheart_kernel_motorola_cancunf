@@ -73,6 +73,12 @@ ifeq ($(WLAN_CHIP_ID),)
 WLAN_CHIP_ID=$(word 1, $(MTK_COMBO_CHIP))
 endif
 
+# Moto read MACs from boot params
+ccflags-y += -DMOTO_UTAGS_MAC=1
+
+# Moto Dynamic tx power
+ccflags-y += -DMOTO_DYNAMIC_TX_PWR=1
+
 ccflags-y += -DCFG_SUPPORT_DEBUG_FS=0
 ccflags-y += -DWLAN_INCLUDE_PROC
 ccflags-y += -DCFG_SUPPORT_AGPS_ASSIST=0
@@ -232,6 +238,11 @@ ccflags-y += -DCONFIG_MTK_WIFI_HE160
 ccflags-y += -DCFG_SUPPORT_BW160
 endif
 
+ifneq ($(findstring devonn,$(TARGET_PRODUCT)),)
+ccflags-y:=$(filter-out -UDEVONN,$(ccflags-y))
+ccflags-y += -DMOTO_MT6855_DEVONN
+endif
+
 ifeq ($(CONFIG_MTK_WIFI_CONNINFRA_SUPPORT), y)
 ccflags-y += -DCFG_ANDORID_CONNINFRA_SUPPORT=1
 else
@@ -304,6 +315,9 @@ ifeq ($(CONFIG_MTK_WIFI_SNIFFER_RADIOTAP), y)
 endif
 
 ccflags-y += -DCFG_DRIVER_INITIAL_RUNNING_MODE=3
+
+# Moto remove 2.4GHz ch12/13
+ccflags-y += -DCFG_MOT_REM_CH12_CH13
 
 ifneq ($(filter 6765, $(WLAN_CHIP_ID)),)
     ccflags-y += -DCFG_SUPPORT_DUAL_STA=0
@@ -541,7 +555,6 @@ ccflags-y += -I$(srctree)/drivers/misc/mediatek/emi/submodule
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/pmic/include/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/power_throttling/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/connectivity/common
-ccflags-y += -I$(srctree)/drivers/gpu/drm/mediatek/mediatek_v2/
 ccflags-y += -I$(srctree)/drivers/devfreq/
 ccflags-y += -I$(srctree)/net
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/connectivity/connfem/include/
@@ -642,7 +655,8 @@ COMMON_OBJS := 	$(COMMON_DIR)dump.o \
 		$(COMMON_DIR)wlan_lib.o \
 		$(COMMON_DIR)wlan_oid.o \
 		$(COMMON_DIR)wlan_bow.o \
-		$(COMMON_DIR)debug.o
+		$(COMMON_DIR)debug.o \
+        $(COMMON_DIR)mot_config.o
 
 NIC_OBJS := 	$(NIC_DIR)nic.o \
 		$(NIC_DIR)nic_tx.o \

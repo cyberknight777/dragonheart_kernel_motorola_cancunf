@@ -82,18 +82,15 @@ void soc2_1x1ShowHifInfo(IN struct ADAPTER *prAdapter)
 {
 	uint32_t u4Value = 0;
 
-	if (!in_interrupt()) {
-		wf_ioremap_write(SOC2_1X1_CONN_HIF_ON_BASE,
-			SOC2_1X1_CONSYS_CLOCK_CHECK_VALUE);
-		udelay(200);
-		wf_ioremap_read(SOC2_1X1_CONN_HIF_ON_BASE, &u4Value);
-		if (!((u4Value & SOC2_1X1_CONSYS_HCLK_CHECK_BIT) &&
-			(u4Value & SOC2_1X1_CONSYS_OSCCLK_CHECK_BIT))) {
-			DBGLOG(HAL, INFO,
-				"consys_check_reg_readable: fail 0x%08x\n",
-					u4Value);
-			return;
-		}
+	wf_ioremap_write(SOC2_1X1_CONN_HIF_ON_BASE,
+		SOC2_1X1_CONSYS_CLOCK_CHECK_VALUE);
+	udelay(200);
+	wf_ioremap_read(SOC2_1X1_CONN_HIF_ON_BASE, &u4Value);
+	if (!((u4Value & SOC2_1X1_CONSYS_HCLK_CHECK_BIT) &&
+		(u4Value & SOC2_1X1_CONSYS_OSCCLK_CHECK_BIT))) {
+		DBGLOG(HAL, INFO,
+			"consys_check_reg_readable: fail 0x%08x\n", u4Value);
+		return;
 	}
 
 	/* conn2ap axi master sleep info */

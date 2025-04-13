@@ -140,7 +140,7 @@ extern bool fgIsTxPowerDecreased;
 	(GLUE_FLAG_HALT | GLUE_FLAG_SUB_MOD_MULTICAST | \
 	GLUE_FLAG_TX_CMD_DONE | GLUE_FLAG_TXREQ | GLUE_FLAG_TIMEOUT | \
 	GLUE_FLAG_FRAME_FILTER | GLUE_FLAG_OID | GLUE_FLAG_RX | \
-	GLUE_FLAG_SER_TIMEOUT | GLUE_FLAG_DISABLE_PERF)
+	GLUE_FLAG_SER_TIMEOUT)
 
 #define GLUE_FLAG_HIF_PROCESS \
 	(GLUE_FLAG_HALT | GLUE_FLAG_INT | GLUE_FLAG_HIF_TX | \
@@ -203,11 +203,13 @@ extern bool fgIsTxPowerDecreased;
 #define TRAFFIC_RHRESHOLD	150
 #endif
 
+#if CFG_SUPPORT_SA_LOG
 #define WIFI_LOG_MSG_MAX	(512)
 #if IS_ENABLED(CONFIG_ARM64)
 #define WIFI_LOG_MSG_BUFFER	(WIFI_LOG_MSG_MAX * 2)
 #else
 #define WIFI_LOG_MSG_BUFFER	(768)
+#endif
 #endif
 
 #if (CFG_SUPPORT_POWER_THROTTLING == 1)
@@ -925,18 +927,20 @@ int8_t atoi(uint8_t ch);
 
 #define kalGetTimeTick()                jiffies_to_msecs(jiffies)
 
-#define kalPrintLogLimited(fmt, ...)					\
+#if CFG_SUPPORT_SA_LOG
+#define kalPrintSALogLimited(fmt, ...)					\
 ({									\
 	static DEFINE_RATELIMIT_STATE(_rs,				\
 		DEFAULT_RATELIMIT_INTERVAL, DEFAULT_RATELIMIT_BURST);	\
 									\
 	if (__ratelimit(&_rs))						\
-		kalPrintLog(fmt, ##__VA_ARGS__);			\
+		kalPrintSALog(fmt, ##__VA_ARGS__);			\
 })
+#endif
 
 #define WLAN_TAG                        "[wlan]"
-#define kalPrint               kalPrintLog
-#define kalPrintLimited(_Fmt...) kalPrintLogLimited(WLAN_TAG _Fmt)
+#define kalPrint(_Fmt...)               pr_info(WLAN_TAG _Fmt)
+#define kalPrintLimited(_Fmt...)        pr_info_ratelimited(WLAN_TAG _Fmt)
 
 #define kalBreakPoint() \
 do { \
@@ -1835,8 +1839,9 @@ void kalSyncTimeToFWByIoctl(void);
 void kalUpdateCompHdlrRec(IN struct ADAPTER *prAdapter,
 	IN PFN_OID_HANDLER_FUNC pfnOidHandler, IN struct CMD_INFO *prCmdInfo);
 
-extern uint32_t get_wifi_standalone_log_mode(void);
-void kalPrintLog(const char *fmt, ...);
+#if CFG_SUPPORT_SA_LOG
+void kalPrintSALog(const char *fmt, ...);
+#endif
 
 #if (CFG_SUPPORT_POWER_THROTTLING == 1)
 void kalPwrLevelHdlrRegister(IN struct ADAPTER *prAdapter,

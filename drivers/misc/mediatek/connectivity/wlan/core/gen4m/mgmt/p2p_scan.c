@@ -155,8 +155,7 @@ scanP2pProcessBeaconAndProbeResp(IN struct ADAPTER *prAdapter,
 			prP2pBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter,
 					(uint8_t) u4Idx);
 
-			if (!prP2pBssInfo ||
-				!IS_BSS_ACTIVE(prP2pBssInfo))
+			if (!IS_BSS_ACTIVE(prP2pBssInfo))
 				continue;
 
 			if ((prP2pBssInfo->eNetworkType != NETWORK_TYPE_P2P) ||

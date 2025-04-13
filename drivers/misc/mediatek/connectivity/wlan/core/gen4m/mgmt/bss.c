@@ -113,8 +113,6 @@ struct APPEND_VAR_IE_ENTRY txBcnIETable[] = {
 	   rlmRspGenerateHtCapIE}	/* 45 */
 	, {(ELEM_HDR_LEN + ELEM_MAX_LEN_HT_OP), NULL,
 	   rlmRspGenerateHtOpIE}	/* 61 */
-	, {(ELEM_HDR_LEN + ELEM_MAX_LEN_TPE), NULL,
-	   rlmGenerateHtTPEIE}		/* 34 */
 #if CFG_ENABLE_WIFI_DIRECT
 	, {(ELEM_HDR_LEN + ELEM_MAX_LEN_OBSS_SCAN), NULL,
 	   rlmRspGenerateObssScanIE}	/* 74 */
@@ -186,8 +184,6 @@ struct APPEND_VAR_IE_ENTRY txProbRspIETable[] = {
 	   rlmRspGenerateHtCapIE}	/* 45 */
 	, {(ELEM_HDR_LEN + ELEM_MAX_LEN_HT_OP), NULL,
 	   rlmRspGenerateHtOpIE}	/* 61 */
-	, {(ELEM_HDR_LEN + ELEM_MAX_LEN_TPE), NULL,
-	   rlmGenerateHtTPEIE}		/* 34 */
 #if CFG_ENABLE_WIFI_DIRECT
 	, {(ELEM_HDR_LEN + ELEM_MAX_LEN_WPA), NULL,
 	   rsnGenerateWPAIE}	/* 221 */
@@ -364,7 +360,7 @@ void bssDetermineStaRecPhyTypeSet(IN struct ADAPTER *prAdapter,
 		prStaRec->ucPhyTypeSet &= ~PHY_TYPE_BIT_VHT;
 	else if (IS_FEATURE_FORCE_ENABLED(ucVhtOption))
 		prStaRec->ucPhyTypeSet |= PHY_TYPE_BIT_VHT;
-	else if (prBssDesc->eBand == BAND_2G4 &&
+	else if (prBssInfo->eBand == BAND_2G4 &&
 		IS_FEATURE_DISABLED(prWifiVar->ucVhtIeIn2g)) {
 		prStaRec->ucPhyTypeSet &= ~PHY_TYPE_BIT_VHT;
 	}
@@ -1445,12 +1441,6 @@ uint32_t bssProcessProbeRequest(IN struct ADAPTER *prAdapter,
 			continue;
 
 		prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter, ucBssIndex);
-		if (prBssInfo == NULL) {
-			log_dbg(BSS, ERROR, "prBssInfo %d is NULL!\n"
-				, ucBssIndex);
-			 continue;
-		}
-
 
 		if ((!fgIsBcBssid)
 		    && UNEQUAL_MAC_ADDR(prBssInfo->aucBSSID,
@@ -2520,7 +2510,7 @@ int8_t bssGetRxNss(IN struct ADAPTER *prAdapter,
 
 	pucIe = kalFindIeMatchMask(
 		ELEM_ID_HT_CAP,
-		prBssDesc->pucIeBuf,
+		&prBssDesc->aucIEBuf[0],
 		prBssDesc->u2IELength,
 		NULL, 0, 0, NULL);
 
@@ -2552,7 +2542,6 @@ void bssProcessErTxModeEvent(IN struct ADAPTER *prAdapter,
 	prErTxMode = (struct EVENT_ER_TX_MODE *) (prEvent->aucBuffer);
 	prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter, prErTxMode->ucBssInfoIdx);
 
-	if (prBssInfo)
 	prBssInfo->ucErMode = prErTxMode->ucErMode;
 
 	DBGLOG_LIMITED(BSS, WARN,
@@ -2594,7 +2583,7 @@ uint32_t bssGetIotApAction(IN struct ADAPTER *prAdapter,
 	prBssDesc->fgIotApActionValid = TRUE;
 	prBssDesc->ucIotApAct = WLAN_IOT_AP_VOID;
 
-	pucIes = prBssDesc->pucIeBuf;
+	pucIes = &prBssDesc->aucIEBuf[0];
 	for (ucCnt = 0; ucCnt < CFG_IOT_AP_RULE_MAX_CNT; ucCnt++) {
 		prIotApRule = &prAdapter->rIotApRule[ucCnt];
 		u2MatchFlag = prIotApRule->u2MatchFlag;

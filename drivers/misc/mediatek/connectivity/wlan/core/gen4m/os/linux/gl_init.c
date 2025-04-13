@@ -95,7 +95,8 @@
 #if (CFG_SUPPORT_CONNINFRA == 1)
 #include "fw_log_wifi.h"
 #endif
-
+#include "mgmt/rlm_domain.h"
+#include "mot_config.h"
 /*******************************************************************************
  *                              C O N S T A N T S
  *******************************************************************************
@@ -260,7 +261,9 @@ static struct ieee80211_channel mtk_2ghz_channels[] = {
 	CHAN2G(11, 2462, 0),
 	CHAN2G(12, 2467, 0),
 	CHAN2G(13, 2472, 0),
+#ifdef WLAN_ENABLE_JP_CH14
 	CHAN2G(14, 2484, 0),
+#endif
 };
 
 #if KERNEL_VERSION(5, 4, 0) <= CFG80211_VERSION_CODE
@@ -291,30 +294,16 @@ static struct ieee80211_channel mtk_2ghz_channels[] = {
 #endif
 
 #if (CFG_SUPPORT_WIFI_6G == 1)
-#if KERNEL_VERSION(5, 8, 0) <= CFG80211_VERSION_CODE
-	#define CHAN6G(_channel, _flags)				\
-	{								\
-		.band               = KAL_BAND_6GHZ,			\
-		.center_freq        =	\
-			((_channel == 2) ? (5935) : (5950 + (5 * (_channel)))),\
-		.freq_offset        = 0,				\
-		.hw_value           = (_channel),			\
-		.flags              = (_flags),				\
-		.max_antenna_gain   = 0,				\
-		.max_power          = 30,				\
-	}
-#else
-	#define CHAN6G(_channel, _flags)				\
-	{								\
-		.band               = KAL_BAND_6GHZ,			\
-		.center_freq        =	\
-			((_channel == 2) ? (5935) : (5950 + (5 * (_channel)))),\
-		.hw_value           = (_channel),			\
-		.flags              = (_flags),				\
-		.max_antenna_gain   = 0,				\
-		.max_power          = 30,				\
-	}
-#endif
+#define CHAN6G(_channel, _flags)				\
+{								\
+	.band               = KAL_BAND_6GHZ,			\
+	.center_freq        = (5950 + (5 * (_channel))),	\
+	.freq_offset        = 0,				\
+	.hw_value           = (_channel),			\
+	.flags              = (_flags),				\
+	.max_antenna_gain   = 0,				\
+	.max_power          = 30,				\
+}
 #endif
 
 static struct ieee80211_channel mtk_5ghz_channels[] = {
@@ -352,7 +341,6 @@ static struct ieee80211_channel mtk_5ghz_channels[] = {
 #if (CFG_SUPPORT_WIFI_6G == 1)
 static struct ieee80211_channel mtk_6ghz_channels[] = {
 	/* UNII-5 */
-	CHAN6G(2, 0),
 	CHAN6G(1, 0),
 	CHAN6G(5, 0),
 	CHAN6G(9, 0),
@@ -414,7 +402,9 @@ static struct ieee80211_channel mtk_6ghz_channels[] = {
 	CHAN6G(221, 0),
 	CHAN6G(225, 0),
 	CHAN6G(229, 0),
+#ifdef MOT_WLAN_ENABLE_6G_CH233
 	CHAN6G(233, 0)
+#endif
 };
 #endif
 
@@ -2361,6 +2351,7 @@ static int wlanOpen(struct net_device *prDev)
 /*----------------------------------------------------------------------------*/
 static int wlanStop(struct net_device *prDev)
 {
+	uint32_t u4SetInfoLen = 0, rStatus;
 	struct GLUE_INFO *prGlueInfo = NULL;
 	uint8_t fgNeedAbortScan = FALSE;
 
@@ -2387,9 +2378,15 @@ static int wlanStop(struct net_device *prDev)
 			fgNeedAbortScan = TRUE;
 		}
 		GLUE_RELEASE_SPIN_LOCK(prGlueInfo, SPIN_LOCK_NET_DEV);
-		if (fgNeedAbortScan)
-			aisFsmStateAbort_SCAN(prGlueInfo->prAdapter,
-							wlanGetBssIdx(prDev));
+		if (fgNeedAbortScan) {
+			rStatus = kalIoctlByBssIdx(prGlueInfo,
+					wlanoidAbortScan,
+					NULL, 1, FALSE, FALSE, TRUE,
+					&u4SetInfoLen, wlanGetBssIdx(prDev));
+			if (rStatus != WLAN_STATUS_SUCCESS)
+				DBGLOG(REQ, ERROR,
+				"wlanoidAbortScan fail 0x%x\n", rStatus);
+		}
 	}
 
 	netif_tx_stop_all_queues(prDev);
@@ -3767,10 +3764,9 @@ void reset_p2p_mode(struct GLUE_INFO *prGlueInfo)
 			sizeof(struct PARAM_CUSTOM_P2P_SET_STRUCT),
 			FALSE, FALSE, TRUE, &u4BufLen);
 
-	if (rWlanStatus != WLAN_STATUS_SUCCESS) {
-		DBGLOG(INIT, ERROR, "set p2p mode failed\n");
+	if (rWlanStatus != WLAN_STATUS_SUCCESS)
 		p2pRemove(prGlueInfo);
-	}
+
 	DBGLOG(INIT, INFO,
 			"ret = 0x%08x\n", (uint32_t) rWlanStatus);
 }
@@ -3875,6 +3871,8 @@ void wlanGetParseConfig(struct ADAPTER *prAdapter)
 {
 	uint8_t *pucConfigBuf;
 	uint32_t u4ConfigReadLen;
+	char motoConfigName[ARRAY_VALUE_MAX] = {0}; // IKSWR-130356
+	int motoRet = 1;// IKSWR-130356
 
 	wlanCfgInit(prAdapter, NULL, 0, 0);
 	pucConfigBuf = (uint8_t *) kalMemAlloc(
@@ -3882,15 +3880,31 @@ void wlanGetParseConfig(struct ADAPTER *prAdapter)
 	kalMemZero(pucConfigBuf, WLAN_CFG_FILE_BUF_SIZE);
 	u4ConfigReadLen = 0;
 	if (pucConfigBuf) {
+		// IKSWT-165541
 		if (kalRequestFirmware("wifi_sigma.cfg", pucConfigBuf,
-			   WLAN_CFG_FILE_BUF_SIZE, &u4ConfigReadLen,
-			   prAdapter->prGlueInfo->prDev) == 0) {
+				WLAN_CFG_FILE_BUF_SIZE, &u4ConfigReadLen,
+				prAdapter->prGlueInfo->prDev) == 0) {
 			/* ToDo:: Nothing */
-		} else if (kalRequestFirmware("wifi.cfg", pucConfigBuf,
-			   WLAN_CFG_FILE_BUF_SIZE, &u4ConfigReadLen,
-			   prAdapter->prGlueInfo->prDev) == 0) {
-			/* ToDo:: Nothing */
+		} else {
+			// IKSWR-130356
+			DBGLOG(INIT, ERROR, "wlanGetParseConfig.\n");
+			get_moto_config_file_name(motoConfigName, WIFI_CFG_INDEX);
+			if (strlen(motoConfigName)) {
+				motoRet = kalRequestFirmware(motoConfigName, pucConfigBuf,
+						WLAN_CFG_FILE_BUF_SIZE, &u4ConfigReadLen,
+						prAdapter->prGlueInfo->prDev);
+			}
+			// END IKSWR-130356
+			if (motoRet == 0) {
+				/* ToDo:: Nothing */
+			}
+			else if (kalRequestFirmware("wifi.cfg", pucConfigBuf,
+					WLAN_CFG_FILE_BUF_SIZE, &u4ConfigReadLen,
+					prAdapter->prGlueInfo->prDev) == 0) {
+				/* ToDo:: Nothing */
+			}
 		}
+		// END IKSWT-165541
 
 		if (pucConfigBuf[0] != '\0' && u4ConfigReadLen > 0)
 			wlanCfgParse(prAdapter, pucConfigBuf, u4ConfigReadLen,
@@ -3918,21 +3932,40 @@ void wlanGetConfig(struct ADAPTER *prAdapter)
 	uint8_t *pucConfigBuf;
 	uint32_t u4ConfigReadLen;
 
+    char motoConfigName[ARRAY_VALUE_MAX] = {0}; // IKSWR-130356
+	int motoRet = 1;// IKSWR-130356
+
 	wlanCfgInit(prAdapter, NULL, 0, 0);
 	pucConfigBuf = (uint8_t *) kalMemAlloc(
 			       WLAN_CFG_FILE_BUF_SIZE, VIR_MEM_TYPE);
 	kalMemZero(pucConfigBuf, WLAN_CFG_FILE_BUF_SIZE);
 	u4ConfigReadLen = 0;
 	if (pucConfigBuf) {
+		// IKSWT-165541
 		if (kalRequestFirmware("wifi_sigma.cfg", pucConfigBuf,
-			   WLAN_CFG_FILE_BUF_SIZE, &u4ConfigReadLen,
-			   prAdapter->prGlueInfo->prDev) == 0) {
+				WLAN_CFG_FILE_BUF_SIZE, &u4ConfigReadLen,
+				prAdapter->prGlueInfo->prDev) == 0) {
 			/* ToDo:: Nothing */
-		} else if (kalRequestFirmware("wifi.cfg", pucConfigBuf,
-			   WLAN_CFG_FILE_BUF_SIZE, &u4ConfigReadLen,
-			   prAdapter->prGlueInfo->prDev) == 0) {
-			/* ToDo:: Nothing */
+		} else {
+			// IKSWR-130356
+			DBGLOG(INIT, ERROR, "wlanGetConfig\n");
+			get_moto_config_file_name(motoConfigName, 0);
+			if (strlen(motoConfigName)) {
+				motoRet = kalRequestFirmware(motoConfigName, pucConfigBuf,
+						WLAN_CFG_FILE_BUF_SIZE, &u4ConfigReadLen,
+						prAdapter->prGlueInfo->prDev);
+			}
+			// END IKSWR-130356
+			if (motoRet == 0) {
+				/* ToDo:: Nothing */
+			}
+			else if (kalRequestFirmware("wifi.cfg", pucConfigBuf,
+					WLAN_CFG_FILE_BUF_SIZE, &u4ConfigReadLen,
+					prAdapter->prGlueInfo->prDev) == 0) {
+				/* ToDo:: Nothing */
+			}
 		}
+		// END IKSWT-165541
 
 		if (pucConfigBuf[0] != '\0' && u4ConfigReadLen > 0)
 			wlanCfgInit(prAdapter,

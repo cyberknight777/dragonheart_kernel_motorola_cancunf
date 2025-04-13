@@ -58,10 +58,7 @@ p2pRoleStateInit_IDLE(IN struct ADAPTER *prAdapter,
 {
 	cnmTimerStartTimer(prAdapter,
 		&(prP2pRoleFsmInfo->rP2pRoleFsmTimeoutTimer),
-		p2pFuncIsAPMode(prAdapter->rWifiVar.
-		prP2PConnSettings[prP2pRoleFsmInfo->ucRoleIndex])
-		? prAdapter->rWifiVar.u4ApChnlHoldTime
-		: prAdapter->rWifiVar.u4P2pChnlHoldTime);
+		prAdapter->rWifiVar.u4ApChnlHoldTime);
 }				/* p2pRoleStateInit_IDLE */
 
 void
@@ -239,9 +236,8 @@ p2pRoleStateInit_AP_CHNL_DETECTION(IN struct ADAPTER *prAdapter,
 	do {
 		prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter, ucBssIndex);
 		ASSERT_BREAK((prAdapter != NULL) && (prScanReqInfo != NULL)
-			     && (prConnReqInfo != NULL));
-		if (!prBssInfo)
-			break;
+			     && (prConnReqInfo != NULL) && (prBssInfo != NULL));
+
 		prP2pSpecificBssInfo =
 			prAdapter->rWifiVar
 				.prP2pSpecificBssInfo[prBssInfo->u4PrivateData];
@@ -314,8 +310,6 @@ p2pRoleStateAbort_AP_CHNL_DETECTION(IN struct ADAPTER *prAdapter,
 		if (eNextState == P2P_ROLE_STATE_REQING_CHANNEL) {
 			prBssInfo =
 				GET_BSS_INFO_BY_INDEX(prAdapter, ucBssIndex);
-			if (!prBssInfo)
-				break;
 			prP2pSpecificBssInfo =
 				prAdapter->rWifiVar
 				.prP2pSpecificBssInfo[prBssInfo->u4PrivateData];
@@ -346,14 +340,7 @@ p2pRoleStateAbort_AP_CHNL_DETECTION(IN struct ADAPTER *prAdapter,
 				prP2pSpecificBssInfo->ucPreferredChannel;
 			prChnlReqInfo->eBand = prP2pSpecificBssInfo->eRfBand;
 			prChnlReqInfo->eChnlSco = prP2pSpecificBssInfo->eRfSco;
-			if (p2pFuncIsAPMode(prAdapter->rWifiVar.
-				prP2PConnSettings[prBssInfo->u4PrivateData]))
-				prChnlReqInfo->u4MaxInterval =
-					prAdapter->rWifiVar.u4ApChnlHoldTime;
-			else
-				prChnlReqInfo->u4MaxInterval =
-					prAdapter->rWifiVar.u4P2pChnlHoldTime;
-
+			prChnlReqInfo->u4MaxInterval = P2P_AP_CHNL_HOLD_TIME_MS;
 			prChnlReqInfo->eChnlReqType = CH_REQ_TYPE_GO_START_BSS;
 
 			prChnlReqInfo->eChannelWidth = CW_20_40MHZ;
@@ -384,8 +371,7 @@ p2pRoleStateInit_GC_JOIN(IN struct ADAPTER *prAdapter,
 		prP2pBssInfo =
 			GET_BSS_INFO_BY_INDEX(prAdapter,
 				prP2pRoleFsmInfo->ucBssIndex);
-		if (!prP2pBssInfo)
-			break;
+
 		/* Setup a join timer. */
 		DBGLOG(P2P, TRACE, "Start a join init timer\n");
 		cnmTimerStartTimer(prAdapter,
@@ -497,8 +483,7 @@ p2pRoleStateInit_SWITCH_CHANNEL(IN struct ADAPTER *prAdapter,
 	struct BSS_INFO *prBssInfo = (struct BSS_INFO *) NULL;
 
 	prBssInfo = GET_BSS_INFO_BY_INDEX(prAdapter, ucBssIdx);
-	if (!prBssInfo)
-		return;
+
 	do {
 		ASSERT_BREAK((prAdapter != NULL) && (prChnlReqInfo != NULL));
 
@@ -565,14 +550,7 @@ p2pRoleStatePrepare_To_REQING_CHANNEL_STATE(IN struct ADAPTER *prAdapter,
 			prConnReqInfo->rChannelInfo.ucChannelNum;
 		prChnlReqInfo->eBand = prConnReqInfo->rChannelInfo.eBand;
 		prChnlReqInfo->eChnlSco = prBssInfo->eBssSCO;
-		if (p2pFuncIsAPMode(prAdapter->rWifiVar.
-			prP2PConnSettings[prBssInfo->u4PrivateData]))
-			prChnlReqInfo->u4MaxInterval =
-			prAdapter->rWifiVar.u4ApChnlHoldTime;
-		else
-			prChnlReqInfo->u4MaxInterval =
-			prAdapter->rWifiVar.u4P2pChnlHoldTime;
-
+		prChnlReqInfo->u4MaxInterval = P2P_AP_CHNL_HOLD_TIME_MS;
 		prChnlReqInfo->eChnlReqType = CH_REQ_TYPE_GO_START_BSS;
 
 		if (prBssInfo->eBand == BAND_5G
