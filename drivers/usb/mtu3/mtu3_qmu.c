@@ -328,6 +328,17 @@ void mtu3_insert_gpd(struct mtu3_ep *mep, struct mtu3_request *mreq)
 		mtu3_prepare_rx_gpd(mep, mreq);
 }
 
+void mtu3_clean_gpd(struct mtu3_ep *mep, struct mtu3_request *mreq)
+{
+	struct qmu_gpd *gpd = mreq->gpd;
+
+	if (!gpd)
+		return;
+
+	/* set all fields to zero */
+	memset(gpd, 0, sizeof(*gpd));
+}
+
 int mtu3_qmu_start(struct mtu3_ep *mep)
 {
 	struct mtu3 *mtu = mep->mtu;
@@ -432,6 +443,8 @@ static void qmu_tx_zlp_error_handler(struct mtu3 *mtu, u8 epnum)
 
 	cur_gpd_dma = read_txq_cur_addr(mbase, epnum);
 	gpd_current = gpd_dma_to_virt(ring, cur_gpd_dma);
+	if (!gpd_current)
+		return;
 
 	if (GPD_DATA_LEN(mtu, le32_to_cpu(gpd_current->dw3_info)) != 0) {
 		dev_err(mtu->dev, "TX EP%d buffer length error(!=0)\n", epnum);
@@ -485,7 +498,8 @@ static void qmu_done_tx(struct mtu3 *mtu, u8 epnum)
 	dev_dbg(mtu->dev, "%s EP%d, last=%p, current=%p, enq=%p\n",
 		__func__, epnum, gpd, gpd_current, ring->enqueue);
 
-	while (gpd && gpd != gpd_current && !GET_GPD_HWO(gpd)) {
+	while (gpd != NULL && gpd != gpd_current &&
+			!GET_GPD_HWO(gpd)) {
 
 		mreq = next_request(mep);
 
@@ -524,7 +538,8 @@ static void qmu_done_rx(struct mtu3 *mtu, u8 epnum)
 	dev_dbg(mtu->dev, "%s EP%d, last=%p, current=%p, enq=%p\n",
 		__func__, epnum, gpd, gpd_current, ring->enqueue);
 
-	while (gpd && gpd != gpd_current && !GET_GPD_HWO(gpd)) {
+	while (gpd != NULL && gpd != gpd_current &&
+			!GET_GPD_HWO(gpd)) {
 
 		mreq = next_request(mep);
 
