@@ -356,7 +356,6 @@ OUT:
 #define HW_SUSPEND_CTRL_RX_LEN2	(3)
 
 /* return 0 if okay, otherwise is fail */
-#define GPS_NSEC_IN_MSEC (1000000)
 static int GPS2_hw_suspend_ctrl(bool to_suspend, UINT8 mode)
 {
 	UINT8 tx_buf[HW_SUSPEND_CTRL_TX_LEN2] = {0};
@@ -372,7 +371,7 @@ static int GPS2_hw_suspend_ctrl(bool to_suspend, UINT8 mode)
 
 	do_gettimeofday(&tv);
 	tmp = local_clock();
-	do_div(tmp, GPS_NSEC_IN_MSEC);
+	do_div(tmp, 1e6);
 	local_ms0 = (UINT32)tmp; /* overflow almost 4.9 days */
 
 	tx_buf[0] = to_suspend ? GPS2_FWCTL_OPCODE_ENTER_STOP_MODE :
@@ -385,7 +384,7 @@ static int GPS2_hw_suspend_ctrl(bool to_suspend, UINT8 mode)
 
 	/* local_ms1 = jiffies_to_msecs(jiffies); */
 	tmp = local_clock();
-	do_div(tmp, GPS_NSEC_IN_MSEC);
+	do_div(tmp, 1e6);
 	local_ms1 = (UINT32)tmp;
 
 	if (wmt_status == 0) { /* 0 is okay */

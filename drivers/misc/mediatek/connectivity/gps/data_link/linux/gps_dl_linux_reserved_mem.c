@@ -31,10 +31,6 @@ void gps_dl_reserved_mem_init(void)
 #endif
 	unsigned int min_size = sizeof(struct gps_dl_reserved_mem_layout);
 
-#if (GPS_DL_SET_EMI_MPU_CFG)
-	memset((void *)&region, 0x0, sizeof(region));
-#endif
-
 	if (gGpsRsvMemPhyBase == (phys_addr_t)NULL || gGpsRsvMemSize < min_size) {
 		GDL_LOGE_INI("res_mem: base = 0x%llx, size = 0x%llx, min_size = %d, not enough",
 			(unsigned long long)gGpsRsvMemPhyBase,
