@@ -819,14 +819,12 @@ static signed int mt6627_PowerUp(unsigned short *chip_id, unsigned short *device
 	if ((tmp_reg == 0x6625) || (tmp_reg == 0x6627))
 		*chip_id = 0x6627;
 	*device_id = tmp_reg;
+	mt6627_hw_info.chip_id = (signed int) tmp_reg;
+	WCN_DBG(FM_DBG | CHIP, "chip_id:0x%04x\n", tmp_reg);
 
-	if ((tmp_reg != 0x6627) && (tmp_reg != 0x6625)) {
-		WCN_DBG(FM_NTC | CHIP,
-			"chip_id:0x%04x fm sys error, reset hw\n", tmp_reg);
+	if ((mt6627_hw_info.chip_id != 0x6627) && (mt6627_hw_info.chip_id != 0x6625)) {
+		WCN_DBG(FM_NTC | CHIP, "fm sys error, reset hw\n");
 		return -FM_EFW;
-	} else {
-		WCN_DBG(FM_NTC | CHIP, "chip_id:0x%04x\n", tmp_reg);
-		mt6627_hw_info.chip_id = (signed int) tmp_reg;
 	}
 
 	/* Wholechip FM Power Up: step 3, patch download */

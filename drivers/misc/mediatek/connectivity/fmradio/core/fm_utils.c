@@ -423,7 +423,6 @@ static signed int fm_timer_init(struct fm_timer *thiz, void (*timeout) (unsigned
 	timerlist->function = thiz->timeout_func;
 	timerlist->data = (unsigned long)thiz->data;
 #endif
-	thiz->flag |= FM_TIMER_FLAG_INITED;
 	timerlist->expires = jiffies + (thiz->timeout_ms) / (1000 / HZ);
 
 	FM_UNLOCK(thiz->lock);
@@ -437,8 +436,7 @@ static signed int fm_timer_start(struct fm_timer *thiz)
 	if (FM_LOCK(thiz->lock))
 		return -FM_ELOCK;
 
-	if (thiz->flag & FM_TIMER_FLAG_INITED
-		&& !(thiz->flag & FM_TIMER_FLAG_ACTIVATED)) {
+	if (!(thiz->flag & FM_TIMER_FLAG_ACTIVATED)) {
 		thiz->flag |= FM_TIMER_FLAG_ACTIVATED;
 		timerlist->expires = jiffies + (thiz->timeout_ms) / (1000 / HZ);
 		add_timer(timerlist);
@@ -454,8 +452,7 @@ static signed int fm_timer_update(struct fm_timer *thiz)
 
 	if (FM_LOCK(thiz->lock))
 		return -FM_ELOCK;
-	if (thiz->flag & FM_TIMER_FLAG_INITED
-		&& thiz->flag & FM_TIMER_FLAG_ACTIVATED) {
+	if (thiz->flag & FM_TIMER_FLAG_ACTIVATED) {
 		mod_timer(timerlist, jiffies + (thiz->timeout_ms) / (1000 / HZ));
 		FM_UNLOCK(thiz->lock);
 		return 0;
@@ -471,8 +468,7 @@ static signed int fm_timer_stop(struct fm_timer *thiz)
 
 	if (FM_LOCK(thiz->lock))
 		return -FM_ELOCK;
-	if (thiz->flag & FM_TIMER_FLAG_INITED
-		&& thiz->flag & FM_TIMER_FLAG_ACTIVATED) {
+	if (thiz->flag & FM_TIMER_FLAG_ACTIVATED) {
 		thiz->flag &= ~FM_TIMER_FLAG_ACTIVATED;
 		del_timer(timerlist);
 	}
@@ -546,7 +542,6 @@ signed int fm_timer_put(struct fm_timer *thiz)
 		return -FM_EPARA;
 	}
 
-	thiz->flag = 0;
 	del_timer(thiz->priv);
 	thiz->ref--;
 	if (thiz->ref == 0) {
