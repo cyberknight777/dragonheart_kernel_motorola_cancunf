@@ -8,8 +8,6 @@ sfile="$(readlink -f "$0")"
 outdir="$(pwd)"
 tarfile=$1
 cpio_dir=$outdir/$tarfile.tmp
-cpio=$abs_srctree/tools/build/cpio
-tar=$abs_srctree/tools/build/tar
 
 dir_list="
 include/
@@ -70,7 +68,7 @@ if [ "$building_out_of_srctree" ]; then
 		cd $srctree
 		for f in $dir_list
 			do find "$f" -name "*.h";
-		done | $cpio --quiet -pd $cpio_dir
+		done | cpio --quiet -pd $cpio_dir
 	)
 fi
 
@@ -88,7 +86,7 @@ find $cpio_dir -type f -print0 |
 # For compatibility with older versions of tar, files are fed to tar
 # pre-sorted, as --sort=name might not be available.
 find $cpio_dir -printf "./%P\n" | LC_ALL=C sort | \
-    $tar "${KBUILD_BUILD_TIMESTAMP:+--mtime=$KBUILD_BUILD_TIMESTAMP}" \
+    tar "${KBUILD_BUILD_TIMESTAMP:+--mtime=$KBUILD_BUILD_TIMESTAMP}" \
     --exclude=".__afs*" --exclude=".nfs*" \
     --owner=0 --group=0 --numeric-owner --no-recursion --mode=u=rw,go=r,a+X \
     -I $XZ -cf $tarfile -C $cpio_dir/ -T - > /dev/null
