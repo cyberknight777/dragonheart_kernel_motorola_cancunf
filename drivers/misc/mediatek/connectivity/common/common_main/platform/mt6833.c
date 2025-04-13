@@ -206,6 +206,10 @@ static struct regulator *reg_VCN18;
 static struct regulator *reg_VCN33_1_BT;
 static struct regulator *reg_VCN33_1_WIFI;
 static struct regulator *reg_VCN33_2_WIFI;
+
+static struct regulator *reg_VRF18;
+static struct regulator *reg_VRF13;
+static struct regulator *reg_VRF09;
 #endif
 
 static void __iomem *g_conn_mcu_btif_0_base;
@@ -541,6 +545,17 @@ static INT32 consys_pmic_get_from_dts(struct platform_device *pdev)
 	reg_VCN33_2_WIFI = regulator_get(&pdev->dev, "vcn33_2_wifi");
 	if (!reg_VCN33_2_WIFI)
 		WMT_PLAT_PR_INFO("Regulator_get VCN33_2_WIFI fail\n");
+
+	WMT_PLAT_PR_INFO(" --------- consys_pmic_get_from_dts ----- get vfr18, vrf13 and vrf09!\n");
+	reg_VRF18 = regulator_get_optional(&pdev->dev, "vrf18");
+	if (IS_ERR(reg_VRF18))
+		WMT_PLAT_PR_INFO("Regulator_get VRF18 fail\n");
+	reg_VRF13 = regulator_get_optional(&pdev->dev, "VDRAM1");
+	if (IS_ERR(reg_VRF13))
+		WMT_PLAT_PR_INFO("Regulator_get VRF13(VDRAM1) fail\n");
+	reg_VRF09 = regulator_get_optional(&pdev->dev, "vmodem");
+	if (IS_ERR(reg_VRF09))
+		WMT_PLAT_PR_INFO("Regulator_get VRF09(vmodem) fail\n");
 #endif
 
 	return 0;
@@ -2019,9 +2034,75 @@ static VOID consys_hw_wifi_vcn33_legacy_mode_disable(VOID)
 #endif
 }
 
+#if CONSYS_PMIC_CTRL_ENABLE
+static INT32 consys_hw_transceiver_ctrl(UINT32 enable)
+{
+	WMT_PLAT_PR_INFO("enable is %d\n", enable);
+	if (enable) {
+		if (!IS_ERR(reg_VRF18)) {
+			if (regulator_enable(reg_VRF18))
+				WMT_PLAT_PR_INFO("enable VRF18 fail\n");
+			else
+				WMT_PLAT_PR_INFO("enable VRF18 ok\n");
+		} else {
+			WMT_PLAT_PR_INFO("VRF18 is error!!!!\n");
+		}
+
+		if (!IS_ERR(reg_VRF13)) {
+			if (regulator_enable(reg_VRF13))
+				WMT_PLAT_PR_INFO("enable VRF13 fail\n");
+			else
+				WMT_PLAT_PR_INFO("enable VRF13 ok\n");
+		} else {
+			WMT_PLAT_PR_INFO("VRF18 is error!!!!\n");
+		}
+
+		if (!IS_ERR(reg_VRF09)) {
+			if (regulator_enable(reg_VRF09))
+				WMT_PLAT_PR_INFO("enable VRF09 fail\n");
+			else
+				WMT_PLAT_PR_INFO("enable VRF09 ok\n");
+		} else {
+			WMT_PLAT_PR_INFO("VRF09 is error!!!!\n");
+		}
+	} else {
+		if (!IS_ERR(reg_VRF18)) {
+			if (regulator_disable(reg_VRF18))
+				WMT_PLAT_PR_INFO("disable VRF18 fail!\n");
+			else
+				WMT_PLAT_PR_INFO("disable VRF18 ok\n");
+		} else {
+			WMT_PLAT_PR_INFO("VRF18 error\n");
+		}
+
+		if (!IS_ERR(reg_VRF13)) {
+			if (regulator_disable(reg_VRF13))
+				WMT_PLAT_PR_INFO("disable VRF13 fail!\n");
+			else
+				WMT_PLAT_PR_INFO("disable VRF13 ok\n");
+		} else {
+			WMT_PLAT_PR_INFO("VRF13 error\n");
+		}
+
+		if (!IS_ERR(reg_VRF09)) {
+			if (regulator_disable(reg_VRF09))
+				WMT_PLAT_PR_INFO("disable VRF09 fail!\n");
+			else
+				WMT_PLAT_PR_INFO("disable VRF09 ok\n");
+		} else {
+			WMT_PLAT_PR_INFO("VRF09 error\n");
+		}
+	}
+	return 0;
+}
+#endif
+
 static INT32 consys_hw_wifi_vcn33_ctrl(UINT32 enable)
 {
 #if CONSYS_PMIC_CTRL_ENABLE
+	WMT_PLAT_PR_INFO("begin hw transceiver...\n");
+	consys_hw_transceiver_ctrl(enable);
+	WMT_PLAT_PR_INFO("end hw transceiver...\n");
 	if (mtk_wcn_consys_get_adie_chipid() != SECONDARY_ADIE)
 		/* 6631 not supported */
 		return 0;

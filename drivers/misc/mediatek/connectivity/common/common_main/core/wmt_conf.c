@@ -23,6 +23,8 @@
 #include "wmt_dev.h"
 #include "wmt_conf.h"
 #include "wmt_detect.h"
+/* for reading moto bootargs */
+#include <linux/of.h>
 
 
 /*******************************************************************************
@@ -99,6 +101,136 @@ static INT32 wmt_conf_parse(P_DEV_WMT pWmtDev, const PINT8 pInBuf, UINT32 size);
 *                          F U N C T I O N S
 ********************************************************************************
 */
+#define ARRAY_VALUE_MAX  72
+
+/* use moto bootargs to get device name & radio parameters */
+static char *bootargs_str = NULL;
+
+static int mmi_get_bootarg_dt(char *key, char **value, char *prop, char *spl_flag)
+{
+	const char *bootargs_tmp = NULL;
+	char *idx = NULL;
+	char *kvpair = NULL;
+	int err = 1;
+	struct device_node *n = of_find_node_by_path("/chosen");
+	size_t bootargs_tmp_len = 0;
+
+	if (n == NULL)
+		goto err;
+
+	if (of_property_read_string(n, prop, &bootargs_tmp) != 0)
+		goto putnode;
+
+	bootargs_tmp_len = strlen(bootargs_tmp);
+	if (!bootargs_str) {
+		/* The following operations need a non-const
+		 * version of bootargs
+		 */
+		bootargs_str = kzalloc(bootargs_tmp_len + 1, GFP_KERNEL);
+		if (!bootargs_str)
+			goto putnode;
+	}
+	strlcpy(bootargs_str, bootargs_tmp, bootargs_tmp_len + 1);
+
+	idx = strnstr(bootargs_str, key, strlen(bootargs_str));
+	if (idx) {
+		kvpair = strsep(&idx, " ");
+		if (kvpair)
+			if (strsep(&kvpair, "=")) {
+				*value = strsep(&kvpair, spl_flag);
+				if (*value)
+					err = 0;
+			}
+	}
+
+putnode:
+	of_node_put(n);
+err:
+	return err;
+}
+
+int mmi_get_bootarg(char *key, char **value)
+{
+#ifdef CONFIG_BOOT_CONFIG
+	return mmi_get_bootarg_dt(key, value, "mmi,bootconfig", "\n");
+#else
+	return mmi_get_bootarg_dt(key, value, "bootargs", " ");
+#endif
+}
+
+typedef struct moto_product {
+        char hw_device[ARRAY_VALUE_MAX];
+        char hw_radio[ARRAY_VALUE_MAX];
+        char moto_filename[ARRAY_VALUE_MAX];
+        char rev[ARRAY_VALUE_MAX];
+} moto_product;
+
+static moto_product products_list[] = {
+        {"austin",     "all",         "AUSTIN_FEM",  "all"},
+        {"ellis",      "NCA",         "ELLIS",       "all"},
+        {"ellis",      "CA",          "ELLIS_EPA",   "all"},
+        {"tonga",      "NA",          "TONGA_EPA",   "all"},
+        {"tonga",      "NA_CARRIERS", "TONGA_IPA",   "all"},
+        {"milan",      "all",         "MILAN_FEM",   "all"},
+        {"devonn",     "all",         "devonn_epa",  "all"},
+        {"gnevan",     "all",         "GNEVAN_FEM",  "all"},
+        {"cancunf",    "all",         "CANCUNF",     "all"},
+        {"cancunn",    "all",         "CANCUNN_FEM", "all"},
+        {"maui",       "NA",          "MAUI_EPAO",   "EVT1"},
+        {"maui",       "NA",          "MAUI_EPAO",   "EVT2"},
+        {"maui",       "NA",          "MAUI_EPA",    "all"},
+        {"maui",       "NA_CARRIERS", "MAUI_IPA",    "all"},
+        {{0},        {0},   {0}},
+};
+
+
+void get_moto_wmt_soc_file_name(char *name)
+{
+	char device[ARRAY_VALUE_MAX] = {0};
+	char radio[ARRAY_VALUE_MAX] = {0};
+	char rev[ARRAY_VALUE_MAX] = {0};
+	char prefix[ARRAY_VALUE_MAX] = "WMT_SOC";
+	int num = 0;
+	int i = 0;
+	char *s;
+
+	if (mmi_get_bootarg("androidboot.device=", &s) == 0) {
+		memcpy(device, s, strlen(s));
+		WMT_INFO_FUNC("[WMT-MOTO]bootargs get device: %s\n", device);
+		kfree(bootargs_str);
+		bootargs_str = NULL;
+	}
+	if (mmi_get_bootarg("androidboot.radio=", &s) == 0) {
+		memcpy(radio, s, strlen(s));
+		WMT_INFO_FUNC("[WMT-MOTO]bootargs get radio: %s\n", radio);
+		kfree(bootargs_str);
+		bootargs_str = NULL;
+	}
+	if (mmi_get_bootarg("androidboot.revision=", &s) == 0) {
+		memcpy(rev, s, strlen(s));
+		WMT_INFO_FUNC("[WMT-MOTO]bootargs get revision: %s\n", rev);
+		kfree(bootargs_str);
+		bootargs_str = NULL;
+	}
+
+	num = sizeof(products_list) / sizeof(moto_product);
+	for (i=0; i<num; i++) {
+		if (strncmp(device, (products_list+i)->hw_device, ARRAY_VALUE_MAX) == 0) {
+			if (strncmp(radio, (products_list+i)->hw_radio, ARRAY_VALUE_MAX) == 0
+				|| strncmp((products_list+i)->hw_radio, "all", ARRAY_VALUE_MAX) == 0) {
+
+				if ((strncmp((products_list+i)->rev, "all", ARRAY_VALUE_MAX) == 0)
+					|| (strncmp(rev, (products_list+i)->rev, ARRAY_VALUE_MAX) == 0)) {
+					snprintf(name, ARRAY_VALUE_MAX, "%s_%s.cfg", prefix, (products_list+i)->moto_filename);
+					WMT_INFO_FUNC("[WMT-MOTO]Use moto WMT_SOC file name: %s\n", name);
+					return;
+				}
+			}
+		}
+	}
+
+	WMT_INFO_FUNC("[WMT-MOTO]Use default WMT_SOC file name: %s\n", CUST_CFG_WMT_SOC);
+}
 
 static const struct parse_data wmtcfg_fields[] = {
 	CHAR(coex_wmt_ant_mode),
@@ -600,6 +732,7 @@ INT32 wmt_conf_read_file(VOID)
 {
 	INT32 ret = -1;
 	ENUM_WMT_CHIP_TYPE chip_type;
+	char filename[ARRAY_VALUE_MAX] = {0};
 
 	osal_memset(&gDevWmt.rWmtGenConf, 0, osal_sizeof(gDevWmt.rWmtGenConf));
 	osal_memset(&gDevWmt.pWmtCfg, 0, osal_sizeof(gDevWmt.pWmtCfg));
@@ -607,7 +740,14 @@ INT32 wmt_conf_read_file(VOID)
 	if (chip_type == WMT_CHIP_TYPE_SOC) {
 		osal_memset(&gDevWmt.cWmtcfgName[0], 0, osal_sizeof(gDevWmt.cWmtcfgName));
 
-		osal_strncat(&(gDevWmt.cWmtcfgName[0]), CUST_CFG_WMT_SOC, osal_sizeof(CUST_CFG_WMT_SOC));
+		get_moto_wmt_soc_file_name(filename);
+
+                if(strlen(filename)) {
+                   osal_strncat(&(gDevWmt.cWmtcfgName[0]), filename, osal_sizeof(filename));
+
+                } else {
+                   osal_strncat(&(gDevWmt.cWmtcfgName[0]), CUST_CFG_WMT_SOC, osal_sizeof(CUST_CFG_WMT_SOC));
+                }
 	}
 
 	if (!osal_strlen(&(gDevWmt.cWmtcfgName[0]))) {
