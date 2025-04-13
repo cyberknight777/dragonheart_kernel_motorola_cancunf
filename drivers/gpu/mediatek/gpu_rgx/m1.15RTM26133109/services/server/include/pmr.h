@@ -102,6 +102,8 @@ typedef struct _PMR_EXPORT_ PMR_EXPORT;
 
 typedef struct _PMR_PAGELIST_ PMR_PAGELIST;
 
+IMG_INT32 PMRGetLiveCount(void);
+
 /*
  * PMRValidateSize
  *
@@ -581,6 +583,34 @@ PMRCpuMapCountDecr(PMR *psPMR);
 IMG_BOOL
 PMR_IsCpuMapped(PMR *psPMR);
 
+/*
+ * PMRGpuResCountIncr()
+ *
+ * Increment count of the number of current GPU reservations associated with the PMR.
+ * Must be protected by PMR lock.
+ */
+void
+PMRGpuResCountIncr(PMR *psPMR);
+
+/*
+ * PMRGpuResCountDecr()
+ *
+ * Decrement count of the number of current GPU reservations associated with the PMR.
+ * Must be protected by PMR lock.
+ *
+ */
+void
+PMRGpuResCountDecr(PMR *psPMR);
+
+/*
+ * PMR_IsGpuMultiMapped()
+ *
+ * Must be protected by PMR lock.
+ *
+ */
+IMG_BOOL
+PMR_IsGpuMultiMapped(PMR *psPMR);
+
 PPVRSRV_DEVICE_NODE
 PMR_DeviceNode(const PMR *psPMR);
 
@@ -655,6 +685,9 @@ PMR_IsOffsetValid(const PMR *psPMR,
 PMR_IMPL_TYPE
 PMR_GetType(const PMR *psPMR);
 
+IMG_CHAR *
+PMR_GetTypeStr(const PMR *psPMR);
+
 IMG_INT32
 PMR_GetRefCount(const PMR *psPMR);
 
@@ -705,6 +738,62 @@ PMR_CpuPhysAddr(const PMR *psPMR,
 PVRSRV_ERROR
 PMRGetUID(PMR *psPMR,
           IMG_UINT64 *pui64UID);
+
+#if defined(SUPPORT_PMR_DEFERRED_FREE)
+/*
+ * PMR_IsZombie()
+ *
+ * Indicates if a PMR is a "zombie" PMR. This function **must** be called
+ * inside a PMR factory lock.
+ */
+IMG_BOOL
+PMR_IsZombie(const PMR *psPMR);
+
+/*
+ * PMRMarkForDeferFree
+ *
+ * Sets sync value required for this PMR to be freed.
+ */
+void
+PMRMarkForDeferFree(PMR *psPMR);
+
+/*
+ * PMRQueueZombiesForCleanup
+ *
+ * Defers cleanup of all zombie PMRs to the CleanupThread.
+ *
+ * Returns IMG_TRUE if any PMRs were queued for free and IMG_FALSE if no PMRs
+ * were queued.
+ */
+IMG_BOOL
+PMRQueueZombiesForCleanup(PPVRSRV_DEVICE_NODE psDevNode);
+
+/*
+ * PMRDequeueZombieAndRef
+ *
+ * Removed the PMR either form zombie list or cleanup item's list
+ * and references it.
+ */
+void
+PMRDequeueZombieAndRef(PMR *psPMR);
+#endif /* defined(SUPPORT_PMR_DEFERRED_FREE) */
+
+/*
+ * PMR_ChangeSparseMemUnlocked()
+ *
+ * See note above about Lock/Unlock semantics.
+ *
+ * This function alters the memory map of the given PMR in device space by
+ * adding/deleting the pages as requested. PMR lock must be taken
+ * before calling this function.
+ *
+ */
+PVRSRV_ERROR PMR_ChangeSparseMemUnlocked(PMR *psPMR,
+                                 IMG_UINT32 ui32AllocPageCount,
+                                 IMG_UINT32 *pai32AllocIndices,
+                                 IMG_UINT32 ui32FreePageCount,
+                                 IMG_UINT32 *pai32FreeIndices,
+                                 IMG_UINT32 uiSparseFlags);
 /*
  * PMR_ChangeSparseMem()
  *
@@ -1199,6 +1288,40 @@ PMRInit(void);
  */
 PVRSRV_ERROR
 PMRDeInit(void);
+
+#if defined(SUPPORT_PMR_DEFERRED_FREE)
+/*
+ * PMRInitDevice()
+ *
+ * Initialised device specific PMR data.
+ */
+PVRSRV_ERROR
+PMRInitDevice(PPVRSRV_DEVICE_NODE psDeviceNode);
+
+/*
+ * PMRFreeZombies()
+ *
+ * Free deferred PMRs.
+ */
+void
+PMRFreeZombies(PPVRSRV_DEVICE_NODE psDeviceNode);
+
+/*
+ * PMRFreeZombies()
+ *
+ * Print all zombies to the log.
+ */
+void
+PMRDumpZombies(PPVRSRV_DEVICE_NODE psDeviceNode);
+
+/*
+ * PMRDeInitDevice()
+ *
+ * Cleans up device specific PMR data.
+ */
+void
+PMRDeInitDevice(PPVRSRV_DEVICE_NODE psDeviceNode);
+#endif /* defined(SUPPORT_PMR_DEFERRED_FREE) */
 
 #if defined(PVRSRV_ENABLE_GPU_MEMORY_INFO)
 PVRSRV_ERROR

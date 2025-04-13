@@ -92,7 +92,7 @@ typedef struct {
  * GPU DVFS Table
  *****************************************************************************/
 
-#define RGX_GPU_DVFS_TABLE_SIZE                      32
+#define RGX_GPU_DVFS_TABLE_SIZE                      37        /* Moto IKSWT-166001 Align mt6855's opp table size */
 #define RGX_GPU_DVFS_FIRST_CALIBRATION_TIME_US       25000     /* Time required to calibrate a clock frequency the first time */
 #define RGX_GPU_DVFS_TRANSITION_CALIBRATION_TIME_US  150000    /* Time required for a recalibration after a DVFS transition */
 #define RGX_GPU_DVFS_PERIODIC_CALIBRATION_TIME_US    10000000  /* Time before the next periodic calibration and correlation */
@@ -781,8 +781,6 @@ typedef struct _PVRSRV_RGXDEV_INFO_
 	IMG_UINT32 ui32ECCRAMErrInjModule;
 	IMG_UINT32 ui32ECCRAMErrInjInterval;
 #endif
-
-	IMG_UINT32              ui32Log2Non4KPgSize; /* Page size of Non4k heap in log2 form */
 
 #if defined(SUPPORT_SECURE_ALLOC_KM)
 	PMR						*psGenHeapSecMem;		/*!< An allocation of secure memory mapped to

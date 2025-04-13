@@ -59,8 +59,6 @@ static void MTKWriteBackFreqToRGX(PVRSRV_DEVICE_NODE *psDevNode, IMG_UINT32 ui32
 static void MTKCalGPULoading(unsigned int *pui32Loading,
 	unsigned int *pui32Block, unsigned int *pui32Idle, void *Util_Ex)
 {
-	struct GpuUtilization_Ex *util_ex = (struct GpuUtilization_Ex *) Util_Ex;
-
 	PVRSRV_DEVICE_NODE *psDevNode = NULL;
 	PVRSRV_RGXDEV_INFO *psDevInfo = NULL;
 	RGXFWIF_GPU_UTIL_STATS sGpuUtilStats = {};
@@ -90,7 +88,6 @@ static void MTKCalGPULoading(unsigned int *pui32Loading,
 			*pui32Idle = (unsigned long)(100*(sGpuUtilStats.ui64GpuStatIdle)) /
 				(unsigned long)sGpuUtilStats.ui64GpuStatCumulative;
 #endif /* defined(__arm64__) || defined(__aarch64__) */
-			util_ex->util_active = *pui32Loading;
 		}
 	}
 }

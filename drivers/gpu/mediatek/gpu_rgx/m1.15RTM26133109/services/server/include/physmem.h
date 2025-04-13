@@ -75,6 +75,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                                         allocation is to be done
 @Input          pszSymbolicAddress    Symbolic name of the allocation
 @Input          phHandlePtr           PDUMP handle to the allocation
+@Input          uiPid                 PID of the process owning the allocation
+                                        (or PVR_SYS_ALLOC_PID if the allocation
+                                        belongs to the driver)
 @Output         hMemHandle            Handle to the allocated memory
 @Output         psDevPhysAddr         Device Physical address of allocated
                                         page
@@ -91,6 +94,7 @@ DevPhysMemAlloc(PVRSRV_DEVICE_NODE *psDevNode,
                 const IMG_CHAR *pszSymbolicAddress,
                 IMG_HANDLE *phHandlePtr,
 #endif
+                IMG_PID uiPid,
                 IMG_HANDLE hMemHandle,
                 IMG_DEV_PHYADDR *psDevPhysAddr);
 

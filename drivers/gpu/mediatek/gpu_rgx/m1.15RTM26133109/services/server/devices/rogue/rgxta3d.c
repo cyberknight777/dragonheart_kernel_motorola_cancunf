@@ -3670,6 +3670,7 @@ PVRSRV_ERROR PVRSRVRGXKickTA3DKM(RGX_SERVER_RENDER_CONTEXT	*psRenderContext,
 		CMDTA3D_SHARED *psGeomCmdShared = (CMDTA3D_SHARED *)pui8TADMCmd;
 		CMDTA3D_SHARED *ps3DCmdShared = (CMDTA3D_SHARED *)pui83DDMCmd;
 		CMDTA3D_SHARED *psPR3DCmdShared = (CMDTA3D_SHARED *)pui83DPRDMCmd;
+		RGXFWIF_DEV_VIRTADDR sNullFWAddr = {0};
 
 		if (psKMHWRTDataSet == NULL)
 		{
@@ -3689,14 +3690,10 @@ PVRSRV_ERROR PVRSRVRGXKickTA3DKM(RGX_SERVER_RENDER_CONTEXT	*psRenderContext,
 
 			psGeomCmdShared->sHWRTData = psKMHWRTDataSet->sHWRTDataFwAddr;
 
-			if (psZSBuffer != NULL)
-			{
-				psGeomCmdShared->asPRBuffer[RGXFWIF_PRBUFFER_ZSBUFFER] = psZSBuffer->sZSBufferFWDevVAddr;
-			}
-			if (psMSAAScratchBuffer != NULL)
-			{
-				psGeomCmdShared->asPRBuffer[RGXFWIF_PRBUFFER_MSAABUFFER] = psMSAAScratchBuffer->sZSBufferFWDevVAddr;
-			}
+			psGeomCmdShared->asPRBuffer[RGXFWIF_PRBUFFER_ZSBUFFER] =
+			    psZSBuffer ? psZSBuffer->sZSBufferFWDevVAddr : sNullFWAddr;
+			psGeomCmdShared->asPRBuffer[RGXFWIF_PRBUFFER_MSAABUFFER] =
+			    psMSAAScratchBuffer ? psMSAAScratchBuffer->sZSBufferFWDevVAddr : sNullFWAddr;
 		}
 
 		/* Write FW address for 3D CMD
@@ -3711,14 +3708,10 @@ PVRSRV_ERROR PVRSRVRGXKickTA3DKM(RGX_SERVER_RENDER_CONTEXT	*psRenderContext,
 
 			ps3DCmdShared->sHWRTData = psKMHWRTDataSet->sHWRTDataFwAddr;
 
-			if (psZSBuffer != NULL)
-			{
-				ps3DCmdShared->asPRBuffer[RGXFWIF_PRBUFFER_ZSBUFFER] = psZSBuffer->sZSBufferFWDevVAddr;
-			}
-			if (psMSAAScratchBuffer != NULL)
-			{
-				ps3DCmdShared->asPRBuffer[RGXFWIF_PRBUFFER_MSAABUFFER] = psMSAAScratchBuffer->sZSBufferFWDevVAddr;
-			}
+			ps3DCmdShared->asPRBuffer[RGXFWIF_PRBUFFER_ZSBUFFER] =
+			    psZSBuffer ? psZSBuffer->sZSBufferFWDevVAddr : sNullFWAddr;
+			ps3DCmdShared->asPRBuffer[RGXFWIF_PRBUFFER_MSAABUFFER] =
+			    psMSAAScratchBuffer ? psMSAAScratchBuffer->sZSBufferFWDevVAddr : sNullFWAddr;
 		}
 
 		/* Write FW address for PR3D CMD
@@ -3732,15 +3725,10 @@ PVRSRV_ERROR PVRSRVRGXKickTA3DKM(RGX_SERVER_RENDER_CONTEXT	*psRenderContext,
 			}
 
 			psPR3DCmdShared->sHWRTData = psKMHWRTDataSet->sHWRTDataFwAddr;
-
-			if (psZSBuffer != NULL)
-			{
-				psPR3DCmdShared->asPRBuffer[RGXFWIF_PRBUFFER_ZSBUFFER] = psZSBuffer->sZSBufferFWDevVAddr;
-			}
-			if (psMSAAScratchBuffer != NULL)
-			{
-				psPR3DCmdShared->asPRBuffer[RGXFWIF_PRBUFFER_MSAABUFFER] = psMSAAScratchBuffer->sZSBufferFWDevVAddr;
-			}
+			psPR3DCmdShared->asPRBuffer[RGXFWIF_PRBUFFER_ZSBUFFER] =
+			    psZSBuffer ? psZSBuffer->sZSBufferFWDevVAddr : sNullFWAddr;
+			psPR3DCmdShared->asPRBuffer[RGXFWIF_PRBUFFER_MSAABUFFER] =
+			    psMSAAScratchBuffer ? psMSAAScratchBuffer->sZSBufferFWDevVAddr : sNullFWAddr;
 		}
 	}
 
