@@ -146,6 +146,12 @@ struct pvr_counting_fence_timeline *pvr_counting_fence_timeline_create(
 	if (!timeline->context)
 		goto err_free_timeline;
 
+	timeline->current_value = 0;
+	timeline->next_value = 1;
+	kref_init(&timeline->kref);
+	spin_lock_init(&timeline->active_fences_lock);
+	INIT_LIST_HEAD(&timeline->active_fences);
+
 	srv_err = PVRSRVRegisterDbgRequestNotify(&timeline->dbg_request_handle,
 				dev_cookie,
 				pvr_counting_fence_timeline_debug_request,
@@ -156,12 +162,6 @@ struct pvr_counting_fence_timeline *pvr_counting_fence_timeline_create(
 		       __func__, PVRSRVGetErrorString(srv_err));
 		goto err_free_timeline_ctx;
 	}
-
-	timeline->current_value = 0;
-	timeline->next_value = 1;
-	kref_init(&timeline->kref);
-	spin_lock_init(&timeline->active_fences_lock);
-	INIT_LIST_HEAD(&timeline->active_fences);
 
 err_out:
 	return timeline;
