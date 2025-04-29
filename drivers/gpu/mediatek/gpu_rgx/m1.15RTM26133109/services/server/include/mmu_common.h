@@ -473,7 +473,15 @@ MMU_UnmapPages(MMU_CONTEXT *psMMUContext,
                IMG_UINT32 *pai32UnmapIndicies,
                IMG_UINT32 uiLog2PageSize);
 
+
+/* Guides the MMU when remapping valid entries to other valid entries */
+typedef enum {
+	MMU_PTE_REMAP_POLICY_ALLOW = 0,
+	MMU_PTE_REMAP_POLICY_BLOCK
+} MMU_PTE_REMAP_POLICY;
+
 /*************************************************************************/ /*!
+
 @Function       MMU_MapPMRFast
 
 @Description    Map a PMR into the MMU. Must be not sparse.
@@ -491,6 +499,8 @@ MMU_UnmapPages(MMU_CONTEXT *psMMUContext,
 
 @Input          uiMappingFlags          Memalloc flags for the mapping
 
+@Input          eRemapPolicy            Policy of remapping PTEs
+
 @Return         PVRSRV_OK if the PMR was successfully mapped
 */
 /*****************************************************************************/
@@ -500,7 +510,8 @@ MMU_MapPMRFast(MMU_CONTEXT *psMMUContext,
                PMR *psPMR,
                IMG_DEVMEM_SIZE_T uiSizeBytes,
                PVRSRV_MEMALLOCFLAGS_T uiMappingFlags,
-               IMG_UINT32 uiLog2PageSize);
+               IMG_UINT32 uiLog2PageSize,
+               MMU_PTE_REMAP_POLICY eRemapPolicy);
 
 /*************************************************************************/ /*!
 @Function       MMU_UnmapPMRFast
