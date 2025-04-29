@@ -2332,6 +2332,9 @@ PVRSRV_ERROR RGXCreateZSBufferKM2(CONNECTION_DATA * psConnection,
 	DEVMEM_MEMDESC				*psFWZSBufferMemDesc;
 	IMG_BOOL					bOnDemand = PVRSRV_CHECK_ON_DEMAND(uiMapFlags) ? IMG_TRUE : IMG_FALSE;
 
+	PVR_LOG_RETURN_IF_INVALID_PARAM((PMR_Flags(psPMR) & PVRSRV_MEMALLOCFLAG_DEVICE_FLAG(PMMETA_PROTECT)) == 0U,
+	    "ZS-Buffer cannot be mapped with PMMETA_PROTECT.");
+
 	/* Allocate host data structure */
 	psZSBuffer = OSAllocZMem(sizeof(*psZSBuffer));
 	if (psZSBuffer == NULL)
