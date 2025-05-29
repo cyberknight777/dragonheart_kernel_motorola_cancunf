@@ -3978,15 +3978,21 @@ static PVRSRV_ERROR RGXSendCommandRaw(PVRSRV_RGXDEV_INFO  *psDevInfo,
 #endif
 
 #if defined(SUPPORT_AUTOVZ)
-	if (!((KM_FW_CONNECTION_IS(READY, psDevInfo) && KM_OS_CONNECTION_IS(READY, psDevInfo)) ||
-		(KM_FW_CONNECTION_IS(ACTIVE, psDevInfo) && KM_OS_CONNECTION_IS(ACTIVE, psDevInfo))))
+	if ((likely(KM_FW_CONNECTION_IS(ACTIVE, psDevInfo) &&
+		(KM_OS_CONNECTION_IS(ACTIVE, psDevInfo) || KM_OS_CONNECTION_IS(READY, psDevInfo)))) ||
+			(KM_FW_CONNECTION_IS(READY, psDevInfo) && KM_OS_CONNECTION_IS(READY, psDevInfo)))
+	{
+		RGXUpdateAutoVzWdgToken(psDevInfo);
+	}
+	else
 	{
 		PVR_DPF((PVR_DBG_ERROR, "%s: The firmware-driver connection is invalid:"
 								"driver state = %u / firmware state = %u;"
-								"expected READY (%u/%u) or ACTIVE (%u/%u);",
+								"expected READY (%u/%u) or ACTIVE (%u/%u) or in transition (%u/%u);",
 								__func__, KM_GET_OS_CONNECTION(psDevInfo), KM_GET_FW_CONNECTION(psDevInfo),
 								RGXFW_CONNECTION_OS_READY, RGXFW_CONNECTION_FW_READY,
-								RGXFW_CONNECTION_OS_ACTIVE, RGXFW_CONNECTION_FW_ACTIVE));
+								RGXFW_CONNECTION_OS_ACTIVE, RGXFW_CONNECTION_FW_ACTIVE,
+								RGXFW_CONNECTION_OS_READY, RGXFW_CONNECTION_FW_ACTIVE));
 		eError = PVRSRV_ERROR_PVZ_OSID_IS_OFFLINE;
 		goto _RGXSendCommandRaw_Exit;
 	}
@@ -4635,7 +4641,7 @@ void RGXCheckFirmwareCCB(PVRSRV_RGXDEV_INFO *psDevInfo)
 
 #if defined(RGX_NUM_OS_SUPPORTED) && (RGX_NUM_OS_SUPPORTED > 1)
 	PVR_LOG_RETURN_VOID_IF_FALSE((KM_FW_CONNECTION_IS(ACTIVE, psDevInfo) &&
-								  KM_OS_CONNECTION_IS(ACTIVE, psDevInfo)),
+								 (KM_OS_CONNECTION_IS(ACTIVE, psDevInfo) || KM_OS_CONNECTION_IS(READY, psDevInfo))),
 								  "FW-KM connection is down");
 #endif
 
@@ -6340,7 +6346,8 @@ _RGXUpdateHealthStatus_Exit:
 #if defined(SUPPORT_AUTOVZ)
 void RGXUpdateAutoVzWdgToken(PVRSRV_RGXDEV_INFO *psDevInfo)
 {
-	if (likely(KM_FW_CONNECTION_IS(ACTIVE, psDevInfo) && KM_OS_CONNECTION_IS(ACTIVE, psDevInfo)))
+	if (likely(KM_FW_CONNECTION_IS(ACTIVE, psDevInfo) &&
+		(KM_OS_CONNECTION_IS(ACTIVE, psDevInfo) || KM_OS_CONNECTION_IS(READY, psDevInfo))))
 	{
 		/* read and write back the alive token value to confirm to the
 		 * virtualisation watchdog that this connection is healthy */

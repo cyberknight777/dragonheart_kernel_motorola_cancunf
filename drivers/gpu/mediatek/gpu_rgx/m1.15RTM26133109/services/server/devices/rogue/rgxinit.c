@@ -547,11 +547,16 @@ static IMG_BOOL RGX_LISRHandler(void *pvData)
 	}
 	else
 	{
+#if defined(SUPPORT_AUTOVZ)
 		/* AutoVz drivers rebooting while the firmware is active must acknowledge
 		 * and clear the hw IRQ line before the RGXInit() has finished. */
-		if (!(psDevInfo->psDeviceNode->bAutoVzFwIsUp &&
-			  (psDevInfo->pfnRGXAckIrq != NULL) &&
-			  psDevInfo->pfnRGXAckIrq(psDevInfo)))
+		if ((psDevInfo->pfnRGXAckIrq != NULL) &&
+			 psDevInfo->pfnRGXAckIrq(psDevInfo))
+		{
+			bIrqAcknowledged = IMG_TRUE;
+		}
+		else
+#endif
 		{
 			UPDATE_LISR_DBG_STATUS(RGX_LISR_DEVICE_NOT_POWERED);
 		}
