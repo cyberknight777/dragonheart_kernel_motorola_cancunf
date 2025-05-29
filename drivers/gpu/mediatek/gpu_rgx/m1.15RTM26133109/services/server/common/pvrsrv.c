@@ -1033,11 +1033,7 @@ static void DevicesWatchdogThread(void *pvData)
 #if defined(SUPPORT_AUTOVZ)
 static void AutoVzWatchdogThread_ForEachCb(PVRSRV_DEVICE_NODE *psDeviceNode)
 {
-	if (psDeviceNode->eDevState != PVRSRV_DEVICE_STATE_ACTIVE)
-	{
-		return;
-	}
-	else if (psDeviceNode->pfnUpdateAutoVzWatchdog != NULL)
+	if (psDeviceNode->pfnUpdateAutoVzWatchdog != NULL)
 	{
 		psDeviceNode->pfnUpdateAutoVzWatchdog(psDeviceNode);
 	}

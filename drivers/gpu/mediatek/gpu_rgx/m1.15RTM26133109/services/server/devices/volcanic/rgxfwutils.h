@@ -1325,13 +1325,13 @@ PVRSRV_ERROR RGXRiscvWriteMem(PVRSRV_RGXDEV_INFO *psDevInfo,
 #define KM_SET_OS_ALIVE_TOKEN(val, psDevInfo)		OSWriteDeviceMem32WithWMB(&psDevInfo->psRGXFWIfConnectionCtl->ui32AliveOsToken, val)
 #endif /* defined(SUPPORT_AUTOVZ) */
 
-#if !defined(NO_HARDWARE) && (defined(RGX_VZ_STATIC_CARVEOUT_FW_HEAPS) || (defined(RGX_NUM_OS_SUPPORTED) && (RGX_NUM_OS_SUPPORTED == 1)))
-/* native, static-vz and AutoVz using shared memory */
+#if !defined(NO_HARDWARE) && defined(RGX_NUM_OS_SUPPORTED) && (RGX_NUM_OS_SUPPORTED > 1)
+/* static, dynamic and AutoVz DDKs using shared memory */
 #define KM_GET_FW_CONNECTION(psDevInfo)			(psDevInfo->psRGXFWIfConnectionCtl->eConnectionFwState)
 #define KM_GET_OS_CONNECTION(psDevInfo)			(psDevInfo->psRGXFWIfConnectionCtl->eConnectionOsState)
 #define KM_SET_OS_CONNECTION(val, psDevInfo)	OSWriteDeviceMem32WithWMB(&psDevInfo->psRGXFWIfConnectionCtl->eConnectionOsState, RGXFW_CONNECTION_OS_##val)
 #else
-/* dynamic-vz & nohw */
+/* nohw & native */
 #define KM_GET_FW_CONNECTION(psDevInfo)			(RGXFW_CONNECTION_FW_ACTIVE)
 #define KM_GET_OS_CONNECTION(psDevInfo)			(RGXFW_CONNECTION_OS_ACTIVE)
 #define KM_SET_OS_CONNECTION(val, psDevInfo)
