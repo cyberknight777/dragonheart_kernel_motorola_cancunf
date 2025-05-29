@@ -2524,6 +2524,12 @@ void RGXDumpRGXDebugSummary(DUMPDEBUG_PRINTF_FUNC *pfnDumpDebugPrintf,
 							 );
 
 			bOsIsolationEnabled |= sFwRunFlags.bfIsolatedOS;
+
+			if (PVRSRV_VZ_MODE_IS(NATIVE))
+			{
+				/* don't print guest information on native mode drivers */
+				break;
+			}
 		}
 
 #if defined(PVR_ENABLE_PHR)

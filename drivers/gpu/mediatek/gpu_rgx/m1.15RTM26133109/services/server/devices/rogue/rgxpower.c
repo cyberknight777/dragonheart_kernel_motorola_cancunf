@@ -442,6 +442,37 @@ PVRSRV_ERROR RGXVzPrePowerState(IMG_HANDLE				hDevHandle,
 	return eError;
 }
 
+#if defined(RGX_VZ_STATIC_CARVEOUT_FW_HEAPS)
+static PVRSRV_ERROR RGXVzWaitFirmwareReady(PVRSRV_RGXDEV_INFO *psDevInfo)
+{
+	if (!KM_FW_CONNECTION_IS(READY, psDevInfo))
+	{
+		PVR_DPF((PVR_DBG_ERROR, "%s: Firmware Connection is not in Ready state. Waiting for Firmware ...", __func__));
+	}
+
+	LOOP_UNTIL_TIMEOUT(RGX_VZ_CONNECTION_TIMEOUT_US)
+	{
+		if (KM_FW_CONNECTION_IS(READY, psDevInfo))
+		{
+			PVR_DPF((PVR_DBG_ERROR, "%s: Firmware Connection is Ready. Initialisation proceeding.", __func__));
+			break;
+		}
+		else
+		{
+			OSSleepms(10);
+		}
+	} END_LOOP_UNTIL_TIMEOUT();
+
+	if (!KM_FW_CONNECTION_IS(READY, psDevInfo))
+	{
+		PVR_DPF((PVR_DBG_ERROR, "%s: Timed out waiting for the Firmware to enter Ready state.", __func__));
+		return PVRSRV_ERROR_TIMEOUT;
+	}
+
+	return PVRSRV_OK;
+}
+#endif
+
 /*
 	RGXVzPostPowerState
 */
@@ -458,8 +489,17 @@ PVRSRV_ERROR RGXVzPostPowerState(IMG_HANDLE				hDevHandle,
 
 	if (!(PVRSRV_VZ_MODE_IS(GUEST) || (psDeviceNode->bAutoVzFwIsUp)))
 	{
+		if (eCurrentPowerState != PVRSRV_DEV_POWER_STATE_ON)
+		{
+			KM_SET_OS_CONNECTION(READY, psDevInfo);
+		}
+
 		/* call regular device power function */
 		eError = RGXPostPowerState(hDevHandle, eNewPowerState, eCurrentPowerState, bForced);
+	}
+	else
+	{
+		KM_SET_OS_CONNECTION(OFFLINE, psDevInfo);
 	}
 
 	if (eNewPowerState != PVRSRV_DEV_POWER_STATE_ON)
@@ -508,21 +548,10 @@ PVRSRV_ERROR RGXVzPostPowerState(IMG_HANDLE				hDevHandle,
 
 #if defined(RGX_VZ_STATIC_CARVEOUT_FW_HEAPS)
 			/* Guest drivers expect the firmware to have set its end of the
-			 * connection to Ready state by now. Poll indefinitely otherwise. */
-			if (!KM_FW_CONNECTION_IS(READY, psDevInfo))
-			{
-				PVR_DPF((PVR_DBG_WARNING, "%s: Firmware Connection is not in Ready state. Waiting for Firmware ...", __func__));
-			}
-			while (!KM_FW_CONNECTION_IS(READY, psDevInfo))
-			{
-				OSSleepms(10);
-			}
-			PVR_DPF((PVR_DBG_WARNING, "%s: Firmware Connection is Ready. Initialisation proceeding.", __func__));
+			 * connection to Ready state by now. */
+			eError = RGXVzWaitFirmwareReady(psDevInfo);
+			PVR_LOG_RETURN_IF_ERROR(eError, "RGXVzWaitFirmwareReady()");
 #endif /* RGX_VZ_STATIC_CARVEOUT_FW_HEAPS */
-
-			/* Guests can only access the register holding the connection states,
-			 * after the GPU is confirmed to be powered up */
-			KM_SET_OS_CONNECTION(READY, psDevInfo);
 
 			OSWriteDeviceMem32WithWMB(pbUpdatedFlag, IMG_FALSE);
 
@@ -536,14 +565,14 @@ PVRSRV_ERROR RGXVzPostPowerState(IMG_HANDLE				hDevHandle,
 				RGXFWIF_KCCB_CMD sCmpKCCBCmd;
 				sCmpKCCBCmd.eCmdType = RGXFWIF_KCCB_CMD_HEALTH_CHECK;
 
+				KM_SET_OS_CONNECTION(READY, psDevInfo);
+
 				eError = RGXSendCommandAndGetKCCBSlot(psDevInfo, &sCmpKCCBCmd, PDUMP_FLAGS_CONTINUOUS, NULL);
 				PVR_LOG_RETURN_IF_ERROR(eError, "RGXSendCommandAndGetKCCBSlot()");
 			}
 		}
 		else
 		{
-			KM_SET_OS_CONNECTION(READY, psDevInfo);
-
 			/* Disable power callbacks that should not be run on virtualised drivers after the GPU
 			 * is fully initialised: system layer pre/post functions and driver idle requests.
 			 * The original device RGX Pre/Post functions are called from this Vz wrapper. */
@@ -552,19 +581,50 @@ PVRSRV_ERROR RGXVzPostPowerState(IMG_HANDLE				hDevHandle,
 									NULL, NULL, NULL, NULL);
 
 #if defined(SUPPORT_AUTOVZ)
-			/* During first-time boot the flag is set here, while subsequent reboots will already
-			 * have set it earlier in RGXInit. Set to true from this point onwards in any case. */
-			psDeviceNode->bAutoVzFwIsUp = IMG_TRUE;
+			/* AutoVz Host driver reconnecting to running Firmware */
+			if (psDeviceNode->bAutoVzFwIsUp)
+			{
+				/* Firmware already running, send a KCCB command to establish the new connection */
+				RGXFWIF_KCCB_CMD sCmpKCCBCmd;
+				sCmpKCCBCmd.eCmdType = RGXFWIF_KCCB_CMD_HEALTH_CHECK;
+
+				eError = RGXVzWaitFirmwareReady(psDevInfo);
+				PVR_LOG_RETURN_IF_ERROR(eError, "RGXVzWaitFirmwareReady()");
+
+				KM_SET_OS_CONNECTION(READY, psDevInfo);
+
+				eError = RGXSendCommand(psDevInfo, &sCmpKCCBCmd, PDUMP_FLAGS_CONTINUOUS);
+				PVR_LOG_RETURN_IF_ERROR(eError, "RGXSendCommand()");
+			}
+			else
+			{
+				/* During first-time boot the flag is set here, while subsequent reboots will already
+				 * have set it earlier in RGXInit. Set to true from this point on. */
+				psDeviceNode->bAutoVzFwIsUp = IMG_TRUE;
+			}
 #endif
 		}
 
 		/* Wait for the firmware to accept and enable the connection with this OS by setting its state to Active */
-		while (!KM_FW_CONNECTION_IS(ACTIVE, psDevInfo))
+		LOOP_UNTIL_TIMEOUT(RGX_VZ_CONNECTION_TIMEOUT_US)
 		{
-			PVR_DPF((PVR_DBG_WARNING, "%s: Firmware Connection is not in Active state. Waiting for Firmware ...", __func__));
-			OSSleepms(100);
+			if (KM_FW_CONNECTION_IS(ACTIVE, psDevInfo))
+			{
+				PVR_DPF((PVR_DBG_WARNING, "%s: Firmware Connection is Active. Initialisation proceeding.", __func__));
+				break;
+			}
+			else
+			{
+				PVR_DPF((PVR_DBG_WARNING, "%s: Firmware Connection is not in Active state. Waiting for Firmware ...", __func__));
+				OSSleepms(10);
+			}
+		} END_LOOP_UNTIL_TIMEOUT();
+
+		if (!KM_FW_CONNECTION_IS(ACTIVE, psDevInfo))
+		{
+			PVR_DPF((PVR_DBG_ERROR, "%s: Timed out waiting for the Firmware to enter Active state.", __func__));
+			return PVRSRV_ERROR_TIMEOUT;
 		}
-		PVR_DPF((PVR_DBG_WARNING, "%s: Firmware Connection is Active. Initialisation proceeding.", __func__));
 
 		/* poll on the Firmware supplying the compatibility data */
 		LOOP_UNTIL_TIMEOUT(ui32FwTimeout)
