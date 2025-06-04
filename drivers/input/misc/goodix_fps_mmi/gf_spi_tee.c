@@ -30,8 +30,8 @@
 #else
 #include <linux/notifier.h>
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5,10,0)
-#include "../../../../drivers/gpu/drm/mediatek/mediatek_v2/mtk_disp_notify.h"
-#include "../../../../drivers/gpu/drm/mediatek/mediatek_v2/mtk_panel_ext.h"
+#include <linux/mtk_disp_notify.h>
+#include <linux/mtk_panel_ext.h>
 #endif
 #endif
 
