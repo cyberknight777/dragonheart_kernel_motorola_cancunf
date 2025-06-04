@@ -58,6 +58,9 @@
 #undef CREATE_TRACE_POINTS
 #include <trace/hooks/timer.h>
 
+
+
+
 EXPORT_TRACEPOINT_SYMBOL_GPL(hrtimer_expire_entry);
 EXPORT_TRACEPOINT_SYMBOL_GPL(hrtimer_expire_exit);
 
@@ -1739,6 +1742,9 @@ void timer_clear_idle(void)
 void update_process_times(int user_tick)
 {
 	struct task_struct *p = current;
+#if IS_ENABLED(CONFIG_MTK_IRQ_MONITOR_DEBUG)
+	u64 start, end, process_time;
+#endif
 
 	PRANDOM_ADD_NOISE(jiffies, user_tick, p, 0);
 
@@ -1750,7 +1756,17 @@ void update_process_times(int user_tick)
 	if (in_irq())
 		irq_work_tick();
 #endif
+#if IS_ENABLED(CONFIG_MTK_IRQ_MONITOR_DEBUG)
+	start = sched_clock();
+#endif
 	scheduler_tick();
+#if IS_ENABLED(CONFIG_MTK_IRQ_MONITOR_DEBUG)
+	end = sched_clock();
+	process_time = end - start;
+	if (process_time > 5000000L) // > 5ms
+		pr_notice("irq_monitor: time: %lld func: %s line: %d "
+			, process_time, __func__, __LINE__);
+#endif
 	if (IS_ENABLED(CONFIG_POSIX_TIMERS))
 		run_posix_cpu_timers();
 }
@@ -2129,3 +2145,5 @@ void __sched usleep_range(unsigned long min, unsigned long max)
 	usleep_range_state(min, max, TASK_UNINTERRUPTIBLE);
 }
 EXPORT_SYMBOL(usleep_range);
+
+
