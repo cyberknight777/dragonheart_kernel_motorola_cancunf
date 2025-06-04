@@ -10,6 +10,7 @@
 #define _MTK_JPEG_CORE_H
 
 #include <linux/interrupt.h>
+#include "mtk-interconnect-provider.h"
 #include <media/v4l2-ctrls.h>
 #include <media/v4l2-device.h>
 #include <media/v4l2-fh.h>
@@ -17,6 +18,7 @@
 #define MTK_JPEG_NAME		"mtk-jpeg"
 
 #define MTK_JPEG_COMP_MAX		3
+#define MTK_JPEG_MAX_FREQ		8
 
 #define MTK_JPEG_FMT_FLAG_OUTPUT	BIT(0)
 #define MTK_JPEG_FMT_FLAG_CAPTURE	BIT(1)
@@ -72,6 +74,7 @@ struct mtk_jpeg_variant {
 	const struct v4l2_ioctl_ops *ioctl_ops;
 	u32 out_q_default_fourcc;
 	u32 cap_q_default_fourcc;
+	bool support_34bit;
 };
 
 /**
@@ -102,6 +105,13 @@ struct mtk_jpeg_dev {
 	struct device		*larb;
 	struct delayed_work job_timeout_work;
 	const struct mtk_jpeg_variant *variant;
+	struct icc_path *path_y_rdma;
+	struct icc_path *path_c_rdma;
+	struct icc_path *path_qtbl;
+	struct icc_path *path_bsdma;
+	struct regulator *jpegenc_reg;
+	int freq_cnt;
+	unsigned long freqs[MTK_JPEG_MAX_FREQ];
 };
 
 /**
@@ -160,6 +170,7 @@ struct mtk_jpeg_ctx {
 	u8 enc_quality;
 	u8 restart_interval;
 	struct v4l2_ctrl_handler ctrl_hdl;
+	u32 dst_offset;
 };
 
 #endif /* _MTK_JPEG_CORE_H */
