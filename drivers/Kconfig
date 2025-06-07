@@ -263,10 +263,6 @@ source "drivers/mmi_info/Kconfig"
 
 source "drivers/mmi_relay/Kconfig"
 
-source "drivers/moto_f_mass_storage/Kconfig"
-
-source "drivers/moto_f_usbnet/Kconfig"
-
 source "drivers/sensors/Kconfig"
 
 endmenu
