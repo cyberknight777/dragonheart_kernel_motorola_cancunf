@@ -450,16 +450,22 @@ static void _CheckFreelist(RGX_FREELIST *psFreeList,
  *
  *  If the threshold or grow size means less than 4 pages, then the feature
  *  is not used.
+ *
+ *  Ready pages should be less than ui32FLPages, so ui32GrowThreshold
+ *  parameter should be less than GROW_THRESHOLD_DENOMINATOR.
  */
-static IMG_UINT32 _CalculateFreelistReadyPages(RGX_FREELIST *psFreeList,
-		IMG_UINT32  ui32FLPages)
-{
-	IMG_UINT32  ui32ReadyFLPages = ((ui32FLPages * psFreeList->ui32GrowThreshold) / 100) &
-			~((RGX_BIF_PM_FREELIST_BASE_ADDR_ALIGNSIZE/sizeof(IMG_UINT32))-1);
+#define GROW_THRESHOLD_DENOMINATOR (100U)
 
-	if (ui32ReadyFLPages > psFreeList->ui32GrowFLPages)
+static IMG_UINT32 _CalculateFreelistReadyPages(IMG_UINT32 ui32GrowThreshold,
+                                               IMG_UINT32 ui32FLPages,
+                                               IMG_UINT32 ui32GrowFLPages)
+{
+	IMG_UINT32  ui32ReadyFLPages = ((ui32FLPages * ui32GrowThreshold) / GROW_THRESHOLD_DENOMINATOR) &
+	                               ~((RGX_BIF_PM_FREELIST_BASE_ADDR_ALIGNSIZE/sizeof(IMG_UINT32))-1);
+
+	if (ui32ReadyFLPages > ui32GrowFLPages)
 	{
-		ui32ReadyFLPages = psFreeList->ui32GrowFLPages;
+		ui32ReadyFLPages = ui32GrowFLPages;
 	}
 
 	return ui32ReadyFLPages;
@@ -716,7 +722,9 @@ PVRSRV_ERROR RGXGrowFreeList(RGX_FREELIST *psFreeList,
 	}
 
 	/* Reserve a number ready pages to allow the FW to process OOM quickly and asynchronously request a grow. */
-	psFreeList->ui32ReadyFLPages    = _CalculateFreelistReadyPages(psFreeList, psFreeList->ui32CurrentFLPages);
+	psFreeList->ui32ReadyFLPages    = _CalculateFreelistReadyPages(psFreeList->ui32GrowThreshold,
+	                                                               psFreeList->ui32CurrentFLPages,
+	                                                               psFreeList->ui32GrowFLPages);
 	psFreeList->ui32CurrentFLPages -= psFreeList->ui32ReadyFLPages;
 
 	if (psFreeList->bCheckFreelist)
@@ -1974,13 +1982,7 @@ PVRSRV_ERROR RGXCreateFreeList2(CONNECTION_DATA			*psConnection,
 	PVRSRV_RGXDEV_INFO *psDevInfo = psDeviceNode->pvDevice;
 	IMG_DEV_VIRTADDR   sFreeListDevVAddr;
 	PMR*               psFreeListPMR = NULL;
-
-	eError = AcquireValidateRefCriticalBuffer(psDeviceNode,
-	                                          psFreeListReservation,
-	                                          0, /* Size is checked later after calculating initial grow size */
-	                                          &psFreeListPMR,
-	                                          &sFreeListDevVAddr);
-	PVR_LOG_RETURN_IF_ERROR(eError,  "Validation failed for Freelist reservation");
+	IMG_UINT32         ui32ReadyPages;
 
 	if (OSGetPageShift() > RGX_BIF_PM_PHYSICAL_PAGE_ALIGNSHIFT)
 	{
@@ -2007,6 +2009,31 @@ PVRSRV_ERROR RGXCreateFreeList2(CONNECTION_DATA			*psConnection,
 		ui32GrowFLPages = ui32NewGrowFLPages;
 		ui32MaxFLPages = ui32NewMaxFLPages;
 	}
+
+	PVR_LOG_RETURN_IF_FALSE(ui32InitFLPages <= ui32MaxFLPages,
+	                        "ui32InitFLPages cannot be more than ui32MaxFLPages",
+	                        PVRSRV_ERROR_INVALID_PARAMS);
+
+	PVR_LOG_RETURN_IF_FALSE(ui32GrowFLPages <= ui32MaxFLPages - ui32InitFLPages,
+	                        "ui32GrowFLPages cannot be more than ui32MaxFLPages - ui32InitFLPages",
+	                        PVRSRV_ERROR_INVALID_PARAMS);
+
+	PVR_LOG_RETURN_IF_FALSE_VA(ui32GrowParamThreshold <= GROW_THRESHOLD_DENOMINATOR,
+	                           PVRSRV_ERROR_INVALID_PARAMS,
+	                           "ui32GrowParamThreshold should not exceed %d", GROW_THRESHOLD_DENOMINATOR);
+
+	ui32ReadyPages = _CalculateFreelistReadyPages(ui32GrowParamThreshold, ui32InitFLPages, ui32GrowFLPages);
+
+	PVR_LOG_RETURN_IF_FALSE(ui32InitFLPages > ui32ReadyPages,
+	                        "ui32InitFLPages less than ui32ReadyPages (based on ui32GrowParamThreshold)",
+	                        PVRSRV_ERROR_INVALID_PARAMS);
+
+	eError = AcquireValidateRefCriticalBuffer(psDeviceNode,
+	                                          psFreeListReservation,
+	                                          (IMG_DEVMEM_SIZE_T)ui32MaxFLPages * sizeof(IMG_UINT32),
+	                                          &psFreeListPMR,
+	                                          &sFreeListDevVAddr);
+	PVR_LOG_RETURN_IF_ERROR(eError,  "Validation failed for Freelist reservation");
 
 	/* Allocate kernel freelist struct */
 	psFreeList = OSAllocZMem(sizeof(*psFreeList));
@@ -2092,8 +2119,6 @@ PVRSRV_ERROR RGXCreateFreeList2(CONNECTION_DATA			*psConnection,
 	PVR_LOG_GOTO_IF_ERROR(eError, "Devmem AcquireCpuVirtAddr", FWFreeListCpuMap);
 
 	{
-		const IMG_UINT32 ui32ReadyPages = _CalculateFreelistReadyPages(psFreeList, ui32InitFLPages);
-
 		psFWFreeList->ui32MaxPages = ui32MaxFLPages;
 		psFWFreeList->ui32CurrentPages = ui32InitFLPages - ui32ReadyPages;
 		psFWFreeList->ui32GrowPages = ui32GrowFLPages;
