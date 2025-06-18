@@ -7,7 +7,7 @@
 
 /* Log Format */
 #define AW_LOGI(format, ...) \
-	pr_info("[%s][%04d]%s: " format "\n", OIS_DRVNAME, __LINE__, __func__, \
+	pr_debug("[%s][%04d]%s: " format "\n", OIS_DRVNAME, __LINE__, __func__, \
 								##__VA_ARGS__)
 #define AW_LOGD(format, ...) \
 	pr_debug("[%s][%04d]%s: " format "\n", OIS_DRVNAME, __LINE__, \
