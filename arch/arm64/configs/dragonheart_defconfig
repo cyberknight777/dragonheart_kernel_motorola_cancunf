@@ -2283,8 +2283,7 @@ CONFIG_MTK_TINYSYS_VCP_VERSION=""
 #
 # Debug, log, trace
 #
-CONFIG_MTK_MET=m
-# CONFIG_MTK_MET_DEBUG is not set
+# CONFIG_MTK_MET is not set
 # CONFIG_RTNL_LOCK_DEBUG is not set
 # CONFIG_MTK_VM_DEBUG is not set
 
