@@ -208,22 +208,6 @@ apusys-objs += apusys_rv/apu_timesync.o
 apusys-objs += apusys_rv/apu_deepidle.o
 apusys-objs += apusys_rv/apu_regdump.o
 apusys-objs += apusys_rv/apu_debug.o
-ifneq ($(wildcard $(srctree)/drivers/misc/mediatek/apusys/apusys_rv/2.0/mt6879_plat.c),)
-subdir-ccflags-y += -DMT6879_APUSYS_RV_PLAT_DATA
-apusys-objs += apusys_rv/2.0/mt6879_plat.o
-endif
-ifneq ($(wildcard $(srctree)/drivers/misc/mediatek/apusys/apusys_rv/1.0/mt6893_plat.c),)
-subdir-ccflags-y += -DMT6893_APUSYS_RV_PLAT_DATA
-apusys-objs += apusys_rv/1.0/mt6893_plat.o
-endif
-ifneq ($(wildcard $(srctree)/drivers/misc/mediatek/apusys/apusys_rv/2.0/mt6895_plat.c),)
-subdir-ccflags-y += -DMT6895_APUSYS_RV_PLAT_DATA
-apusys-objs += apusys_rv/2.0/mt6895_plat.o
-endif
-ifneq ($(wildcard $(srctree)/drivers/misc/mediatek/apusys/apusys_rv/2.0/mt6983_plat.c),)
-subdir-ccflags-y += -DMT6983_APUSYS_RV_PLAT_DATA
-apusys-objs += apusys_rv/2.0/mt6983_plat.o
-endif
 
 # ipi
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/apusys/ipi/
