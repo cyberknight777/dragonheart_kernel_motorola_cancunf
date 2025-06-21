@@ -4935,7 +4935,9 @@ static int chg_reboot(struct notifier_block *nb,
 	if (info->mmi.factory_mode) {
 		switch (event) {
 		case SYS_POWER_OFF:
+#if IS_ENABLED(CONFIG_MTK_HANG_DETECT)
 			aee_kernel_RT_Monitor_api_factory();
+#endif
 			info->is_suspend = true;
 			/* Disable Factory Kill */
 			info->disable_charger = true;
