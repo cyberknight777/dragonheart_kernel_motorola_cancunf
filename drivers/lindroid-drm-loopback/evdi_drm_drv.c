@@ -535,6 +535,7 @@ int evdi_gbm_create_buff (struct drm_device *dev, void *data,
 {
 	struct drm_evdi_gbm_create_buff *cmd = data;
 	struct evdi_device *evdi = dev->dev_private;
+	struct drm_evdi_create_buff_callabck *cb_cmd;
 	int ret;
 	struct evdi_event *event = evdi_create_event(evdi, create_buf, cmd);
 	if (!event)
@@ -553,7 +554,7 @@ int evdi_gbm_create_buff (struct drm_device *dev, void *data,
 		return ret;
 	}
 
-	struct drm_evdi_create_buff_callabck *cb_cmd = (struct drm_evdi_create_buff_callabck *)event->reply_data;
+	cb_cmd = (struct drm_evdi_create_buff_callabck *)event->reply_data;
 	copy_to_user(cmd->id, &cb_cmd->id, sizeof(int));
 	copy_to_user(cmd->stride, &cb_cmd->stride, sizeof(int));
 	mutex_lock(&evdi->event_lock);
