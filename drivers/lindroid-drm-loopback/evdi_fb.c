@@ -179,7 +179,9 @@ static void evdi_user_framebuffer_destroy(struct drm_framebuffer *fb)
 	struct evdi_framebuffer *efb = to_evdi_fb(fb);
 	struct drm_device *dev = efb->base.dev;
 	struct evdi_device *evdi = dev->dev_private;
+	struct evdi_event *event;
 	int ret;
+	
 	EVDI_CHECKPT();
 	if (efb->obj)
 #if KERNEL_VERSION(5, 9, 0) <= LINUX_VERSION_CODE || defined(EL8)
@@ -189,7 +191,7 @@ static void evdi_user_framebuffer_destroy(struct drm_framebuffer *fb)
 #endif
 	drm_framebuffer_cleanup(fb);
 
-	struct evdi_event *event = evdi_create_event(evdi, destroy_buf, &efb->gralloc_buf_id);
+	event = evdi_create_event(evdi, destroy_buf, &efb->gralloc_buf_id);
 	if (!event)
 		return;
 
@@ -263,7 +265,9 @@ struct drm_framebuffer *evdi_fb_user_fb_create(
 	int bpp = evdi_fb_get_bpp(mode_cmd->pixel_format);
 	uint32_t handle;
 	ssize_t bytes_read;
-	struct evdi_device *evdi = dev->dev_private;
+	struct file *memfd_file;
+	int id;
+	loff_t pos;
 
 	size = mode_cmd->offsets[0] + mode_cmd->pitches[0] * mode_cmd->height;
 	size = ALIGN(size, PAGE_SIZE);
@@ -288,16 +292,13 @@ struct drm_framebuffer *evdi_fb_user_fb_create(
 		goto err_no_mem;
 	efb->base.obj[0] = obj;
 
-	struct file *memfd_file;
-	int id;
-
 	memfd_file = fget(mode_cmd->handles[0]);
 	if (!memfd_file) {
 		printk("Failed to open fake fb: %d\n", mode_cmd->handles[0]);
 		return ERR_PTR(-EINVAL);
 	}
 
-	loff_t pos = 0;
+	pos = 0;
 	bytes_read = kernel_read(memfd_file, &id, sizeof(id), &pos);
 	if (bytes_read != sizeof(id)) {
 		printk("Failed to read id from memfd, bytes_read=%zd\n", bytes_read);

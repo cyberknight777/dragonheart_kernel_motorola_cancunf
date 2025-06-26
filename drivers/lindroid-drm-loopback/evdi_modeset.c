@@ -10,7 +10,10 @@
  * License v2. See the file COPYING in the main directory of this archive for
  * more details.
  */
-
+#include <linux/slab.h>
+#include <linux/file.h>
+#include <linux/fdtable.h>
+#include <linux/fs.h>
 #include <linux/version.h>
 #if KERNEL_VERSION(5, 16, 0) <= LINUX_VERSION_CODE || defined(EL8) || defined(EL9)
 #include <drm/drm_vblank.h>
@@ -72,15 +75,19 @@ static void evdi_crtc_atomic_flush(
 #endif
 	)
 {
+	struct drm_crtc_state *crtc_state;
+	struct evdi_device *evdi;
+	bool notify_mode_changed;
+	bool notify_dpms;
 #if KERNEL_VERSION(5, 11, 0) <= LINUX_VERSION_CODE || defined(RPI) || defined(EL8)
-	struct drm_crtc_state *crtc_state = drm_atomic_get_new_crtc_state(state, crtc);
+	crtc_state = drm_atomic_get_new_crtc_state(state, crtc);
 #else
-	struct drm_crtc_state *crtc_state = crtc->state;
+	crtc_state = crtc->state;
 #endif
-	struct evdi_device *evdi = crtc->dev->dev_private;
-	bool notify_mode_changed = crtc_state->active &&
-				   (crtc_state->mode_changed || evdi_painter_needs_full_modeset(evdi->painter));
-	bool notify_dpms = crtc_state->active_changed || evdi_painter_needs_full_modeset(evdi->painter);
+	evdi = crtc->dev->dev_private;
+	notify_mode_changed = crtc_state->active &&
+			   (crtc_state->mode_changed || evdi_painter_needs_full_modeset(evdi->painter));
+	notify_dpms = crtc_state->active_changed || evdi_painter_needs_full_modeset(evdi->painter);
 
 	if (notify_mode_changed)
 		evdi_painter_mode_changed_notify(evdi, &crtc_state->adjusted_mode);
@@ -91,7 +98,6 @@ static void evdi_crtc_atomic_flush(
 
 	evdi_painter_set_vblank(evdi->painter, crtc, crtc_state->event);
 	evdi_painter_send_update_ready_if_needed(evdi->painter);
-	struct evdi_framebuffer *efb = evdi->painter->scanout_fb;
 //	int ret = wait_event_interruptible(evdi->poll_response_ioct_wq, !evdi->poll_done);
 
 //	if (ret < 0) {
@@ -212,7 +218,6 @@ static void evdi_disable_vblank(__always_unused struct drm_crtc *crtc)
 #endif
 
 void evdi_vblank(struct evdi_device *evdi) {
-	struct evdi_framebuffer *efb = evdi->painter->scanout_fb;
 }
 
 int evdi_atomic_helper_page_flip(struct drm_crtc *crtc,
@@ -221,12 +226,16 @@ int evdi_atomic_helper_page_flip(struct drm_crtc *crtc,
 				uint32_t flags,
 				struct drm_modeset_acquire_ctx *ctx)
 {
-	struct drm_device *dev = crtc->dev;
-	struct evdi_device *evdi = dev->dev_private;
-	struct evdi_framebuffer *efb = evdi->painter->scanout_fb;
+	struct drm_device *dev;
+	struct evdi_device *evdi;
+	struct evdi_framebuffer *efb;
+	struct evdi_event *ev_event;
 	int ret;
+	dev = crtc->dev;
+	evdi = dev->dev_private;
+	efb = evdi->painter->scanout_fb;
 
-	struct evdi_event *ev_event = evdi_create_event(evdi, swap_to, &efb->gralloc_buf_id);
+	ev_event = evdi_create_event(evdi, swap_to, &efb->gralloc_buf_id);
 	if (!ev_event)
 		return -ENOMEM;
 

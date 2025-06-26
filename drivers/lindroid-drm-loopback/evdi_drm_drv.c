@@ -11,6 +11,10 @@
  * more details.
  */
 
+#include <linux/slab.h>
+#include <linux/file.h>
+#include <linux/fdtable.h>
+#include <linux/fs.h>
 #include <linux/version.h>
 #if KERNEL_VERSION(5, 16, 0) <= LINUX_VERSION_CODE || defined(EL8) || defined(EL9)
 #include <drm/drm_ioctl.h>
@@ -238,6 +242,7 @@ int evdi_add_buff_callback_ioctl(struct drm_device *drm_dev, void *data,
 	struct evdi_device *evdi = drm_dev->dev_private;
 	struct drm_evdi_add_buff_callabck *cmd = data;
 	struct evdi_event *event;
+	int *buff_id_ptr;
 
 	mutex_lock(&evdi->event_lock);
 	event = idr_find(&evdi->event_idr, cmd->poll_id);
@@ -246,7 +251,7 @@ int evdi_add_buff_callback_ioctl(struct drm_device *drm_dev, void *data,
 	if (!event)
 		return -EINVAL;
 
-	int *buff_id_ptr = kzalloc(sizeof(int), GFP_KERNEL);
+	buff_id_ptr = kzalloc(sizeof(int), GFP_KERNEL);
 	*buff_id_ptr = cmd->buff_id;
 	event->reply_data = buff_id_ptr;
 	event->result = 0;
@@ -256,11 +261,14 @@ int evdi_add_buff_callback_ioctl(struct drm_device *drm_dev, void *data,
 }
 
 int evdi_get_buff_callback_ioctl(struct drm_device *drm_dev, void *data,
-                    struct drm_file *file)
+                     struct drm_file *file)
 {
 	struct evdi_device *evdi = drm_dev->dev_private;
 	struct drm_evdi_get_buff_callabck *cmd = data;
 	struct evdi_event *event;
+	struct evdi_gralloc_buf *gralloc_buf;
+	int *fd_ints;
+	int i;
 
 	mutex_lock(&evdi->event_lock);
 	event = idr_find(&evdi->event_idr, cmd->poll_id);
@@ -269,7 +277,7 @@ int evdi_get_buff_callback_ioctl(struct drm_device *drm_dev, void *data,
 	if (!event)
 		return -EINVAL;
 
-	struct evdi_gralloc_buf *gralloc_buf = kzalloc(sizeof(struct evdi_gralloc_buf), GFP_KERNEL);
+	gralloc_buf = kzalloc(sizeof(struct evdi_gralloc_buf), GFP_KERNEL);
 	gralloc_buf->version = cmd->version;
 	gralloc_buf->numFds = cmd->numFds;
 	gralloc_buf->numInts = cmd->numInts;
@@ -277,9 +285,10 @@ int evdi_get_buff_callback_ioctl(struct drm_device *drm_dev, void *data,
 	gralloc_buf->data_files = kzalloc(sizeof(struct file*)*cmd->numFds, GFP_KERNEL);
 
 	copy_from_user(gralloc_buf->data_ints, cmd->data_ints, sizeof(int) * cmd->numInts);
-	int *fd_ints = kzalloc(sizeof(int)*cmd->numFds, GFP_KERNEL);
+	fd_ints = kzalloc(sizeof(int)*cmd->numFds, GFP_KERNEL);
 	copy_from_user(fd_ints, cmd->fd_ints, sizeof(int) * cmd->numFds);
-	for(int i = 0; i < cmd->numFds; i++) {
+	
+	for (i = 0; i < cmd->numFds; i++) {
 		gralloc_buf->data_files[i] = fget(fd_ints[i]);
 		if (!gralloc_buf->data_files[i]) {
 			printk("evdi_get_buff_callback_ioctl: Failed to open fake fb %d\n", cmd->fd_ints[i]);
@@ -294,7 +303,7 @@ int evdi_get_buff_callback_ioctl(struct drm_device *drm_dev, void *data,
 }
 
 int evdi_destroy_buff_callback_ioctl(struct drm_device *drm_dev, void *data,
-                    struct drm_file *file)
+                     struct drm_file *file)
 {
 	struct evdi_device *evdi = drm_dev->dev_private;
 	struct drm_evdi_add_buff_callabck *cmd = data;
@@ -341,12 +350,14 @@ int evdi_gbm_add_buf_ioctl(struct drm_device *dev, void *data,
 	struct file *memfd_file;
 	struct file *fd_file;
 	int ret;
-	uint32_t handle;
 	int version, numFds, numInts, fd;
 	ssize_t bytes_read;
 	struct evdi_gralloc_buf *add_gralloc_buf;
 	struct evdi_device *evdi = dev->dev_private;
 	struct drm_evdi_gbm_add_buf *cmd = data;
+	struct evdi_event *event;
+	loff_t pos;
+	int i;
 
 	memfd_file = fget(cmd->fd);
 	if (!memfd_file) {
@@ -354,7 +365,7 @@ int evdi_gbm_add_buf_ioctl(struct drm_device *dev, void *data,
 		return -EINVAL;
 	}
 
-	loff_t pos = 0; // Initialize offset
+	pos = 0; /* Initialize offset */
 	bytes_read = kernel_read(memfd_file, &version, sizeof(version), &pos);
 	if (bytes_read != sizeof(version)) {
 		printk("Failed to read version from memfd, bytes_read=%zd\n", bytes_read);
@@ -379,7 +390,7 @@ int evdi_gbm_add_buf_ioctl(struct drm_device *dev, void *data,
 	add_gralloc_buf->data_files = kzalloc(sizeof(struct file*)*numFds, GFP_KERNEL);
 	add_gralloc_buf->memfd_file = memfd_file;
 
-	for(int i = 0; i < numFds; i++) {
+	for (i = 0; i < numFds; i++) {
 		bytes_read = kernel_read(memfd_file, &fd, sizeof(fd), &pos);
 		if (bytes_read != sizeof(fd)) {
 			printk("Failed to read fd from memfd, bytes_read=%zd\n", bytes_read);
@@ -400,7 +411,7 @@ int evdi_gbm_add_buf_ioctl(struct drm_device *dev, void *data,
 		return -EIO;
 	}
 
-	struct evdi_event *event = evdi_create_event(evdi, add_buf, add_gralloc_buf);
+	event = evdi_create_event(evdi, add_buf, add_gralloc_buf);
 	if (!event)
 		return -ENOMEM;
 
@@ -426,8 +437,7 @@ int evdi_gbm_add_buf_ioctl(struct drm_device *dev, void *data,
 	kfree(event);
 	return 0;
 
- err_no_mem:
-	return -ENOMEM;
+ /* err_no_mem: removed unused label */
  err_inval:
 	return -EINVAL;
 }
@@ -440,8 +450,10 @@ int evdi_gbm_get_buf_ioctl(struct drm_device *dev, void *data,
 	struct evdi_gralloc_buf *gralloc_buf_tmp;
 	struct evdi_device *evdi = dev->dev_private;
 	int fd_tmp, ret;
+	struct evdi_event *event;
+	int i;
 
-	struct evdi_event *event = evdi_create_event(evdi, get_buf, &cmd->id);
+	event = evdi_create_event(evdi, get_buf, &cmd->id);
 	if (!event)
 		return -ENOMEM;
 
@@ -464,7 +476,7 @@ int evdi_gbm_get_buf_ioctl(struct drm_device *dev, void *data,
 	gralloc_buf->numInts = gralloc_buf_tmp->numInts;
 	memcpy(&gralloc_buf->data[gralloc_buf->numFds], gralloc_buf_tmp->data_ints, sizeof(int)*gralloc_buf->numInts);
 
-	for(int i = 0; i < gralloc_buf->numFds; i++) {
+	for (i = 0; i < gralloc_buf->numFds; i++) {
 		fd_tmp = get_unused_fd_flags(O_RDWR);
 		fd_install(fd_tmp, gralloc_buf_tmp->data_files[i]);
 		gralloc_buf->data[i] = fd_tmp;
@@ -491,8 +503,9 @@ int evdi_gbm_del_buf_ioctl(struct drm_device *dev, void *data,
 	struct drm_evdi_gbm_del_buff *cmd = data;
 	struct evdi_device *evdi = dev->dev_private;
 	int ret;
+	struct evdi_event *event;
 
-	struct evdi_event *event = evdi_create_event(evdi, destroy_buf, &cmd->id);
+	event = evdi_create_event(evdi, destroy_buf, &cmd->id);
 	if (!event)
 		return -ENOMEM;
 
@@ -560,6 +573,7 @@ int evdi_poll_ioctl(struct drm_device *drm_dev, void *data,
 	int fd, fd_tmp, ret;
 	ssize_t bytes_write;
 	loff_t pos;
+	int i;
 
 	EVDI_CHECKPT();
 
@@ -603,7 +617,7 @@ int evdi_poll_ioctl(struct drm_device *drm_dev, void *data,
 
 			fd_install(fd, add_gralloc_buf->memfd_file);
 
-			for(int i = 0; i < add_gralloc_buf->numFds; i++) {
+			for (i = 0; i < add_gralloc_buf->numFds; i++) {
 				fd_tmp = get_unused_fd_flags(O_RDWR);
 				fd_install(fd_tmp, add_gralloc_buf->data_files[i]);
 				pos = sizeof(int) * (3 + i);
@@ -783,4 +797,3 @@ int evdi_drm_device_remove(struct drm_device *dev)
 	drm_dev_put(dev);
 	return 0;
 }
-
