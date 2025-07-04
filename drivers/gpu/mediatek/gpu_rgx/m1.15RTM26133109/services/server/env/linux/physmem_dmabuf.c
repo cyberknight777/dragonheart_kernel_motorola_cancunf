@@ -168,6 +168,7 @@ typedef struct _PMR_DMA_BUF_DATA_
 	struct dma_buf_attachment *psAttachment;
 	PFN_DESTROY_DMABUF_PMR pfnDestroy;
 	IMG_BOOL bPoisonOnFree;
+	IMG_PID uiOriginPID;
 
 	/* Mapping information. */
 	struct dma_buf_map sMap;
@@ -329,14 +330,14 @@ static PVRSRV_ERROR PMRFinalizeDmaBuf(PMR_IMPL_PRIVDATA pvPriv)
 	{
 		PVRSRVStatsDecrMemAllocStat(PVRSRV_MEM_ALLOC_TYPE_DMA_BUF_ZOMBIE,
 		                            psPrivData->ui32PhysPageCount << PAGE_SHIFT,
-		                            OSGetCurrentClientProcessIDKM());
+		                            psPrivData->uiOriginPID);
 	}
 	else
 #endif
 	{
 		PVRSRVStatsDecrMemAllocStat(PVRSRV_MEM_ALLOC_TYPE_DMA_BUF_IMPORT,
 		                            psPrivData->ui32PhysPageCount << PAGE_SHIFT,
-		                            OSGetCurrentClientProcessIDKM());
+		                            psPrivData->uiOriginPID);
 	}
 #endif
 
@@ -396,10 +397,10 @@ static PVRSRV_ERROR PMRZombifyDmaBufMem(PMR_IMPL_PRIVDATA pvPriv, PMR *psPMR)
 #if defined(PVRSRV_ENABLE_PROCESS_STATS)
 	PVRSRVStatsDecrMemAllocStat(PVRSRV_MEM_ALLOC_TYPE_DMA_BUF_IMPORT,
 	                            psPrivData->ui32PhysPageCount << PAGE_SHIFT,
-	                            OSGetCurrentClientProcessIDKM());
+	                            psPrivData->uiOriginPID);
 	PVRSRVStatsIncrMemAllocStat(PVRSRV_MEM_ALLOC_TYPE_DMA_BUF_ZOMBIE,
 	                            psPrivData->ui32PhysPageCount << PAGE_SHIFT,
-	                            OSGetCurrentClientProcessIDKM());
+	                            psPrivData->uiOriginPID);
 #else
 	PVR_UNREFERENCED_PARAMETER(pvPriv);
 #endif
@@ -649,6 +650,7 @@ PhysmemCreateNewDmaBufBackedPMR(PHYS_HEAP *psHeap,
 	psPrivData->psAttachment = psAttachment;
 	psPrivData->pfnDestroy = pfnDestroy;
 	psPrivData->bPoisonOnFree = bPoisonOnFree;
+	psPrivData->uiOriginPID = OSGetCurrentClientProcessIDKM();
 	psPrivData->ui32VirtPageCount =
 			(ui32NumVirtChunks * uiChunkSize) >> PAGE_SHIFT;
 
@@ -758,7 +760,7 @@ PhysmemCreateNewDmaBufBackedPMR(PHYS_HEAP *psHeap,
 #if defined(PVRSRV_ENABLE_PROCESS_STATS)
 	PVRSRVStatsIncrMemAllocStat(PVRSRV_MEM_ALLOC_TYPE_DMA_BUF_IMPORT,
 	                            psPrivData->ui32PhysPageCount << PAGE_SHIFT,
-	                            OSGetCurrentClientProcessIDKM());
+	                            psPrivData->uiOriginPID);
 #endif
 
 		uiPMRFlags = (PMR_FLAGS_T)(uiFlags & PVRSRV_MEMALLOCFLAGS_PMRFLAGSMASK);
@@ -879,7 +881,7 @@ PhysmemCreateNewDmaBufBackedPMR(PHYS_HEAP *psHeap,
 #if defined(PVRSRV_ENABLE_PROCESS_STATS)
 	PVRSRVStatsIncrMemAllocStat(PVRSRV_MEM_ALLOC_TYPE_DMA_BUF_IMPORT,
 	                            psPrivData->ui32PhysPageCount << PAGE_SHIFT,
-	                            OSGetCurrentClientProcessIDKM());
+	                            psPrivData->uiOriginPID);
 #endif
 
 	uiPMRFlags = (PMR_FLAGS_T)(uiFlags & PVRSRV_MEMALLOCFLAGS_PMRFLAGSMASK);
@@ -1327,10 +1329,10 @@ PhysmemImportSparseDmaBuf(CONNECTION_DATA *psConnection,
 			{
 				PVRSRVStatsIncrMemAllocStat(PVRSRV_MEM_ALLOC_TYPE_DMA_BUF_IMPORT,
 				                            psPrivData->ui32PhysPageCount << PAGE_SHIFT,
-				                            OSGetCurrentClientProcessIDKM());
+				                            psPrivData->uiOriginPID);
 				PVRSRVStatsDecrMemAllocStat(PVRSRV_MEM_ALLOC_TYPE_DMA_BUF_ZOMBIE,
 				                            psPrivData->ui32PhysPageCount << PAGE_SHIFT,
-				                            OSGetCurrentClientProcessIDKM());
+				                            psPrivData->uiOriginPID);
 			}
 #endif
 
