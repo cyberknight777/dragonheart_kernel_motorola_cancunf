@@ -521,9 +521,11 @@ static int ccmni_open(struct net_device *dev)
 		ccmni_ctl->ccci_ops->md_ability,
 		dev->features, gro_flush_timer, ccmni->flt_cnt);
 
+#if IS_ENABLED(CONFIG_MTK_NET_RPS)
 	if (s_call_times == 0)
 		set_ccmni_rps(0x70);
 	s_call_times++;
+#endif
 
 	return 0;
 }
