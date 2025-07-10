@@ -46,6 +46,7 @@ int32_t kalCheckTputLoad(IN struct ADAPTER *prAdapter,
 			 IN int32_t i4Pending,
 			 IN uint32_t u4Used)
 {
+#if CFG_SUPPORT_CPU_BOOST
 	uint32_t pendingTh =
 		CFG_TX_STOP_NETIF_PER_QUEUE_THRESHOLD *
 		prAdapter->rWifiVar.u4PerfMonPendingTh / 100;
@@ -64,10 +65,14 @@ int32_t kalCheckTputLoad(IN struct ADAPTER *prAdapter,
 	       i4Pending >= pendingTh &&
 	       u4Used >= usedTh ?
 	       TRUE : FALSE;
+#else
+	return -1;
+#endif
 }
 
 void kalSetTaskUtilMinPct(IN int pid, IN unsigned int min)
 {
+#if CFG_SUPPORT_CPU_BOOST
 	int ret = 0;
 	unsigned int blc_1024;
 	struct task_struct *p;
@@ -105,6 +110,7 @@ void kalSetTaskUtilMinPct(IN int pid, IN unsigned int min)
 		ret = sched_setattr(p, &attr);
 		put_task_struct(p);
 	}
+#endif
 }
 
 static LIST_HEAD(wlan_policy_list);
@@ -115,6 +121,7 @@ struct wlan_policy {
 
 void kalSetCpuFreq(IN int32_t freq)
 {
+#if CFG_SUPPORT_CPU_BOOST
 	int cpu, ret;
 	struct cpufreq_policy *policy;
 	struct wlan_policy *wReq;
@@ -146,6 +153,7 @@ void kalSetCpuFreq(IN int32_t freq)
 	list_for_each_entry(wReq, &wlan_policy_list, list) {
 		freq_qos_update_request(&wReq->qos_req, freq);
 	}
+#endif
 }
 
 void kalSetDramBoost(IN struct ADAPTER *prAdapter, IN u_int8_t onoff)
@@ -157,6 +165,7 @@ int32_t kalBoostCpu(IN struct ADAPTER *prAdapter,
 		    IN uint32_t u4TarPerfLevel,
 		    IN uint32_t u4BoostCpuTh)
 {
+#if CFG_SUPPORT_CPU_BOOST
 	struct GLUE_INFO *prGlueInfo = NULL;
 	int32_t i4Freq = -1;
 	static u_int8_t fgRequested = ENUM_CPU_BOOST_STATUS_INIT;
@@ -206,6 +215,9 @@ int32_t kalBoostCpu(IN struct ADAPTER *prAdapter,
 	kalTraceInt(fgRequested == ENUM_CPU_BOOST_STATUS_START, "kalBoostCpu");
 
 	return 0;
+#else
+	return -1;
+#endif /* CFG_SUPPORT_CPU_BOOST */
 }
 
 #ifdef CONFIG_MTK_EMI
