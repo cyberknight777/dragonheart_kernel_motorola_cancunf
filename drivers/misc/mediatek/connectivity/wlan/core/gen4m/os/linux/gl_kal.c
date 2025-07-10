@@ -7993,8 +7993,10 @@ inline int32_t kalPerMonInit(IN struct GLUE_INFO
 #if CFG_SUPPORT_PERF_IND
 	kalPerfIndReset(prGlueInfo->prAdapter);
 #endif
+#if IS_ENABLED(CONFIG_MTK_NET_RPS)
 	/* enable rps on all cpu cores */
 	kalSetRpsMap(prGlueInfo, 0xff);
+#endif
 	KAL_SET_BIT(PERF_MON_INIT_BIT, prPerMonitor->ulPerfMonFlag);
 	DBGLOG(SW4, INFO, "exit %s\n", __func__);
 	return 0;
@@ -8650,6 +8652,7 @@ int32_t __weak kalCheckVcoreBoost(IN struct ADAPTER *prAdapter,
 	return FALSE;
 }
 
+#if IS_ENABLED(CONFIG_MTK_NET_RPS)
 /* mimic store_rps_map as net-sysfs.c does */
 int wlan_set_rps_map(struct netdev_rx_queue *queue, unsigned long rps_value)
 {
@@ -8723,6 +8726,7 @@ void kalSetRpsMap(IN struct GLUE_INFO *glue, IN unsigned long value)
 		}
 	}
 }
+#endif
 
 int32_t kalPerMonSetForceEnableFlag(uint8_t uFlag)
 {
