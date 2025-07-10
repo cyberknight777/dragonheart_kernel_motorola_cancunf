@@ -1718,7 +1718,9 @@ uint32_t kalGetLittleCpuBoostThreshold(void);
 int32_t kalCheckVcoreBoost(IN struct ADAPTER *prAdapter, IN uint8_t uBssIndex);
 uint32_t kalGetEmiMetOffset(void);
 void kalSetEmiMetOffset(uint32_t newEmiMetOffset);
+#if IS_ENABLED(CONFIG_MTK_NET_RPS)
 void kalSetRpsMap(IN struct GLUE_INFO *glue, IN unsigned long value);
+#endif
 extern int set_task_util_min_pct(pid_t pid, unsigned int min);
 
 #if CFG_MTK_ANDROID_EMI
