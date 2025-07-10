@@ -1688,7 +1688,9 @@ int32_t kalCheckTputLoad(IN struct ADAPTER *prAdapter,
 			 IN uint32_t u4TarPerfLevel,
 			 IN int32_t i4Pending,
 			 IN uint32_t u4Used);
+#if IS_ENABLED(CONFIG_MTK_NET_RPS)
 void kalSetRpsMap(IN struct GLUE_INFO *glue, IN unsigned long value);
+#endif
 #if CFG_MTK_ANDROID_EMI
 void kalSetEmiMpuProtection(phys_addr_t emiPhyBase, uint32_t offset,
 			    uint32_t size, bool enable);
