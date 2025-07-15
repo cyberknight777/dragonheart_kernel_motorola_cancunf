@@ -182,6 +182,10 @@ struct _RGX_FREELIST_ {
 	/* FW data structures */
 	DEVMEM_MEMDESC			*psFWFreelistMemDesc;
 	RGXFWIF_DEV_VIRTADDR	sFreeListFWDevVAddr;
+
+	IMG_UINT32				uiStillReferencedRetryCount;
+	IMG_UINT32				uiStillReferencedRetryCountCT;
+	IMG_UINT32				uiFWRequestCleanupRetryCount;
 };
 
 struct _RGX_PMR_NODE_ {
