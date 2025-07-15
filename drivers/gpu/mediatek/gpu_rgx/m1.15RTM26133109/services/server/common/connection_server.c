@@ -379,7 +379,10 @@ void PVRSRVCommonConnectionDisconnect(void *pvDataPtr)
 		/* Defer the release of the connection data */
 		psConnectionData->sCleanupThreadFn.pfnFree = _CleanupThreadPurgeConnectionData;
 		psConnectionData->sCleanupThreadFn.pvData = psConnectionData;
-		psConnectionData->sCleanupThreadFn.bDependsOnHW = IMG_FALSE;
+		/* Some resources in HANDLE_BASE may need FW idle confirmation
+		 * hence setting to TRUE to use the global EO for retries which is
+		 * signalled by the device MISR */
+		psConnectionData->sCleanupThreadFn.bDependsOnHW = IMG_TRUE;
 		psConnectionData->sCleanupThreadFn.psDevNode = psDevNode;
 		CLEANUP_THREAD_SET_RETRY_TIMEOUT(&psConnectionData->sCleanupThreadFn,
 		                                 IMG_UINT32_C(300000)); /* 5 min. */
