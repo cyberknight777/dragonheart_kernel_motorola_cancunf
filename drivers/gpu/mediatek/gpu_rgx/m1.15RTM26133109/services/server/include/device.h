@@ -464,6 +464,7 @@ typedef struct _PVRSRV_DEVICE_NODE_
 	IMG_HANDLE				hHtbDbgReqNotify;
 	IMG_HANDLE				hAppHintDbgReqNotify;
 	IMG_HANDLE				hThreadsDbgReqNotify;
+	IMG_HANDLE				hFreeListStateDbgReqNotify;
 
 	PVRSRV_DEF_PAGE			sDummyPage;
 	PVRSRV_DEF_PAGE			sDevZeroPage;
