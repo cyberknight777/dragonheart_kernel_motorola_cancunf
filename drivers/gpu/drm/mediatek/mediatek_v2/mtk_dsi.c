@@ -9629,9 +9629,7 @@ static ssize_t sysfs_hbm_read(struct device *dev,
 	struct device_attribute *attr, char *buf)
 {
 	struct mtk_dsi *dsi = dev_get_drvdata(dev);
-	struct drm_crtc *crtc = dsi->encoder.crtc;
-	bool hbm = panel_is_hbm_on(crtc);
-	return scnprintf(buf, PAGE_SIZE, "%d\n", hbm);
+	return scnprintf(buf, PAGE_SIZE, "%d\n", dsi->hbm_mode);
 }
 
 static ssize_t sysfs_hbm_write(struct device *dev,
@@ -9646,8 +9644,13 @@ static ssize_t sysfs_hbm_write(struct device *dev,
 	if (ret)
 		return ret;
 
+	if (val > 1)
+		return -EINVAL;
+
+	dsi->hbm_mode = val;
+
 	param_info.param_idx = PARAM_HBM;
-	param_info.value = val;
+	param_info.value = dsi->hbm_mode;
 
 	ret = mtk_dsi_set_panel_feature(crtc, &param_info);
 	if (ret)
