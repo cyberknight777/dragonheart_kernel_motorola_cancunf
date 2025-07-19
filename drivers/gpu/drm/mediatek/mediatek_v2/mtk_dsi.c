@@ -9599,6 +9599,32 @@ static int mtk_dsi_io_cmd(struct mtk_ddp_comp *comp, struct cmdq_pkt *handle,
 	return 0;
 }
 
+static int mtk_dsi_set_panel_feature(struct drm_crtc *crtc, void *data)
+{
+	struct panel_param_info *param_info = data;
+	struct mtk_panel_params *panel_ext = mtk_drm_get_lcm_ext_params(crtc);
+	int ret = 0;
+	unsigned int bl_level = 0;
+
+	if (panel_ext->check_panel_feature) {
+		if (!mtk_drm_check_pane_feature_valid(crtc, *param_info)) return ret;
+	}
+
+	DDPMSG("%s: set param_idx %d to %d\n", __func__, param_info->param_idx, param_info->value);
+
+	switch (param_info->param_idx) {
+		case PARAM_HBM:
+			bl_level = (param_info->value) ? BRIGHTNESS_HBM_ON : BRIGHTNESS_HBM_OFF;
+			ret = mtk_drm_crtc_set_panel_feature(crtc, *param_info);
+			if (!ret) mtk_drm_setbacklight(crtc, bl_level);
+			break;
+		default:
+			ret = mtk_drm_crtc_set_panel_feature(crtc, *param_info);
+			break;
+	}
+	return ret;
+}
+
 static struct attribute *mtk_dsi_attrs[] = {
 	NULL,
 };
