@@ -818,16 +818,16 @@ static int panel_cabc_set_cmdq(struct tianma *ctx, void *dsi, dcs_grp_write_gce 
 
 	switch (cabc_mode) {
 		case 0:
+			para_count = sizeof(panel_cabc_disable) / sizeof(struct mtk_panel_para_table);
+			pTable = panel_cabc_disable;
+			break;
+		case 1:
 			para_count = sizeof(panel_cabc_ui) / sizeof(struct mtk_panel_para_table);
 			pTable = panel_cabc_ui;
 			break;
-		case 1:
+		case 2:
 			para_count = sizeof(panel_cabc_mv) / sizeof(struct mtk_panel_para_table);
 			pTable = panel_cabc_mv;
-			break;
-		case 2:
-			para_count = sizeof(panel_cabc_disable) / sizeof(struct mtk_panel_para_table);
-			pTable = panel_cabc_disable;
 			break;
 		default:
 			break;
