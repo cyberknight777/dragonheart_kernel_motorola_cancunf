@@ -357,5 +357,6 @@ int copy_mml_submit(struct mml_submit *src, struct mml_submit *dst);
 void **mtk_drm_disp_sec_cb_init(void);
 void **mtk_drm_disp_mtee_cb_init(void);
 bool mtk_disp_is_svp_on_mtee(void);
+bool mtk_drm_check_pane_feature_valid(struct drm_crtc *crtc, struct panel_param_info param_info);
 
 #endif /* MTK_DRM_DRV_H */
