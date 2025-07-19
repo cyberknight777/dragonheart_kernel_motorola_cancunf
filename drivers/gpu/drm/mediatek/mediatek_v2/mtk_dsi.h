@@ -138,6 +138,7 @@ struct mtk_dsi {
 	unsigned int prop_val[CONNECTOR_PROP_MAX];
 	bool pending_switch;
 	int hbm_mode;
+	int cabc_mode;
 };
 
 enum dsi_porch_type;
