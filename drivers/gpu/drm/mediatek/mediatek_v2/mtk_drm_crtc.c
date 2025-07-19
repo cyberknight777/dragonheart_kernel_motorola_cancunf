@@ -876,7 +876,7 @@ static void bl_cmdq_cb(struct cmdq_cb_data data)
 	kfree(cb_data);
 }
 
-bool panel_is_hbm_on(struct drm_crtc *crtc)
+static bool panel_is_hbm_on(struct drm_crtc *crtc)
 {
 	int32_t hbm_mode = 0;
 
