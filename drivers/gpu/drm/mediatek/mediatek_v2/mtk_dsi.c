@@ -9625,7 +9625,43 @@ static int mtk_dsi_set_panel_feature(struct drm_crtc *crtc, void *data)
 	return ret;
 }
 
+static ssize_t sysfs_hbm_read(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	struct mtk_dsi *dsi = dev_get_drvdata(dev);
+	struct drm_crtc *crtc = dsi->encoder.crtc;
+	bool hbm = panel_is_hbm_on(crtc);
+	return scnprintf(buf, PAGE_SIZE, "%d\n", hbm);
+}
+
+static ssize_t sysfs_hbm_write(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct mtk_dsi *dsi = dev_get_drvdata(dev);
+	struct drm_crtc *crtc = dsi->encoder.crtc;
+	struct panel_param_info param_info;
+	int val,ret = 0;
+
+	ret = kstrtoint(buf, 10, &val);
+	if (ret)
+		return ret;
+
+	param_info.param_idx = PARAM_HBM;
+	param_info.value = val;
+
+	ret = mtk_dsi_set_panel_feature(crtc, &param_info);
+	if (ret)
+		return ret;
+
+	return count;
+}
+
+static DEVICE_ATTR(hbm, 0644,
+	sysfs_hbm_read,
+	sysfs_hbm_write);
+
 static struct attribute *mtk_dsi_attrs[] = {
+	&dev_attr_hbm.attr,
 	NULL,
 };
 
