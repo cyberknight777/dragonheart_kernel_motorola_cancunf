@@ -9659,12 +9659,51 @@ static ssize_t sysfs_hbm_write(struct device *dev,
 	return count;
 }
 
+static ssize_t sysfs_cabc_read(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	struct mtk_dsi *dsi = dev_get_drvdata(dev);
+	return scnprintf(buf, PAGE_SIZE, "%d\n", dsi->cabc_mode);
+}
+
+static ssize_t sysfs_cabc_write(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct mtk_dsi *dsi = dev_get_drvdata(dev);
+	struct drm_crtc *crtc = dsi->encoder.crtc;
+	struct panel_param_info param_info;
+	int val,ret = 0;
+
+	ret = kstrtoint(buf, 10, &val);
+	if (ret)
+		return ret;
+
+	if (val > 2)
+		return -EINVAL;
+
+	dsi->cabc_mode = val;
+
+	param_info.param_idx = PARAM_CABC;
+	param_info.value = dsi->cabc_mode;
+
+	ret = mtk_dsi_set_panel_feature(crtc, &param_info);
+	if (ret)
+		return ret;
+
+	return count;
+}
+
 static DEVICE_ATTR(hbm, 0644,
 	sysfs_hbm_read,
 	sysfs_hbm_write);
 
+static DEVICE_ATTR(cabc, 0644,
+	sysfs_cabc_read,
+	sysfs_cabc_write);
+
 static struct attribute *mtk_dsi_attrs[] = {
 	&dev_attr_hbm.attr,
+	&dev_attr_cabc.attr,
 	NULL,
 };
 
