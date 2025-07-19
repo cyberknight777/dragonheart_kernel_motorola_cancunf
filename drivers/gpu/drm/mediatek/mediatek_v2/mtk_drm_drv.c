@@ -5375,7 +5375,7 @@ int mtk_drm_fm_lcm_auto_test(struct drm_device *dev, void *data,
 }
 #endif
 
-static bool mtk_drm_check_pane_feature_valid(struct drm_crtc *crtc, struct panel_param_info param_info)
+bool mtk_drm_check_pane_feature_valid(struct drm_crtc *crtc, struct panel_param_info param_info)
 {
 	uint32_t param_value = 0;
 	bool  ret = false;
