@@ -275,9 +275,13 @@ TLServerCloseStreamKM(PTL_STREAM_DESC psSD)
 
 	PVR_ASSERT(psSD);
 
+	/* Acquire TL_GLOBAL_DATA lock as the following TLRemoveDescAndTryFreeStreamNode
+	 * call will update the TL_SNODE's descriptor value */
+	OSLockAcquire (psGD->hTLGDLock);
 	/* Quick exit if there are no streams */
 	if (psGD->psHead == NULL)
 	{
+		OSLockRelease (psGD->hTLGDLock);
 		PVR_DPF_RETURN_RC(PVRSRV_ERROR_HANDLE_NOT_FOUND);
 	}
 
@@ -285,6 +289,7 @@ TLServerCloseStreamKM(PTL_STREAM_DESC psSD)
 	psNode = TLFindStreamNodeByDesc(psSD);
 	if ((psNode == NULL) || (psNode != psSD->psNode))
 	{
+		OSLockRelease (psGD->hTLGDLock);
 		PVR_DPF_RETURN_RC(PVRSRV_ERROR_HANDLE_NOT_FOUND);
 	}
 
@@ -294,10 +299,6 @@ TLServerCloseStreamKM(PTL_STREAM_DESC psSD)
 	/* Save the stream's reference in-case its destruction is required after this
 	 * client is removed */
 	psStream = psNode->psStream;
-
-	/* Acquire TL_GLOBAL_DATA lock as the following TLRemoveDescAndTryFreeStreamNode
-	 * call will update the TL_SNODE's descriptor value */
-	OSLockAcquire (psGD->hTLGDLock);
 
 	/* Close event handle because event object list might be destroyed in
 	 * TLUnrefDescAndTryFreeStreamNode(). */
@@ -366,20 +367,22 @@ TLServerReserveStreamKM(PTL_STREAM_DESC psSD,
 
 	PVR_ASSERT(psSD);
 
+	/* Acquire the global lock. We have to be sure that no one modifies
+	 * the list while we are looking for our stream. */
+	OSLockAcquire(psGD->hTLGDLock);
 	if (!(psSD->ui32Flags & PVRSRV_STREAM_FLAG_OPEN_WO))
 	{
+		OSLockRelease(psGD->hTLGDLock);
 		PVR_DPF_RETURN_RC(PVRSRV_ERROR_INVALID_PARAMS);
 	}
 
 	/* Quick exit if there are no streams */
 	if (psGD->psHead == NULL)
 	{
+		OSLockRelease(psGD->hTLGDLock);
 		PVR_DPF_RETURN_RC(PVRSRV_ERROR_STREAM_ERROR);
 	}
 
-	/* Acquire the global lock. We have to be sure that no one modifies
-	 * the list while we are looking for our stream. */
-	OSLockAcquire(psGD->hTLGDLock);
 	/* Check stream still valid */
 	psNode = TLFindAndGetStreamNodeByDesc(psSD);
 	OSLockRelease(psGD->hTLGDLock);
@@ -437,20 +440,22 @@ TLServerCommitStreamKM(PTL_STREAM_DESC psSD,
 
 	PVR_ASSERT(psSD);
 
+	/* Acquire the global lock. We have to be sure that no one modifies
+	 * the list while we are looking for our stream. */
+	OSLockAcquire(psGD->hTLGDLock);
 	if (!(psSD->ui32Flags & PVRSRV_STREAM_FLAG_OPEN_WO))
 	{
+		OSLockRelease(psGD->hTLGDLock);
 		PVR_DPF_RETURN_RC(PVRSRV_ERROR_INVALID_PARAMS);
 	}
 
 	/* Quick exit if there are no streams */
 	if (psGD->psHead == NULL)
 	{
+		OSLockRelease(psGD->hTLGDLock);
 		PVR_DPF_RETURN_RC(PVRSRV_ERROR_STREAM_ERROR);
 	}
 
-	/* Acquire the global lock. We have to be sure that no one modifies
-	 * the list while we are looking for our stream. */
-	OSLockAcquire(psGD->hTLGDLock);
 	/* Check stream still valid */
 	psNode = TLFindAndGetStreamNodeByDesc(psSD);
 	OSLockRelease(psGD->hTLGDLock);
@@ -480,6 +485,7 @@ TLServerDiscoverStreamsKM(const IMG_CHAR *pszNamePattern,
                           IMG_CHAR *pszStreams,
                           IMG_UINT32 *pui32NumFound)
 {
+	TL_GLOBAL_DATA*	psGD = TLGGD();
 	PTL_SNODE psNode = NULL;
 	IMG_CHAR (*paszStreams)[PRVSRVTL_MAX_STREAM_NAME_SIZE] =
 			(IMG_CHAR (*)[PRVSRVTL_MAX_STREAM_NAME_SIZE]) (void *)pszStreams;
@@ -490,14 +496,14 @@ TLServerDiscoverStreamsKM(const IMG_CHAR *pszNamePattern,
 	if (ui32Size % PRVSRVTL_MAX_STREAM_NAME_SIZE != 0)
 		return PVRSRV_ERROR_INVALID_PARAMS;
 
+	OSLockAcquire(psGD->hTLGDLock);
 	/* Quick exit if there are no streams */
 	if (TLGGD()->psHead == NULL)
 	{
+		OSLockRelease(psGD->hTLGDLock);
 		*pui32NumFound = 0;
 		return PVRSRV_OK;
 	}
-
-	OSLockAcquire(TLGGD()->hTLGDLock);
 
 	*pui32NumFound = TLDiscoverStreamNodes(pszNamePattern, paszStreams,
 	                                  ui32Size / PRVSRVTL_MAX_STREAM_NAME_SIZE);
@@ -507,7 +513,7 @@ TLServerDiscoverStreamsKM(const IMG_CHAR *pszNamePattern,
 	if (psNode != NULL)
 		TLStreamReset(psNode->psStream);
 
-	OSLockRelease(TLGGD()->hTLGDLock);
+	OSLockRelease(psGD->hTLGDLock);
 
 	return PVRSRV_OK;
 }
@@ -529,14 +535,20 @@ TLServerAcquireDataKM(PTL_STREAM_DESC psSD,
 
 	TL_COUNTER_INC(psSD->ui32AcquireCount);
 
+	/* Acquire TL_GLOBAL_DATA lock as the following TLRemoveDescAndTryFreeStreamNode
+	 * call will update the TL_SNODE's descriptor value */
+	OSLockAcquire(psGD->hTLGDLock);
 	/* Quick exit if there are no streams */
 	if (psGD->psHead == NULL)
 	{
+		OSLockRelease(psGD->hTLGDLock);
 		PVR_DPF_RETURN_RC(PVRSRV_ERROR_STREAM_ERROR);
 	}
 
 	/* Check stream still valid */
 	psNode = TLFindStreamNodeByDesc(psSD);
+	OSLockRelease(psGD->hTLGDLock);
+
 	if ((psNode == NULL) || (psNode != psSD->psNode))
 	{
 		PVR_DPF_RETURN_RC(PVRSRV_ERROR_HANDLE_NOT_FOUND);
@@ -666,19 +678,25 @@ TLServerReleaseDataKM(PTL_STREAM_DESC psSD,
 
 	PVR_ASSERT(psSD);
 
-	/* Quick exit if there are no streams */
-	if (psGD->psHead == NULL)
-	{
-		PVR_DPF_RETURN_RC(PVRSRV_ERROR_STREAM_ERROR);
-	}
-
 	if ((uiReadLen % PVRSRVTL_PACKET_ALIGNMENT != 0))
 	{
 		PVR_DPF_RETURN_RC(PVRSRV_ERROR_INVALID_PARAMS);
 	}
 
+	/* Acquire TL_GLOBAL_DATA lock as the following TLRemoveDescAndTryFreeStreamNode
+	 * call will update the TL_SNODE's descriptor value */
+	OSLockAcquire(psGD->hTLGDLock);
+	/* Quick exit if there are no streams */
+	if (psGD->psHead == NULL)
+	{
+		OSLockRelease(psGD->hTLGDLock);
+		PVR_DPF_RETURN_RC(PVRSRV_ERROR_STREAM_ERROR);
+	}
+
 	/* Check stream still valid */
 	psNode = TLFindStreamNodeByDesc(psSD);
+	OSLockRelease(psGD->hTLGDLock);
+
 	if ((psNode == NULL) || (psNode != psSD->psNode))
 	{
 		PVR_DPF_RETURN_RC(PVRSRV_ERROR_HANDLE_NOT_FOUND);
@@ -707,18 +725,22 @@ TLServerWriteDataKM(PTL_STREAM_DESC psSD,
 
 	PVR_ASSERT(psSD);
 
+	/* Acquire the global lock. We have to be sure that no one modifies
+	 * the list while we are looking for our stream. */
+	OSLockAcquire(psGD->hTLGDLock);
 	if (!(psSD->ui32Flags & PVRSRV_STREAM_FLAG_OPEN_WO))
 	{
+		OSLockRelease(psGD->hTLGDLock);
 		PVR_DPF_RETURN_RC(PVRSRV_ERROR_INVALID_PARAMS);
 	}
 
 	/* Quick exit if there are no streams */
 	if (psGD->psHead == NULL)
 	{
+		OSLockRelease(psGD->hTLGDLock);
 		PVR_DPF_RETURN_RC(PVRSRV_ERROR_STREAM_ERROR);
 	}
 
-	OSLockAcquire(psGD->hTLGDLock);
 	/* Check stream still valid */
 	psNode = TLFindAndGetStreamNodeByDesc(psSD);
 	OSLockRelease(psGD->hTLGDLock);
