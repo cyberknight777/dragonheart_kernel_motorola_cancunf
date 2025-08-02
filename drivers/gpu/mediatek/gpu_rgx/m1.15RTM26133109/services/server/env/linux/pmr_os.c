@@ -174,6 +174,13 @@ static int MMapVAccess(struct vm_area_struct *ps_vma, unsigned long addr,
 
 	if (write)
 	{
+		if (!BITMASK_HAS(ps_vma->vm_flags, VM_WRITE))
+		{
+			PVR_DPF((PVR_DBG_ERROR, "%s: Attempt to write to read only vma.",
+									__func__));
+			return -EACCES;
+		}
+
 		eError = PMR_WriteBytes(psPMR,
 					(IMG_DEVMEM_OFFSET_T) ulOffset,
 					buf,

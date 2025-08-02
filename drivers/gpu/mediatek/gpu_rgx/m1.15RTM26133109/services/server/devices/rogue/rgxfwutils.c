@@ -819,10 +819,14 @@ static PVRSRV_ERROR _CheckPriority(PVRSRV_RGXDEV_INFO *psDevInfo,
 								   IMG_UINT32 ui32Priority,
 								   RGX_CCB_REQUESTOR_TYPE eRequestor)
 {
+	PVRSRV_ERROR eError = PVRSRV_OK;
+
 	/* Only contexts from a single PID allowed with real time priority (highest priority) */
 	if (ui32Priority == RGX_CTX_PRIORITY_REALTIME)
 	{
 		DLLIST_NODE *psNode, *psNext;
+
+		OSWRLockAcquireRead(psDevInfo->hCommonCtxtListLock);
 
 		dllist_foreach_node(&psDevInfo->sCommonCtxtListHead, psNode, psNext)
 		{
@@ -831,15 +835,28 @@ static PVRSRV_ERROR _CheckPriority(PVRSRV_RGXDEV_INFO *psDevInfo,
 
 			if (psThisContext->ui32Priority == RGX_CTX_PRIORITY_REALTIME &&
 				psThisContext->eRequestor == eRequestor &&
+#if defined(PVRSRV_MAX_REAL_TIME_CONTEXTS) && (PVRSRV_MAX_REAL_TIME_CONTEXTS > 1)
+				(psDevInfo->psDeviceNode->pui32RTContextCount == NULL ||
+				 psDevInfo->psDeviceNode->pui32RTContextCount[eRequestor] >= PVRSRV_MAX_REAL_TIME_CONTEXTS) &&
+#endif
 				RGXGetPIDFromServerMMUContext(psThisContext->psServerMMUContext) != OSGetCurrentClientProcessIDKM())
 			{
-				PVR_LOG(("Only one context with real time priority allowed"));
-				return PVRSRV_ERROR_INVALID_PARAMS;
+#if defined(PVRSRV_MAX_REAL_TIME_CONTEXTS) && (PVRSRV_MAX_REAL_TIME_CONTEXTS > 1)
+				PVR_LOG(("Only %d process can have contexts with real time priority", PVRSRV_MAX_REAL_TIME_CONTEXTS));
+#else
+				PVR_LOG(("Only one process can have contexts with real time priority""));
+#endif
+				eError = PVRSRV_ERROR_INVALID_PARAMS;
+				break;
 			}
 		}
+#if defined(PVRSRV_MAX_REAL_TIME_CONTEXTS) && (PVRSRV_MAX_REAL_TIME_CONTEXTS > 1)
+		psDevInfo->psDeviceNode->pui32RTContextCount[eRequestor]++;
+#endif
+		OSWRLockReleaseRead(psDevInfo->hCommonCtxtListLock);
 	}
 
-	return PVRSRV_OK;
+	return eError;
 }
 
 PVRSRV_ERROR FWCommonContextAllocate(CONNECTION_DATA *psConnection,
@@ -1128,6 +1145,12 @@ void FWCommonContextFree(RGX_SERVER_COMMON_CONTEXT *psServerCommonContext)
 	OSWRLockAcquireWrite(psServerCommonContext->psDevInfo->hCommonCtxtListLock);
 	/* Remove the context from the list of all contexts. */
 	dllist_remove_node(&psServerCommonContext->sListNode);
+#if defined(PVRSRV_MAX_REAL_TIME_CONTEXTS) && (PVRSRV_MAX_REAL_TIME_CONTEXTS > 1)
+	if (psServerCommonContext->i32Priority == RGX_CTX_PRIORITY_REALTIME)
+	{
+		psServerCommonContext->psDevInfo->psDeviceNode->pui32RTContextCount[psServerCommonContext->eRequestor]--;
+	}
+#endif
 	OSWRLockReleaseWrite(psServerCommonContext->psDevInfo->hCommonCtxtListLock);
 
 	/*

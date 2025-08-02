@@ -72,7 +72,7 @@ static PVRSRV_ERROR _RGXCreateKickSyncContextpsKickSyncContextIntRelease(void *p
 	return eError;
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXCreateKickSyncContext(IMG_UINT32 ui32DispatchTableEntry,
 				     IMG_UINT8 * psRGXCreateKickSyncContextIN_UI8,
 				     IMG_UINT8 * psRGXCreateKickSyncContextOUT_UI8,
@@ -159,10 +159,10 @@ RGXCreateKickSyncContext_exit:
 		}
 	}
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXCREATEKICKSYNCCONTEXT, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXDestroyKickSyncContext(IMG_UINT32 ui32DispatchTableEntry,
 				      IMG_UINT8 * psRGXDestroyKickSyncContextIN_UI8,
 				      IMG_UINT8 * psRGXDestroyKickSyncContextOUT_UI8,
@@ -200,7 +200,7 @@ PVRSRVBridgeRGXDestroyKickSyncContext(IMG_UINT32 ui32DispatchTableEntry,
 
 RGXDestroyKickSyncContext_exit:
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXDESTROYKICKSYNCCONTEXT, eError);
 }
 
 static_assert(PVRSRV_MAX_DEV_VARS <= IMG_UINT32_MAX,
@@ -208,7 +208,7 @@ static_assert(PVRSRV_MAX_DEV_VARS <= IMG_UINT32_MAX,
 static_assert(PVRSRV_SYNC_NAME_LENGTH <= IMG_UINT32_MAX,
 	      "PVRSRV_SYNC_NAME_LENGTH must not be larger than IMG_UINT32_MAX");
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXKickSync2(IMG_UINT32 ui32DispatchTableEntry,
 			 IMG_UINT8 * psRGXKickSync2IN_UI8,
 			 IMG_UINT8 * psRGXKickSync2OUT_UI8, CONNECTION_DATA * psConnection)
@@ -469,10 +469,10 @@ RGXKickSync2_exit:
 #endif
 		OSFreeMemNoStats(pArrayArgsBuffer);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXKICKSYNC2, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXSetKickSyncContextProperty(IMG_UINT32 ui32DispatchTableEntry,
 					  IMG_UINT8 * psRGXSetKickSyncContextPropertyIN_UI8,
 					  IMG_UINT8 * psRGXSetKickSyncContextPropertyOUT_UI8,
@@ -526,7 +526,7 @@ RGXSetKickSyncContextProperty_exit:
 	/* Release now we have cleaned up look up handles. */
 	UnlockHandle(psConnection->psHandleBase);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXSETKICKSYNCCONTEXTPROPERTY, eError);
 }
 
 /* ***************************************************************************

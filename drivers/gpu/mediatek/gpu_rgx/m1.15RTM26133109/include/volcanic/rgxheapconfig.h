@@ -263,8 +263,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /* 0xF8_0000_0000 - 0xF9_FFFF_FFFF **/
 	/* 992 GiB to 1000 GiB, size 8 GiB : RESERVED ROGUE **/
 
-/* 0xFA_0000_0000 - 0xFF_FFFF_FFFF **/
-	/* 1000 GiB to 1024 GiB, size of 24 GiB : FREE **/
+/* 0xFA_0000_0000 - 0xFA_3FFF_FFFF **/
+	/* 1000 GiB to 1001 GiB, size of 1 GiB : PMMETA_PROTECT_HEAP **/
+	#define RGX_PMMETA_PROTECT_HEAP_BASE        IMG_UINT64_C(0xFA00000000)
+	#define RGX_PMMETA_PROTECT_HEAP_SIZE        RGX_HEAP_SIZE_1GiB
+
+/* 0xFA_4000_000 - 0xFF_FFFF_FFFF **/
+	/* 1001 GiB to 1024 GiB, size of 23 GiB : FREE **/
 
 
 /* 0xFF_FFFF_FFFF ************************************************************/

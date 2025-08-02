@@ -805,7 +805,7 @@ PVRSRVHWOpTimeoutKM(CONNECTION_DATA *psConnection,
 }
 
 
-IMG_INT
+size_t
 DummyBW(IMG_UINT32 ui32DispatchTableEntry,
 		IMG_UINT8 *psBridgeIn,
 		IMG_UINT8 *psBridgeOut,
@@ -1173,6 +1173,7 @@ PVRSRV_ERROR BridgedDispatchKM(CONNECTION_DATA * psConnection,
 	BridgeWrapperFunction pfBridgeHandler;
 	IMG_UINT32   ui32DispatchTableEntry, ui32GroupBoundary;
 	PVRSRV_ERROR err = PVRSRV_OK;
+	size_t       uiOutErrorOffset;
 	PVRSRV_POOL_TOKEN hBridgeBufferPoolToken = NULL;
 	IMG_UINT32 ui32Timestamp = OSClockus();
 #if defined(DEBUG_BRIDGE_KM)
@@ -1311,35 +1312,49 @@ PVRSRV_ERROR BridgedDispatchKM(CONNECTION_DATA * psConnection,
 		PVR_GOTO_WITH_ERROR(err, PVRSRV_ERROR_BRIDGE_EFAULT, unlock_and_return_error);
 	}
 
-	/* pfBridgeHandler functions do not fail and return an IMG_INT.
-	 * The value returned is either 0 or PVRSRV_OK (0).
-	 * In the event this changes an error may be +ve or -ve,
-	 * so try to return something consistent here.
+	/* pfBridgeHandler return an size_t containing the offset to the error code
+	 * in the output buffer.
 	 */
-	if (0 != pfBridgeHandler(ui32DispatchTableEntryIndex,
-						  psBridgeIn,
-						  psBridgeOut,
-						  psConnection)
-		)
-	{
-		PVR_LOG_GOTO_WITH_ERROR("pfBridgeHandler", err, PVRSRV_ERROR_BRIDGE_EPERM, unlock_and_return_error);
-	}
+	uiOutErrorOffset = pfBridgeHandler(ui32DispatchTableEntryIndex,
+							psBridgeIn,
+							psBridgeOut,
+							psConnection);
+
+#if !defined(INTEGRITY_OS)
+	/* The returned offset is expected to be within the range */
+	PVR_ASSERT(uiOutErrorOffset + sizeof(PVRSRV_ERROR) <= psBridgePackageKM->ui32OutBufferSize);
 
 	/*
 	   This should always be true as a.t.m. all bridge calls have to
 	   return an error message, but this could change so we do this
 	   check to be safe.
 	*/
-#if !defined(INTEGRITY_OS)
 	if (psBridgePackageKM->ui32OutBufferSize > 0)
 	{
-		if (CopyToUserWrapper (psConnection,
-						ui32DispatchTableEntryIndex,
-						psBridgePackageKM->pvParamOut,
-						psBridgeOut,
-						psBridgePackageKM->ui32OutBufferSize) != PVRSRV_OK)
+		PVRSRV_ERROR * peHandlerError = (PVRSRV_ERROR *) IMG_OFFSET_ADDR(psBridgeOut, uiOutErrorOffset);
+		if (*peHandlerError != PVRSRV_OK)
 		{
-			PVR_GOTO_WITH_ERROR(err, PVRSRV_ERROR_BRIDGE_EFAULT, unlock_and_return_error);
+			/* Only copy error code to user when pfBridgeHandler fails */
+			if (CopyToUserWrapper (psConnection,
+							ui32DispatchTableEntryIndex,
+							IMG_OFFSET_ADDR_USER(psBridgePackageKM->pvParamOut, uiOutErrorOffset),
+							peHandlerError,
+							sizeof(PVRSRV_ERROR)) != PVRSRV_OK)
+			{
+				PVR_GOTO_WITH_ERROR(err, PVRSRV_ERROR_BRIDGE_EFAULT, unlock_and_return_error);
+			}
+		}
+		else
+		{
+			/* Copy whole output to user when pfBridgeHandler succeeds */
+			if (CopyToUserWrapper (psConnection,
+							ui32DispatchTableEntryIndex,
+							psBridgePackageKM->pvParamOut,
+							psBridgeOut,
+							psBridgePackageKM->ui32OutBufferSize) != PVRSRV_OK)
+			{
+				PVR_GOTO_WITH_ERROR(err, PVRSRV_ERROR_BRIDGE_EFAULT, unlock_and_return_error);
+			}
 		}
 	}
 #endif

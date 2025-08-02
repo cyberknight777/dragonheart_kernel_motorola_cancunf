@@ -248,7 +248,7 @@ static PVRSRV_ERROR _ValidateWithSP(DUMPDEBUG_PRINTF_FUNC *pfnDumpDebugPrintf,
 
 		if (pui32FWCode[i] != ui32Value)
 		{
-			PVR_DUMPDEBUG_LOG("_ValidateWithSP: Mismatch while validating %s at offset 0x%x: CPU 0x%08x (%p), FW 0x%08x (%x)",
+			PVR_DUMPDEBUG_LOG("_ValidateWithSP: Mismatch while validating %s at offset 0x%x: CPU 0x%08x ("IMG_KM_PTR_FMTSPEC"), FW 0x%08x (%x)",
 				 pszDesc,
 				 (i * 4) + ui32StartOffset, pui32FWCode[i], pui32FWCode, ui32Value, ui32FWCodeDevVAAddr);
 			return PVRSRV_ERROR_FW_IMAGE_MISMATCH;
@@ -292,7 +292,7 @@ static PVRSRV_ERROR _ValidateWithDM(DUMPDEBUG_PRINTF_FUNC *pfnDumpDebugPrintf,
 
 		if (pui32FWCode[i] != ui32Value)
 		{
-			PVR_DUMPDEBUG_LOG("%s: Mismatch while validating %s at offset 0x%x: CPU 0x%08x (0x%p), FW 0x%08x (0x%x)",
+			PVR_DUMPDEBUG_LOG("%s: Mismatch while validating %s at offset 0x%x: CPU 0x%08x (0x"IMG_KM_PTR_FMTSPEC"), FW 0x%08x (0x%x)",
 				 __func__, pszDesc,
 				 (i * 4) + ui32StartOffset, pui32FWCode[i], pui32FWCode, ui32Value, ui32FWCodeDevVAAddr);
 
@@ -3456,7 +3456,7 @@ void RGXDebugRequestProcess(DUMPDEBUG_PRINTF_FUNC *pfnDumpDebugPrintf,
 	bRGXPoweredON = (ePowerState == PVRSRV_DEV_POWER_STATE_ON);
 
 	PVR_DUMPDEBUG_LOG("------[ RGX Info ]------");
-	PVR_DUMPDEBUG_LOG("Device Node (Info): %p (%p)", psDevInfo->psDeviceNode, psDevInfo);
+	PVR_DUMPDEBUG_LOG("Device Node (Info): "IMG_KM_PTR_FMTSPEC" ("IMG_KM_PTR_FMTSPEC")", psDevInfo->psDeviceNode, psDevInfo);
 #if defined(MTK_FULL_PORTING)
 	PVR_DUMPDEBUG_LOG("MTK Version String: %s", MTK_DEBUG_VERSION_STR);
 #endif /* MTK_FULL_PORTING */
@@ -3624,7 +3624,7 @@ void RGXDebugRequestProcess(DUMPDEBUG_PRINTF_FUNC *pfnDumpDebugPrintf,
 	{
 
 		PVR_DUMPDEBUG_LOG("------[ RGX registers ]------");
-		PVR_DUMPDEBUG_LOG("RGX Register Base Address (Linear):   0x%p", psDevInfo->pvRegsBaseKM);
+		PVR_DUMPDEBUG_LOG("RGX Register Base Address (Linear):   0x"IMG_KM_PTR_FMTSPEC, psDevInfo->pvRegsBaseKM);
 		PVR_DUMPDEBUG_LOG("RGX Register Base Address (Physical): 0x%08lX", (unsigned long)psDevInfo->sRegsPhysBase.uiAddr);
 
 		if (RGX_IS_FEATURE_VALUE_SUPPORTED(psDevInfo, META))

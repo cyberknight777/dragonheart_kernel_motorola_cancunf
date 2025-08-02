@@ -66,7 +66,7 @@ CopyToUserWrapper(CONNECTION_DATA *psConnection,
                   void *pvSrc,
                   IMG_UINT32 ui32Size);
 
-IMG_INT
+size_t
 DummyBW(IMG_UINT32 ui32DispatchTableEntry,
         IMG_UINT8 *psBridgeIn,
         IMG_UINT8 *psBridgeOut,
@@ -74,7 +74,7 @@ DummyBW(IMG_UINT32 ui32DispatchTableEntry,
 
 typedef PVRSRV_ERROR (*ServerResourceDestroyFunction)(IMG_HANDLE, IMG_HANDLE);
 
-typedef IMG_INT (*BridgeWrapperFunction)(IMG_UINT32 ui32DispatchTableEntry,
+typedef size_t (*BridgeWrapperFunction)(IMG_UINT32 ui32DispatchTableEntry,
 									 IMG_UINT8 *psBridgeIn,
 									 IMG_UINT8 *psBridgeOut,
 									 CONNECTION_DATA *psConnection);

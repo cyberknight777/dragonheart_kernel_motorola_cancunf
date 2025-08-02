@@ -65,7 +65,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Server-side bridge entry points
  */
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXBeginTimerQuery(IMG_UINT32 ui32DispatchTableEntry,
 			       IMG_UINT8 * psRGXBeginTimerQueryIN_UI8,
 			       IMG_UINT8 * psRGXBeginTimerQueryOUT_UI8,
@@ -81,10 +81,10 @@ PVRSRVBridgeRGXBeginTimerQuery(IMG_UINT32 ui32DispatchTableEntry,
 	    PVRSRVRGXBeginTimerQueryKM(psConnection, OSGetDevNode(psConnection),
 				       psRGXBeginTimerQueryIN->ui32QueryId);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXBEGINTIMERQUERY, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXEndTimerQuery(IMG_UINT32 ui32DispatchTableEntry,
 			     IMG_UINT8 * psRGXEndTimerQueryIN_UI8,
 			     IMG_UINT8 * psRGXEndTimerQueryOUT_UI8, CONNECTION_DATA * psConnection)
@@ -99,10 +99,10 @@ PVRSRVBridgeRGXEndTimerQuery(IMG_UINT32 ui32DispatchTableEntry,
 	psRGXEndTimerQueryOUT->eError =
 	    PVRSRVRGXEndTimerQueryKM(psConnection, OSGetDevNode(psConnection));
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXENDTIMERQUERY, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXQueryTimer(IMG_UINT32 ui32DispatchTableEntry,
 			  IMG_UINT8 * psRGXQueryTimerIN_UI8,
 			  IMG_UINT8 * psRGXQueryTimerOUT_UI8, CONNECTION_DATA * psConnection)
@@ -118,7 +118,7 @@ PVRSRVBridgeRGXQueryTimer(IMG_UINT32 ui32DispatchTableEntry,
 				  &psRGXQueryTimerOUT->ui64StartTime,
 				  &psRGXQueryTimerOUT->ui64EndTime);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXQUERYTIMER, eError);
 }
 
 /* ***************************************************************************

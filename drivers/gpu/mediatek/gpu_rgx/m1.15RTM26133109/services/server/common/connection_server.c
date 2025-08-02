@@ -381,8 +381,8 @@ void PVRSRVCommonConnectionDisconnect(void *pvDataPtr)
 		psConnectionData->sCleanupThreadFn.pvData = psConnectionData;
 		psConnectionData->sCleanupThreadFn.bDependsOnHW = IMG_FALSE;
 		psConnectionData->sCleanupThreadFn.psDevNode = psDevNode;
-		CLEANUP_THREAD_SET_RETRY_TIMEOUT(&psConnectionData->sCleanupThreadFn,
-		                                 IMG_UINT32_C(300000)); /* 5 min. */
+		CLEANUP_THREAD_SET_RETRY_COUNT(&psConnectionData->sCleanupThreadFn,
+		                               CLEANUP_THREAD_RETRY_COUNT_DEFAULT);
 		PVRSRVCleanupThreadAddWork(psDevNode, &psConnectionData->sCleanupThreadFn);
 	}
 }

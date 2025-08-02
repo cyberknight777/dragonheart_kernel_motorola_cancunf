@@ -66,7 +66,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Server-side bridge entry points
  */
 
-static IMG_INT
+static size_t
 PVRSRVBridgeSyncRecordRemoveByHandle(IMG_UINT32 ui32DispatchTableEntry,
 				     IMG_UINT8 * psSyncRecordRemoveByHandleIN_UI8,
 				     IMG_UINT8 * psSyncRecordRemoveByHandleOUT_UI8,
@@ -102,7 +102,7 @@ PVRSRVBridgeSyncRecordRemoveByHandle(IMG_UINT32 ui32DispatchTableEntry,
 
 SyncRecordRemoveByHandle_exit:
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_SYNCRECORDREMOVEBYHANDLE, eError);
 }
 
 static PVRSRV_ERROR _SyncRecordAddpshRecordIntRelease(void *pvData)
@@ -115,7 +115,7 @@ static PVRSRV_ERROR _SyncRecordAddpshRecordIntRelease(void *pvData)
 static_assert(PVRSRV_SYNC_NAME_LENGTH <= IMG_UINT32_MAX,
 	      "PVRSRV_SYNC_NAME_LENGTH must not be larger than IMG_UINT32_MAX");
 
-static IMG_INT
+static size_t
 PVRSRVBridgeSyncRecordAdd(IMG_UINT32 ui32DispatchTableEntry,
 			  IMG_UINT8 * psSyncRecordAddIN_UI8,
 			  IMG_UINT8 * psSyncRecordAddOUT_UI8, CONNECTION_DATA * psConnection)
@@ -292,7 +292,7 @@ SyncRecordAdd_exit:
 #endif
 		OSFreeMemNoStats(pArrayArgsBuffer);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_SYNCRECORDADD, eError);
 }
 
 /* ***************************************************************************

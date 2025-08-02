@@ -47,6 +47,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "devicemem.h"
 #include "devicemem_server_utils.h"
 #include "devicemem_pdump.h"
+#include "pvrsrv_memallocflags.h"
 #include "rgxdevice.h"
 #include "rgx_fwif_km.h"
 #include "rgxfwutils.h"
@@ -58,6 +59,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "rgx_memallocflags.h"
 #include "rgx_bvnc_defs_km.h"
 #include "info_page.h"
+#include "rgx_heaps.h"
 
 #if defined(PDUMP)
 #include "sync.h"
@@ -469,6 +471,61 @@ void RGXUnregisterMemoryContext(IMG_HANDLE hPrivData)
 	DevmemFwUnmapAndFree(psDevInfo, psServerMMUContext->psFWMemContextMemDesc);
 
 	OSFreeMem(psServerMMUContext);
+}
+
+IMG_BOOL RGXValidateAddressPermissions(PVRSRV_DEVICE_NODE *psDeviceNode,
+                                       MMU_CONTEXT *psMMUContext,
+                                       IMG_DEV_VIRTADDR sVDevAddr,
+                                       PVRSRV_MEMALLOCFLAGS_T uiFlags)
+{
+	PVRSRV_RGXDEV_INFO *psDevInfo = psDeviceNode->pvDevice;
+
+	/* We need to perform the validation only for application memory context.
+	 * Kernel/Firmware memory context doesn't require it. */
+	if (psDevInfo->psKernelMMUCtx == psMMUContext)
+	{
+		return IMG_TRUE;
+	}
+
+	if (uiFlags & PVRSRV_MEMALLOCFLAG_DEVICE_FLAG(PMMETA_PROTECT))
+	{
+		/* Virtual allocations with the PMMETA_PROTECT flag must only made in
+		 * specific virtual heaps. */
+		if (sVDevAddr.uiAddr != RGX_PMMETA_PROTECT_HEAP_BASE &&
+		    sVDevAddr.uiAddr != RGX_FIRMWARE_HOST_MAIN_HEAP_BASE &&
+		    sVDevAddr.uiAddr != RGX_FIRMWARE_HOST_CONFIG_HEAP_BASE)
+		{
+			PVR_DPF((PVR_DBG_ERROR,
+			         "%s: PMMETA_PROTECT flag set but valid heap was not used.",
+			         __func__));
+			return IMG_FALSE;
+		}
+	}
+	else
+	{
+		/* Allocations without the flag must not be made in the
+		 * PMMETA_PROTECT heap. */
+		if (sVDevAddr.uiAddr == RGX_PMMETA_PROTECT_HEAP_BASE)
+		{
+			PVR_DPF((PVR_DBG_ERROR,
+			         "%s: Attempt to allocate virtual range within "
+			         RGX_PMMETA_PROTECT_HEAP_IDENT " without PMMETA_PROTECT flag",
+			         __func__));
+			return IMG_FALSE;
+		}
+	}
+
+	return IMG_TRUE;
+}
+
+IMG_BOOL RGXValidateExportableFlags(PVRSRV_MEMALLOCFLAGS_T uiFlags)
+{
+	if (uiFlags & PVRSRV_MEMALLOCFLAG_DEVICE_FLAG(PMMETA_PROTECT))
+	{
+		return IMG_FALSE;
+	}
+
+	return IMG_TRUE;
 }
 
 /*

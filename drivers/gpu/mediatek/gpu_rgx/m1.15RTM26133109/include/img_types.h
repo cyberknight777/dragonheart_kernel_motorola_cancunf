@@ -229,6 +229,14 @@ typedef int             IMG_OS_CONNECTION;
 #define IMG_DEVMEM_ALIGN_FMTSPEC "0x%010" IMG_UINT64_FMTSPECX
 #define IMG_DEVMEM_OFFSET_FMTSPEC "0x%010" IMG_UINT64_FMTSPECX
 
+#if defined(__KERNEL__)
+	#if !defined(DEBUG) && defined(__linux__)
+		#define IMG_KM_PTR_FMTSPEC "%pK"
+	#else
+		#define IMG_KM_PTR_FMTSPEC "%p"
+	#endif
+#endif
+
 /* cpu physical address */
 typedef struct
 {

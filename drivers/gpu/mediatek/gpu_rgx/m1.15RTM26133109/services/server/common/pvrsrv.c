@@ -2228,6 +2228,10 @@ PVRSRV_ERROR PVRSRVCommonDeviceCreate(void *pvOSDevice,
 	OSLockCreateNoStats(&psDeviceNode->hValidationLock);
 #endif
 
+#if defined(PVRSRV_MAX_REAL_TIME_CONTEXTS) && (PVRSRV_MAX_REAL_TIME_CONTEXTS > 1)
+	psDeviceNode->pui32RTContextCount = OSAllocZMem(sizeof(IMG_UINT32) * REQ_TYPE_TOTAL_COUNT);
+#endif
+
 	return PVRSRV_OK;
 
 ErrorDecrementDeviceCount:
@@ -2635,6 +2639,10 @@ PVRSRV_ERROR PVRSRVCommonDeviceDestroy(PVRSRV_DEVICE_NODE *psDeviceNode)
 
 	List_PVRSRV_DEVICE_NODE_Remove(psDeviceNode);
 	psPVRSRVData->ui32RegisteredDevices--;
+
+#if defined(PVRSRV_MAX_REAL_TIME_CONTEXTS) && (PVRSRV_MAX_REAL_TIME_CONTEXTS > 1)
+	OSFreeMem(psDeviceNode->pui32RTContextCount);
+#endif
 
 	OSFreeMemNoStats(psDeviceNode);
 

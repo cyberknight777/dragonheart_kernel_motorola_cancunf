@@ -68,7 +68,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Server-side bridge entry points
  */
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXFWDebugSetFWLog(IMG_UINT32 ui32DispatchTableEntry,
 			       IMG_UINT8 * psRGXFWDebugSetFWLogIN_UI8,
 			       IMG_UINT8 * psRGXFWDebugSetFWLogOUT_UI8,
@@ -84,10 +84,10 @@ PVRSRVBridgeRGXFWDebugSetFWLog(IMG_UINT32 ui32DispatchTableEntry,
 	    PVRSRVRGXFWDebugSetFWLogKM(psConnection, OSGetDevNode(psConnection),
 				       psRGXFWDebugSetFWLogIN->ui32RGXFWLogType);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXFWDEBUGSETFWLOG, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXFWDebugDumpFreelistPageList(IMG_UINT32 ui32DispatchTableEntry,
 					   IMG_UINT8 * psRGXFWDebugDumpFreelistPageListIN_UI8,
 					   IMG_UINT8 * psRGXFWDebugDumpFreelistPageListOUT_UI8,
@@ -105,10 +105,10 @@ PVRSRVBridgeRGXFWDebugDumpFreelistPageList(IMG_UINT32 ui32DispatchTableEntry,
 	psRGXFWDebugDumpFreelistPageListOUT->eError =
 	    PVRSRVRGXFWDebugDumpFreelistPageListKM(psConnection, OSGetDevNode(psConnection));
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXFWDEBUGDUMPFREELISTPAGELIST, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXFWDebugSetHCSDeadline(IMG_UINT32 ui32DispatchTableEntry,
 				     IMG_UINT8 * psRGXFWDebugSetHCSDeadlineIN_UI8,
 				     IMG_UINT8 * psRGXFWDebugSetHCSDeadlineOUT_UI8,
@@ -125,10 +125,10 @@ PVRSRVBridgeRGXFWDebugSetHCSDeadline(IMG_UINT32 ui32DispatchTableEntry,
 	    PVRSRVRGXFWDebugSetHCSDeadlineKM(psConnection, OSGetDevNode(psConnection),
 					     psRGXFWDebugSetHCSDeadlineIN->ui32RGXHCSDeadline);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXFWDEBUGSETHCSDEADLINE, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXFWDebugSetOSidPriority(IMG_UINT32 ui32DispatchTableEntry,
 				      IMG_UINT8 * psRGXFWDebugSetOSidPriorityIN_UI8,
 				      IMG_UINT8 * psRGXFWDebugSetOSidPriorityOUT_UI8,
@@ -146,10 +146,10 @@ PVRSRVBridgeRGXFWDebugSetOSidPriority(IMG_UINT32 ui32DispatchTableEntry,
 					      psRGXFWDebugSetOSidPriorityIN->ui32OSid,
 					      psRGXFWDebugSetOSidPriorityIN->ui32Priority);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXFWDEBUGSETOSIDPRIORITY, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXFWDebugSetOSNewOnlineState(IMG_UINT32 ui32DispatchTableEntry,
 					  IMG_UINT8 * psRGXFWDebugSetOSNewOnlineStateIN_UI8,
 					  IMG_UINT8 * psRGXFWDebugSetOSNewOnlineStateOUT_UI8,
@@ -168,10 +168,10 @@ PVRSRVBridgeRGXFWDebugSetOSNewOnlineState(IMG_UINT32 ui32DispatchTableEntry,
 						  psRGXFWDebugSetOSNewOnlineStateIN->
 						  ui32OSNewState);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXFWDEBUGSETOSNEWONLINESTATE, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXFWDebugPHRConfigure(IMG_UINT32 ui32DispatchTableEntry,
 				   IMG_UINT8 * psRGXFWDebugPHRConfigureIN_UI8,
 				   IMG_UINT8 * psRGXFWDebugPHRConfigureOUT_UI8,
@@ -188,10 +188,10 @@ PVRSRVBridgeRGXFWDebugPHRConfigure(IMG_UINT32 ui32DispatchTableEntry,
 	    PVRSRVRGXFWDebugPHRConfigureKM(psConnection, OSGetDevNode(psConnection),
 					   psRGXFWDebugPHRConfigureIN->ui32ui32PHRMode);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXFWDEBUGPHRCONFIGURE, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXFWDebugWdgConfigure(IMG_UINT32 ui32DispatchTableEntry,
 				   IMG_UINT8 * psRGXFWDebugWdgConfigureIN_UI8,
 				   IMG_UINT8 * psRGXFWDebugWdgConfigureOUT_UI8,
@@ -208,10 +208,10 @@ PVRSRVBridgeRGXFWDebugWdgConfigure(IMG_UINT32 ui32DispatchTableEntry,
 	    PVRSRVRGXFWDebugWdgConfigureKM(psConnection, OSGetDevNode(psConnection),
 					   psRGXFWDebugWdgConfigureIN->ui32ui32WdgPeriodUs);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXFWDEBUGWDGCONFIGURE, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXCurrentTime(IMG_UINT32 ui32DispatchTableEntry,
 			   IMG_UINT8 * psRGXCurrentTimeIN_UI8,
 			   IMG_UINT8 * psRGXCurrentTimeOUT_UI8, CONNECTION_DATA * psConnection)
@@ -227,7 +227,7 @@ PVRSRVBridgeRGXCurrentTime(IMG_UINT32 ui32DispatchTableEntry,
 	    PVRSRVRGXCurrentTime(psConnection, OSGetDevNode(psConnection),
 				 &psRGXCurrentTimeOUT->ui64Time);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXCURRENTTIME, eError);
 }
 
 /* ***************************************************************************

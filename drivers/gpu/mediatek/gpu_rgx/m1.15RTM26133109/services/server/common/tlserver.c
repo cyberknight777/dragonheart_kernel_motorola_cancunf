@@ -329,8 +329,6 @@ TLServerCloseStreamKM(PTL_STREAM_DESC psSD)
 	PVR_ASSERT(psGD->uiClientCnt > 0);
 	psGD->uiClientCnt--;
 
-	OSLockRelease (psGD->hTLGDLock);
-
 	/* Destroy the stream if its TL_SNODE was removed from TL_GLOBAL_DATA */
 	if (bDestroyStream)
 	{
@@ -346,6 +344,8 @@ TLServerCloseStreamKM(PTL_STREAM_DESC psSD)
 		/* Free the stream descriptor object */
 		OSFreeMem(psSD);
 	}
+
+	OSLockRelease (psGD->hTLGDLock);
 
 	PVR_DPF_RETURN_RC(eError);
 }

@@ -1424,6 +1424,13 @@ PMRLocalImportPMR(PMR *psPMR,
 	return PVRSRV_OK;
 }
 
+#if defined(PVRSRV_ENABLE_GPU_MEMORY_INFO)
+IMG_UINT64 PMRGetSerialNum(PMR *psPMR)
+{
+	return psPMR != NULL ? psPMR->uiSerialNum : (IMG_UINT64) -1ULL;
+}
+#endif
+
 PVRSRV_ERROR
 PMRGetUID(PMR *psPMR,
           IMG_UINT64 *pui64UID)
@@ -2244,6 +2251,11 @@ PMRMMapPMR(PMR *psPMR, PMR_MMAP_DATA pOSMMapData, PVRSRV_MEMALLOCFLAGS_T uiFlags
 	                    !PVRSRV_CHECK_CPU_WRITEABLE(uiFlags),
 	                    PVRSRV_ERROR_PMR_NOT_PERMITTED);
 
+	/* if readable mapping is requested on non-readable PMR then fail */
+	PVR_RETURN_IF_FALSE(PVRSRV_CHECK_CPU_READABLE(psPMR->uiFlags) ||
+	                    !PVRSRV_CHECK_CPU_READABLE(uiFlags),
+	                    PVRSRV_ERROR_PMR_NOT_PERMITTED);
+
 	if (psPMR->psFuncTab->pfnMMap)
 	{
 		return psPMR->psFuncTab->pfnMMap(psPMR->pvFlavourData, psPMR, pOSMMapData);
@@ -2604,6 +2616,19 @@ PMR_GetRefCount(const PMR *psPMR)
 {
 	PVR_ASSERT(psPMR != NULL);
 	return OSAtomicRead(&psPMR->iRefCount);
+}
+
+PVRSRV_ERROR
+PMR_IsExportable(const PMR *psPMR)
+{
+	PVR_ASSERT(psPMR != NULL);
+
+	if (!PMR_DeviceNode(psPMR)->pfnValidateExportableFlags(psPMR->uiFlags))
+	{
+		return PVRSRV_ERROR_INVALID_FLAGS;
+	}
+
+	return PVRSRV_OK;
 }
 
 /* must have called PMRLockSysPhysAddresses() before calling this! */

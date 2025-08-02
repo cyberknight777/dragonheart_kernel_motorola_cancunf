@@ -79,7 +79,7 @@ static_assert(RGXFWIF_RF_CMD_SIZE <= IMG_UINT32_MAX,
 static_assert(RGXFWIF_STATIC_COMPUTECONTEXT_SIZE <= IMG_UINT32_MAX,
 	      "RGXFWIF_STATIC_COMPUTECONTEXT_SIZE must not be larger than IMG_UINT32_MAX");
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXCreateComputeContext(IMG_UINT32 ui32DispatchTableEntry,
 				    IMG_UINT8 * psRGXCreateComputeContextIN_UI8,
 				    IMG_UINT8 * psRGXCreateComputeContextOUT_UI8,
@@ -314,10 +314,10 @@ RGXCreateComputeContext_exit:
 #endif
 		OSFreeMemNoStats(pArrayArgsBuffer);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXCREATECOMPUTECONTEXT, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXDestroyComputeContext(IMG_UINT32 ui32DispatchTableEntry,
 				     IMG_UINT8 * psRGXDestroyComputeContextIN_UI8,
 				     IMG_UINT8 * psRGXDestroyComputeContextOUT_UI8,
@@ -369,10 +369,10 @@ PVRSRVBridgeRGXDestroyComputeContext(IMG_UINT32 ui32DispatchTableEntry,
 
 RGXDestroyComputeContext_exit:
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXDESTROYCOMPUTECONTEXT, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXFlushComputeData(IMG_UINT32 ui32DispatchTableEntry,
 				IMG_UINT8 * psRGXFlushComputeDataIN_UI8,
 				IMG_UINT8 * psRGXFlushComputeDataOUT_UI8,
@@ -436,10 +436,10 @@ RGXFlushComputeData_exit:
 	/* Release now we have cleaned up look up handles. */
 	UnlockHandle(psConnection->psHandleBase);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXFLUSHCOMPUTEDATA, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXSetComputeContextPriority(IMG_UINT32 ui32DispatchTableEntry,
 					 IMG_UINT8 * psRGXSetComputeContextPriorityIN_UI8,
 					 IMG_UINT8 * psRGXSetComputeContextPriorityOUT_UI8,
@@ -506,10 +506,10 @@ RGXSetComputeContextPriority_exit:
 	/* Release now we have cleaned up look up handles. */
 	UnlockHandle(psConnection->psHandleBase);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXSETCOMPUTECONTEXTPRIORITY, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXNotifyComputeWriteOffsetUpdate(IMG_UINT32 ui32DispatchTableEntry,
 					      IMG_UINT8 * psRGXNotifyComputeWriteOffsetUpdateIN_UI8,
 					      IMG_UINT8 *
@@ -576,7 +576,7 @@ RGXNotifyComputeWriteOffsetUpdate_exit:
 	/* Release now we have cleaned up look up handles. */
 	UnlockHandle(psConnection->psHandleBase);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXNOTIFYCOMPUTEWRITEOFFSETUPDATE, eError);
 }
 
 static_assert(PVRSRV_MAX_SYNCS <= IMG_UINT32_MAX,
@@ -588,7 +588,7 @@ static_assert(RGXFWIF_DM_INDEPENDENT_KICK_CMD_SIZE <= IMG_UINT32_MAX,
 static_assert(PVRSRV_MAX_SYNCS <= IMG_UINT32_MAX,
 	      "PVRSRV_MAX_SYNCS must not be larger than IMG_UINT32_MAX");
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXKickCDM2(IMG_UINT32 ui32DispatchTableEntry,
 			IMG_UINT8 * psRGXKickCDM2IN_UI8,
 			IMG_UINT8 * psRGXKickCDM2OUT_UI8, CONNECTION_DATA * psConnection)
@@ -988,10 +988,10 @@ RGXKickCDM2_exit:
 #endif
 		OSFreeMemNoStats(pArrayArgsBuffer);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXKICKCDM2, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXSetComputeContextProperty(IMG_UINT32 ui32DispatchTableEntry,
 					 IMG_UINT8 * psRGXSetComputeContextPropertyIN_UI8,
 					 IMG_UINT8 * psRGXSetComputeContextPropertyOUT_UI8,
@@ -1059,10 +1059,10 @@ RGXSetComputeContextProperty_exit:
 	/* Release now we have cleaned up look up handles. */
 	UnlockHandle(psConnection->psHandleBase);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXSETCOMPUTECONTEXTPROPERTY, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXGetLastDeviceError(IMG_UINT32 ui32DispatchTableEntry,
 				  IMG_UINT8 * psRGXGetLastDeviceErrorIN_UI8,
 				  IMG_UINT8 * psRGXGetLastDeviceErrorOUT_UI8,
@@ -1097,7 +1097,7 @@ PVRSRVBridgeRGXGetLastDeviceError(IMG_UINT32 ui32DispatchTableEntry,
 
 RGXGetLastDeviceError_exit:
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXGETLASTDEVICEERROR, eError);
 }
 
 /* ***************************************************************************

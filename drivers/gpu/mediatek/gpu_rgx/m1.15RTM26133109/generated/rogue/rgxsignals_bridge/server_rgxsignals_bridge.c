@@ -67,7 +67,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Server-side bridge entry points
  */
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXNotifySignalUpdate(IMG_UINT32 ui32DispatchTableEntry,
 				  IMG_UINT8 * psRGXNotifySignalUpdateIN_UI8,
 				  IMG_UINT8 * psRGXNotifySignalUpdateOUT_UI8,
@@ -132,7 +132,7 @@ RGXNotifySignalUpdate_exit:
 	/* Release now we have cleaned up look up handles. */
 	UnlockHandle(psConnection->psHandleBase);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXNOTIFYSIGNALUPDATE, eError);
 }
 
 /* ***************************************************************************

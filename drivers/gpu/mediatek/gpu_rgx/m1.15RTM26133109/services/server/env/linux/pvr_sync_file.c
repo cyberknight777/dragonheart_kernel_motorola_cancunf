@@ -1076,7 +1076,7 @@ static void _dump_sync_point(struct dma_fence *fence,
 
 	PVR_DUMPDEBUG_LOG(dump_debug_printf,
 					  dump_debug_file,
-					  "<%p> Seq#=%llu TS=%s State=%s TLN=%s",
+					  "<"IMG_KM_PTR_FMTSPEC"> Seq#=%llu TS=%s State=%s TLN=%s",
 					  fence,
 					  (u64) fence->seqno,
 					  time,
@@ -1095,7 +1095,7 @@ static void _dump_fence(struct dma_fence *fence,
 		if (fence_array) {
 			PVR_DUMPDEBUG_LOG(dump_debug_printf,
 					  dump_debug_file,
-					  "Fence: [%p] Sync Points:\n",
+					  "Fence: ["IMG_KM_PTR_FMTSPEC"] Sync Points:\n",
 					  fence_array);
 
 			for (i = 0; i < fence_array->num_fences; i++)

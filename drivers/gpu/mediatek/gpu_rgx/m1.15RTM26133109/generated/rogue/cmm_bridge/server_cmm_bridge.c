@@ -75,7 +75,7 @@ static PVRSRV_ERROR _DevmemIntExportCtxpsContextExportIntRelease(void *pvData)
 	return eError;
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeDevmemIntExportCtx(IMG_UINT32 ui32DispatchTableEntry,
 			       IMG_UINT8 * psDevmemIntExportCtxIN_UI8,
 			       IMG_UINT8 * psDevmemIntExportCtxOUT_UI8,
@@ -179,10 +179,10 @@ DevmemIntExportCtx_exit:
 		}
 	}
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_DEVMEMINTEXPORTCTX, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeDevmemIntUnexportCtx(IMG_UINT32 ui32DispatchTableEntry,
 				 IMG_UINT8 * psDevmemIntUnexportCtxIN_UI8,
 				 IMG_UINT8 * psDevmemIntUnexportCtxOUT_UI8,
@@ -218,7 +218,7 @@ PVRSRVBridgeDevmemIntUnexportCtx(IMG_UINT32 ui32DispatchTableEntry,
 
 DevmemIntUnexportCtx_exit:
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_DEVMEMINTUNEXPORTCTX, eError);
 }
 
 static PVRSRV_ERROR _DevmemIntAcquireRemoteCtxpsContextIntRelease(void *pvData)
@@ -228,7 +228,7 @@ static PVRSRV_ERROR _DevmemIntAcquireRemoteCtxpsContextIntRelease(void *pvData)
 	return eError;
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeDevmemIntAcquireRemoteCtx(IMG_UINT32 ui32DispatchTableEntry,
 				      IMG_UINT8 * psDevmemIntAcquireRemoteCtxIN_UI8,
 				      IMG_UINT8 * psDevmemIntAcquireRemoteCtxOUT_UI8,
@@ -351,7 +351,7 @@ DevmemIntAcquireRemoteCtx_exit:
 		}
 	}
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_DEVMEMINTACQUIREREMOTECTX, eError);
 }
 
 /* ***************************************************************************

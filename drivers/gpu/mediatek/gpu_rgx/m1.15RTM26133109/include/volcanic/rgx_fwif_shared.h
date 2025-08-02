@@ -244,6 +244,18 @@ typedef struct
 	IMG_UINT64	uCDMReg_CDM_CONTEXT_PDS0_B;
 	IMG_UINT64	uCDMReg_CDM_RESUME_PDS0_B;
 
+#if defined(SUPPORT_SECURE_CONTEXT_SWITCH)
+	IMG_UINT64	uCDMReg_CDM_CONTEXT_SECURE_PDS0;
+	IMG_UINT64	uCDMReg_CDM_CONTEXT_SECURE_PDS0_B;
+
+	IMG_UINT64	uCDMReg_CDM_RESUME_SECURE_PDS0;
+	IMG_UINT64	uCDMReg_CDM_RESUME_SECURE_PDS0_B;
+
+	IMG_DEV_VIRTADDR	uCDMReg_CDM_CONTEXT_sSRBuffer;
+	IMG_DEV_VIRTADDR	uCDMReg_CDM_CONTEXT_sSRBuffer_B;
+
+	IMG_UINT64	uCDMReg_CDM_CONTEXT_STATE_BASE_ADDR;
+#endif
 } RGXFWIF_CDM_REGISTERS_CSWITCH;
 
 static_assert((sizeof(RGXFWIF_CDM_REGISTERS_CSWITCH) % 8U) == 0U,
@@ -335,6 +347,14 @@ typedef struct
 #define RGX_HEAP_KM_GENERAL_RESERVED_REGION_OFFSET  RGX_HEAP_UM_GENERAL_RESERVED_SIZE
 
 #define RGX_HEAP_GENERAL_RESERVED_TOTAL_SIZE        (RGX_HEAP_UM_GENERAL_RESERVED_SIZE + RGX_HEAP_KM_GENERAL_RESERVED_SIZE)
+
+/*
+ * 4 dwords reserved for shared register management.
+ * The first dword is the number of shared register blocks to reload.
+ * Should be a multiple of 4 dwords, size in bytes.
+ */
+#define		RGX_LLS_SHARED_REGS_RESERVE_SIZE	(16U)
+
 #endif /*  RGX_FWIF_SHARED_H */
 
 /******************************************************************************

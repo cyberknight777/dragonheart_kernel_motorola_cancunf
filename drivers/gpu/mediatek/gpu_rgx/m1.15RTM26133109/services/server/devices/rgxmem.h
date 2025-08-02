@@ -170,6 +170,37 @@ PVRSRV_ERROR RGXRegisterMemoryContext(PVRSRV_DEVICE_NODE *psDevNode,
 
 DEVMEM_MEMDESC *RGXGetFWMemDescFromMemoryContextHandle(IMG_HANDLE hPriv);
 
+/*************************************************************************/ /*!
+@Function       RGXValidateAddressPermissions
+
+@Description    Check if the given virtual address is valid for the given
+                device specific memory allocation flags.
+                See rgx_memallocflags.h.
+
+@Input          psDevNode    Device Node pointer
+@Input          psMMUContext MMU context pointer
+@Input          sVDevAddr    Device virtual address.
+@Input          uiFlags      Memory allocation flags.
+
+@Return         IMG_TRUE if the address is valid, IMG_FALSE otherwise.
+*/ /**************************************************************************/
+IMG_BOOL RGXValidateAddressPermissions(PVRSRV_DEVICE_NODE *psDevNode,
+                                       MMU_CONTEXT *psMMUContext,
+                                       IMG_DEV_VIRTADDR sVDevAddr,
+                                       PVRSRV_MEMALLOCFLAGS_T uiFlags);
+
+/*************************************************************************/ /*!
+@Function       RGXValidateExportableFlags
+
+@Description    Checks if a memory resource with the given flags can be exported
+                out of the driver and/or process.
+
+@Input          uiFlags      Memory allocation flags.
+
+@Return         IMG_TRUE if export is allowed, IMG_FALSE otherwise.
+*/ /**************************************************************************/
+IMG_BOOL RGXValidateExportableFlags(PVRSRV_MEMALLOCFLAGS_T uiFlags);
+
 void RGXCheckFaultAddress(PVRSRV_RGXDEV_INFO *psDevInfo,
 				IMG_DEV_VIRTADDR *psDevVAddr,
 				IMG_DEV_PHYADDR *psDevPAddr,

@@ -469,6 +469,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define IMG_OFFSET_ADDR(addr, offset_in_bytes) \
 	(void*)&(((IMG_UINT8*)(void*)(addr))[offset_in_bytes])
 
+/* Get a new pointer (user space) with an offset (in bytes) from a base address,
+ * useful when traversing byte buffers and accessing data in buffers through
+ * struct pointers.
+ * Note, this macro is not equivalent to or replacing offsetof() */
+#define IMG_OFFSET_ADDR_USER(addr, offset_in_bytes) \
+	(void __user*)&(((IMG_UINT8 __user*)(void __user*)(addr))[offset_in_bytes])
+
 /* Get a new pointer with an offset (in dwords) from a base address, useful
  * when traversing byte buffers and accessing data in buffers through struct
  * pointers.

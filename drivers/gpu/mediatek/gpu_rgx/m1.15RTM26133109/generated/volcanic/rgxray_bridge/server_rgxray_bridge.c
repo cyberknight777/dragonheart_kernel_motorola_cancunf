@@ -75,7 +75,7 @@ static PVRSRV_ERROR _RGXCreateRayContextpsRayContextIntRelease(void *pvData)
 static_assert(RGXFWIF_STATIC_RAYCONTEXT_SIZE <= IMG_UINT32_MAX,
 	      "RGXFWIF_STATIC_RAYCONTEXT_SIZE must not be larger than IMG_UINT32_MAX");
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXCreateRayContext(IMG_UINT32 ui32DispatchTableEntry,
 				IMG_UINT8 * psRGXCreateRayContextIN_UI8,
 				IMG_UINT8 * psRGXCreateRayContextOUT_UI8,
@@ -257,10 +257,10 @@ RGXCreateRayContext_exit:
 #endif
 		OSFreeMemNoStats(pArrayArgsBuffer);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXCREATERAYCONTEXT, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXDestroyRayContext(IMG_UINT32 ui32DispatchTableEntry,
 				 IMG_UINT8 * psRGXDestroyRayContextIN_UI8,
 				 IMG_UINT8 * psRGXDestroyRayContextOUT_UI8,
@@ -296,7 +296,7 @@ PVRSRVBridgeRGXDestroyRayContext(IMG_UINT32 ui32DispatchTableEntry,
 
 RGXDestroyRayContext_exit:
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXDESTROYRAYCONTEXT, eError);
 }
 
 static_assert(PVRSRV_MAX_SYNCS <= IMG_UINT32_MAX,
@@ -306,7 +306,7 @@ static_assert(PVRSRV_SYNC_NAME_LENGTH <= IMG_UINT32_MAX,
 static_assert(RGXFWIF_DM_INDEPENDENT_KICK_CMD_SIZE <= IMG_UINT32_MAX,
 	      "RGXFWIF_DM_INDEPENDENT_KICK_CMD_SIZE must not be larger than IMG_UINT32_MAX");
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXKickRDM(IMG_UINT32 ui32DispatchTableEntry,
 		       IMG_UINT8 * psRGXKickRDMIN_UI8,
 		       IMG_UINT8 * psRGXKickRDMOUT_UI8, CONNECTION_DATA * psConnection)
@@ -595,7 +595,7 @@ RGXKickRDM_exit:
 #endif
 		OSFreeMemNoStats(pArrayArgsBuffer);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXKICKRDM, eError);
 }
 
 /* ***************************************************************************

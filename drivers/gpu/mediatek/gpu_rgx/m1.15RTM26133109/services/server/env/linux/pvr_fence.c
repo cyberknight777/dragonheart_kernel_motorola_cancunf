@@ -1032,7 +1032,7 @@ u32 pvr_fence_dump_info_on_stalled_ufos(struct pvr_fence_context *fctx,
 
 			/* Dump sync info */
 			PVR_DUMPDEBUG_LOG(pfnDummy, NULL,
-					  "\tSyncID = %d, FWAddr = 0x%08x: TLID = %d (Foreign Fence - [%p] %s)",
+					  "\tSyncID = %d, FWAddr = 0x%08x: TLID = %d (Foreign Fence - ["IMG_KM_PTR_FMTSPEC"] %s)",
 					  SyncCheckpointGetId(checkpoint),
 					  fence_ufo_addr,
 					  SyncCheckpointGetTimeline(checkpoint),

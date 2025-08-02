@@ -78,7 +78,7 @@ static PVRSRV_ERROR _RGXCreateTransferContextpsTransferContextIntRelease(void *p
 static_assert(RGXFWIF_RF_CMD_SIZE <= IMG_UINT32_MAX,
 	      "RGXFWIF_RF_CMD_SIZE must not be larger than IMG_UINT32_MAX");
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXCreateTransferContext(IMG_UINT32 ui32DispatchTableEntry,
 				     IMG_UINT8 * psRGXCreateTransferContextIN_UI8,
 				     IMG_UINT8 * psRGXCreateTransferContextOUT_UI8,
@@ -315,10 +315,10 @@ RGXCreateTransferContext_exit:
 #endif
 		OSFreeMemNoStats(pArrayArgsBuffer);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXCREATETRANSFERCONTEXT, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXDestroyTransferContext(IMG_UINT32 ui32DispatchTableEntry,
 				      IMG_UINT8 * psRGXDestroyTransferContextIN_UI8,
 				      IMG_UINT8 * psRGXDestroyTransferContextOUT_UI8,
@@ -356,10 +356,10 @@ PVRSRVBridgeRGXDestroyTransferContext(IMG_UINT32 ui32DispatchTableEntry,
 
 RGXDestroyTransferContext_exit:
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXDESTROYTRANSFERCONTEXT, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXSetTransferContextPriority(IMG_UINT32 ui32DispatchTableEntry,
 					  IMG_UINT8 * psRGXSetTransferContextPriorityIN_UI8,
 					  IMG_UINT8 * psRGXSetTransferContextPriorityOUT_UI8,
@@ -412,7 +412,7 @@ RGXSetTransferContextPriority_exit:
 	/* Release now we have cleaned up look up handles. */
 	UnlockHandle(psConnection->psHandleBase);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXSETTRANSFERCONTEXTPRIORITY, eError);
 }
 
 static_assert(PVRSRV_MAX_SYNCS <= IMG_UINT32_MAX,
@@ -424,7 +424,7 @@ static_assert(RGXFWIF_DM_INDEPENDENT_KICK_CMD_SIZE <= IMG_UINT32_MAX,
 static_assert(PVRSRV_MAX_SYNCS <= IMG_UINT32_MAX,
 	      "PVRSRV_MAX_SYNCS must not be larger than IMG_UINT32_MAX");
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXSubmitTransfer2(IMG_UINT32 ui32DispatchTableEntry,
 			       IMG_UINT8 * psRGXSubmitTransfer2IN_UI8,
 			       IMG_UINT8 * psRGXSubmitTransfer2OUT_UI8,
@@ -1083,10 +1083,10 @@ RGXSubmitTransfer2_exit:
 	if (pArrayArgsBuffer2)
 		OSFreeMemNoStats(pArrayArgsBuffer2);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXSUBMITTRANSFER2, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXSetTransferContextProperty(IMG_UINT32 ui32DispatchTableEntry,
 					  IMG_UINT8 * psRGXSetTransferContextPropertyIN_UI8,
 					  IMG_UINT8 * psRGXSetTransferContextPropertyOUT_UI8,
@@ -1140,7 +1140,7 @@ RGXSetTransferContextProperty_exit:
 	/* Release now we have cleaned up look up handles. */
 	UnlockHandle(psConnection->psHandleBase);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXSETTRANSFERCONTEXTPROPERTY, eError);
 }
 
 /* ***************************************************************************

@@ -414,6 +414,14 @@ typedef struct _PVRSRV_DEVICE_NODE_
 														struct _DEVMEMINT_CTX_		*psDevMemCtx,
 														IMG_HANDLE					*hPrivData);
 	void					(*pfnUnregisterMemoryContext)(IMG_HANDLE hPrivData);
+	/* Callback for validating heap's protection flags. */
+	IMG_BOOL (*pfnValidateAddressPermissions)(struct _PVRSRV_DEVICE_NODE_ *psDevNode,
+	                                          MMU_CONTEXT *psMMUContext,
+	                                          IMG_DEV_VIRTADDR sVDevAddr,
+	                                          PVRSRV_MEMALLOCFLAGS_T uiFlags);
+
+	/* Functions for validation flags for exportable PMRs */
+	IMG_BOOL (*pfnValidateExportableFlags)(PVRSRV_MEMALLOCFLAGS_T uiFlags);
 
 	/* Functions for allocation/freeing of UFOs */
 	AllocUFOBlockCallback	pfnAllocUFOBlock;	/*!< Callback for allocation of a block of UFO memory */
@@ -510,6 +518,10 @@ typedef struct _PVRSRV_DEVICE_NODE_
 #if defined(PVRSRV_DEBUG_LISR_EXECUTION)
 	IMG_UINT64              ui64nLISR;           /*!< Number of LISR calls seen */
 	IMG_UINT64              ui64nMISR;           /*!< Number of MISR calls made */
+#endif
+
+#if defined(PVRSRV_MAX_REAL_TIME_CONTEXTS) && (PVRSRV_MAX_REAL_TIME_CONTEXTS > 1)
+	IMG_UINT32              *pui32RTContextCount;
 #endif
 
 	IMG_UINT32              ui32RGXLog2Non4KPgSize; /* Page size of Non4k heap in log2 form */

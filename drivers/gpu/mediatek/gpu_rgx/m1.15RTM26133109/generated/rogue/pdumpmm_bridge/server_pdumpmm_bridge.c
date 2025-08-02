@@ -68,7 +68,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Server-side bridge entry points
  */
 
-static IMG_INT
+static size_t
 PVRSRVBridgePMRPDumpLoadMem(IMG_UINT32 ui32DispatchTableEntry,
 			    IMG_UINT8 * psPMRPDumpLoadMemIN_UI8,
 			    IMG_UINT8 * psPMRPDumpLoadMemOUT_UI8, CONNECTION_DATA * psConnection)
@@ -117,10 +117,10 @@ PMRPDumpLoadMem_exit:
 	/* Release now we have cleaned up look up handles. */
 	UnlockHandle(psConnection->psHandleBase);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_PMRPDUMPLOADMEM, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgePMRPDumpLoadMemValue32(IMG_UINT32 ui32DispatchTableEntry,
 				   IMG_UINT8 * psPMRPDumpLoadMemValue32IN_UI8,
 				   IMG_UINT8 * psPMRPDumpLoadMemValue32OUT_UI8,
@@ -172,10 +172,10 @@ PMRPDumpLoadMemValue32_exit:
 	/* Release now we have cleaned up look up handles. */
 	UnlockHandle(psConnection->psHandleBase);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_PMRPDUMPLOADMEMVALUE32, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgePMRPDumpLoadMemValue64(IMG_UINT32 ui32DispatchTableEntry,
 				   IMG_UINT8 * psPMRPDumpLoadMemValue64IN_UI8,
 				   IMG_UINT8 * psPMRPDumpLoadMemValue64OUT_UI8,
@@ -227,13 +227,13 @@ PMRPDumpLoadMemValue64_exit:
 	/* Release now we have cleaned up look up handles. */
 	UnlockHandle(psConnection->psHandleBase);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_PMRPDUMPLOADMEMVALUE64, eError);
 }
 
 static_assert(PVRSRV_PDUMP_MAX_FILENAME_SIZE <= IMG_UINT32_MAX,
 	      "PVRSRV_PDUMP_MAX_FILENAME_SIZE must not be larger than IMG_UINT32_MAX");
 
-static IMG_INT
+static size_t
 PVRSRVBridgePMRPDumpSaveToFile(IMG_UINT32 ui32DispatchTableEntry,
 			       IMG_UINT8 * psPMRPDumpSaveToFileIN_UI8,
 			       IMG_UINT8 * psPMRPDumpSaveToFileOUT_UI8,
@@ -375,10 +375,10 @@ PMRPDumpSaveToFile_exit:
 #endif
 		OSFreeMemNoStats(pArrayArgsBuffer);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_PMRPDUMPSAVETOFILE, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgePMRPDumpSymbolicAddr(IMG_UINT32 ui32DispatchTableEntry,
 				 IMG_UINT8 * psPMRPDumpSymbolicAddrIN_UI8,
 				 IMG_UINT8 * psPMRPDumpSymbolicAddrOUT_UI8,
@@ -564,10 +564,10 @@ PMRPDumpSymbolicAddr_exit:
 #endif
 		OSFreeMemNoStats(pArrayArgsBuffer);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_PMRPDUMPSYMBOLICADDR, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgePMRPDumpPol32(IMG_UINT32 ui32DispatchTableEntry,
 			  IMG_UINT8 * psPMRPDumpPol32IN_UI8,
 			  IMG_UINT8 * psPMRPDumpPol32OUT_UI8, CONNECTION_DATA * psConnection)
@@ -617,10 +617,10 @@ PMRPDumpPol32_exit:
 	/* Release now we have cleaned up look up handles. */
 	UnlockHandle(psConnection->psHandleBase);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_PMRPDUMPPOL32, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgePMRPDumpCheck32(IMG_UINT32 ui32DispatchTableEntry,
 			    IMG_UINT8 * psPMRPDumpCheck32IN_UI8,
 			    IMG_UINT8 * psPMRPDumpCheck32OUT_UI8, CONNECTION_DATA * psConnection)
@@ -670,10 +670,10 @@ PMRPDumpCheck32_exit:
 	/* Release now we have cleaned up look up handles. */
 	UnlockHandle(psConnection->psHandleBase);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_PMRPDUMPCHECK32, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgePMRPDumpCBP(IMG_UINT32 ui32DispatchTableEntry,
 			IMG_UINT8 * psPMRPDumpCBPIN_UI8,
 			IMG_UINT8 * psPMRPDumpCBPOUT_UI8, CONNECTION_DATA * psConnection)
@@ -722,13 +722,13 @@ PMRPDumpCBP_exit:
 	/* Release now we have cleaned up look up handles. */
 	UnlockHandle(psConnection->psHandleBase);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_PMRPDUMPCBP, eError);
 }
 
 static_assert(PVRSRV_PDUMP_MAX_FILENAME_SIZE <= IMG_UINT32_MAX,
 	      "PVRSRV_PDUMP_MAX_FILENAME_SIZE must not be larger than IMG_UINT32_MAX");
 
-static IMG_INT
+static size_t
 PVRSRVBridgeDevmemIntPDumpSaveToFileVirtual(IMG_UINT32 ui32DispatchTableEntry,
 					    IMG_UINT8 * psDevmemIntPDumpSaveToFileVirtualIN_UI8,
 					    IMG_UINT8 * psDevmemIntPDumpSaveToFileVirtualOUT_UI8,
@@ -882,7 +882,7 @@ DevmemIntPDumpSaveToFileVirtual_exit:
 #endif
 		OSFreeMemNoStats(pArrayArgsBuffer);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_DEVMEMINTPDUMPSAVETOFILEVIRTUAL, eError);
 }
 
 /* ***************************************************************************

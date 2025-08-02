@@ -798,6 +798,10 @@ typedef struct _PVRSRV_RGXDEV_INFO_
 													  created and mapped at driver init. It's used for
 													  various purposes. See rgx_fwif_km.h for all use cases. */
 #endif
+
+#if defined(SUPPORT_SECURE_CONTEXT_SWITCH)
+	DEVMEM_MEMDESC			*psRGXFWScratchBufMemDesc;
+#endif
 } PVRSRV_RGXDEV_INFO;
 
 

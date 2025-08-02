@@ -51,7 +51,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "img_defs.h"
 #include "osfunc.h"
 #include "pvr_debug.h"
-
+#include "pvrsrv_memalloc_physheap.h"
 #include "kernel_compatibility.h"
 
 #if defined(CONFIG_OUTER_CACHE)
@@ -254,8 +254,15 @@ void OSCPUCacheInvalidateRangeKM(PVRSRV_DEVICE_NODE *psDevNode,
 }
 
 
-OS_CACHE_OP_ADDR_TYPE OSCPUCacheOpAddressType(void)
+OS_CACHE_OP_ADDR_TYPE OSCPUCacheOpAddressType(PHYS_HEAP_TYPE ePhysHeapType)
 {
+	if (ePhysHeapType != PHYS_HEAP_TYPE_UMA)
+	{
+		/* Heaps other than UMA might not be direct mapped in the kernel causing issues
+		   when using physical address with dma api. */
+		return OS_CACHE_OP_ADDR_TYPE_VIRTUAL;
+	}
+
 	return OS_CACHE_OP_ADDR_TYPE_PHYSICAL;
 }
 

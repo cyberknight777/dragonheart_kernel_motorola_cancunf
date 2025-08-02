@@ -82,7 +82,7 @@ static PVRSRV_ERROR _RGXCreateHWRTDataSetpsKmHwRTDataSet1IntRelease(void *pvData
 static_assert(RGXFW_MAX_FREELISTS <= IMG_UINT32_MAX,
 	      "RGXFW_MAX_FREELISTS must not be larger than IMG_UINT32_MAX");
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXCreateHWRTDataSet(IMG_UINT32 ui32DispatchTableEntry,
 				 IMG_UINT8 * psRGXCreateHWRTDataSetIN_UI8,
 				 IMG_UINT8 * psRGXCreateHWRTDataSetOUT_UI8,
@@ -318,10 +318,10 @@ RGXCreateHWRTDataSet_exit:
 #endif
 		OSFreeMemNoStats(pArrayArgsBuffer);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXCREATEHWRTDATASET, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXDestroyHWRTDataSet(IMG_UINT32 ui32DispatchTableEntry,
 				  IMG_UINT8 * psRGXDestroyHWRTDataSetIN_UI8,
 				  IMG_UINT8 * psRGXDestroyHWRTDataSetOUT_UI8,
@@ -359,7 +359,7 @@ PVRSRVBridgeRGXDestroyHWRTDataSet(IMG_UINT32 ui32DispatchTableEntry,
 
 RGXDestroyHWRTDataSet_exit:
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXDESTROYHWRTDATASET, eError);
 }
 
 static PVRSRV_ERROR _RGXCreateZSBufferpssZSBufferKMIntRelease(void *pvData)
@@ -369,7 +369,7 @@ static PVRSRV_ERROR _RGXCreateZSBufferpssZSBufferKMIntRelease(void *pvData)
 	return eError;
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXCreateZSBuffer(IMG_UINT32 ui32DispatchTableEntry,
 			      IMG_UINT8 * psRGXCreateZSBufferIN_UI8,
 			      IMG_UINT8 * psRGXCreateZSBufferOUT_UI8,
@@ -473,10 +473,10 @@ RGXCreateZSBuffer_exit:
 		}
 	}
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXCREATEZSBUFFER, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXDestroyZSBuffer(IMG_UINT32 ui32DispatchTableEntry,
 			       IMG_UINT8 * psRGXDestroyZSBufferIN_UI8,
 			       IMG_UINT8 * psRGXDestroyZSBufferOUT_UI8,
@@ -513,7 +513,7 @@ PVRSRVBridgeRGXDestroyZSBuffer(IMG_UINT32 ui32DispatchTableEntry,
 
 RGXDestroyZSBuffer_exit:
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXDESTROYZSBUFFER, eError);
 }
 
 static PVRSRV_ERROR _RGXPopulateZSBufferpssPopulationIntRelease(void *pvData)
@@ -523,7 +523,7 @@ static PVRSRV_ERROR _RGXPopulateZSBufferpssPopulationIntRelease(void *pvData)
 	return eError;
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXPopulateZSBuffer(IMG_UINT32 ui32DispatchTableEntry,
 				IMG_UINT8 * psRGXPopulateZSBufferIN_UI8,
 				IMG_UINT8 * psRGXPopulateZSBufferOUT_UI8,
@@ -607,10 +607,10 @@ RGXPopulateZSBuffer_exit:
 		}
 	}
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXPOPULATEZSBUFFER, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXUnpopulateZSBuffer(IMG_UINT32 ui32DispatchTableEntry,
 				  IMG_UINT8 * psRGXUnpopulateZSBufferIN_UI8,
 				  IMG_UINT8 * psRGXUnpopulateZSBufferOUT_UI8,
@@ -646,7 +646,7 @@ PVRSRVBridgeRGXUnpopulateZSBuffer(IMG_UINT32 ui32DispatchTableEntry,
 
 RGXUnpopulateZSBuffer_exit:
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXUNPOPULATEZSBUFFER, eError);
 }
 
 static PVRSRV_ERROR _RGXCreateFreeListpsCleanupCookieIntRelease(void *pvData)
@@ -656,7 +656,7 @@ static PVRSRV_ERROR _RGXCreateFreeListpsCleanupCookieIntRelease(void *pvData)
 	return eError;
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXCreateFreeList(IMG_UINT32 ui32DispatchTableEntry,
 			      IMG_UINT8 * psRGXCreateFreeListIN_UI8,
 			      IMG_UINT8 * psRGXCreateFreeListOUT_UI8,
@@ -796,10 +796,10 @@ RGXCreateFreeList_exit:
 		}
 	}
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXCREATEFREELIST, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXDestroyFreeList(IMG_UINT32 ui32DispatchTableEntry,
 			       IMG_UINT8 * psRGXDestroyFreeListIN_UI8,
 			       IMG_UINT8 * psRGXDestroyFreeListOUT_UI8,
@@ -834,7 +834,7 @@ PVRSRVBridgeRGXDestroyFreeList(IMG_UINT32 ui32DispatchTableEntry,
 
 RGXDestroyFreeList_exit:
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXDESTROYFREELIST, eError);
 }
 
 static PVRSRV_ERROR _RGXCreateRenderContextpsRenderContextIntRelease(void *pvData)
@@ -849,7 +849,7 @@ static_assert(RGXFWIF_RF_CMD_SIZE <= IMG_UINT32_MAX,
 static_assert(RGXFWIF_STATIC_RENDERCONTEXT_SIZE <= IMG_UINT32_MAX,
 	      "RGXFWIF_STATIC_RENDERCONTEXT_SIZE must not be larger than IMG_UINT32_MAX");
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXCreateRenderContext(IMG_UINT32 ui32DispatchTableEntry,
 				   IMG_UINT8 * psRGXCreateRenderContextIN_UI8,
 				   IMG_UINT8 * psRGXCreateRenderContextOUT_UI8,
@@ -1069,10 +1069,10 @@ RGXCreateRenderContext_exit:
 #endif
 		OSFreeMemNoStats(pArrayArgsBuffer);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXCREATERENDERCONTEXT, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXDestroyRenderContext(IMG_UINT32 ui32DispatchTableEntry,
 				    IMG_UINT8 * psRGXDestroyRenderContextIN_UI8,
 				    IMG_UINT8 * psRGXDestroyRenderContextOUT_UI8,
@@ -1110,10 +1110,10 @@ PVRSRVBridgeRGXDestroyRenderContext(IMG_UINT32 ui32DispatchTableEntry,
 
 RGXDestroyRenderContext_exit:
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXDESTROYRENDERCONTEXT, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXSetRenderContextPriority(IMG_UINT32 ui32DispatchTableEntry,
 					IMG_UINT8 * psRGXSetRenderContextPriorityIN_UI8,
 					IMG_UINT8 * psRGXSetRenderContextPriorityOUT_UI8,
@@ -1166,10 +1166,10 @@ RGXSetRenderContextPriority_exit:
 	/* Release now we have cleaned up look up handles. */
 	UnlockHandle(psConnection->psHandleBase);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXSETRENDERCONTEXTPRIORITY, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXRenderContextStalled(IMG_UINT32 ui32DispatchTableEntry,
 				    IMG_UINT8 * psRGXRenderContextStalledIN_UI8,
 				    IMG_UINT8 * psRGXRenderContextStalledOUT_UI8,
@@ -1219,7 +1219,7 @@ RGXRenderContextStalled_exit:
 	/* Release now we have cleaned up look up handles. */
 	UnlockHandle(psConnection->psHandleBase);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXRENDERCONTEXTSTALLED, eError);
 }
 
 static_assert(PVRSRV_MAX_SYNCS <= IMG_UINT32_MAX,
@@ -1241,7 +1241,7 @@ static_assert(RGXFWIF_DM_INDEPENDENT_KICK_CMD_SIZE <= IMG_UINT32_MAX,
 static_assert(PVRSRV_MAX_SYNCS <= IMG_UINT32_MAX,
 	      "PVRSRV_MAX_SYNCS must not be larger than IMG_UINT32_MAX");
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXKickTA3D2(IMG_UINT32 ui32DispatchTableEntry,
 			 IMG_UINT8 * psRGXKickTA3D2IN_UI8,
 			 IMG_UINT8 * psRGXKickTA3D2OUT_UI8, CONNECTION_DATA * psConnection)
@@ -2080,10 +2080,10 @@ RGXKickTA3D2_exit:
 #endif
 		OSFreeMemNoStats(pArrayArgsBuffer);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXKICKTA3D2, eError);
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXSetRenderContextProperty(IMG_UINT32 ui32DispatchTableEntry,
 					IMG_UINT8 * psRGXSetRenderContextPropertyIN_UI8,
 					IMG_UINT8 * psRGXSetRenderContextPropertyOUT_UI8,
@@ -2137,7 +2137,7 @@ RGXSetRenderContextProperty_exit:
 	/* Release now we have cleaned up look up handles. */
 	UnlockHandle(psConnection->psHandleBase);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXSETRENDERCONTEXTPROPERTY, eError);
 }
 
 static PVRSRV_ERROR _RGXCreateZSBuffer2pssZSBufferKMIntRelease(void *pvData)
@@ -2147,7 +2147,7 @@ static PVRSRV_ERROR _RGXCreateZSBuffer2pssZSBufferKMIntRelease(void *pvData)
 	return eError;
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXCreateZSBuffer2(IMG_UINT32 ui32DispatchTableEntry,
 					 IMG_UINT8 *psRGXCreateZSBuffer2IN_UI8,
 					 IMG_UINT8 *psRGXCreateZSBuffer2OUT_UI8,
@@ -2257,7 +2257,7 @@ RGXCreateZSBuffer2_exit:
 		}
 	}
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXCREATEZSBUFFER2, eError);
 }
 
 static PVRSRV_ERROR _RGXCreateFreeList2psCleanupCookieIntRelease(void *pvData)
@@ -2267,7 +2267,7 @@ static PVRSRV_ERROR _RGXCreateFreeList2psCleanupCookieIntRelease(void *pvData)
 	return eError;
 }
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXCreateFreeList2(IMG_UINT32 ui32DispatchTableEntry,
 			       IMG_UINT8 * psRGXCreateFreeList2IN_UI8,
 			       IMG_UINT8 * psRGXCreateFreeList2OUT_UI8,
@@ -2408,7 +2408,7 @@ RGXCreateFreeList2_exit:
 		}
 	}
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXCREATEFREELIST2, eError);
 }
 
 static PVRSRV_ERROR _RGXCreateHWRTDataSet2psKmHwRTDataSet0IntRelease(void *pvData)
@@ -2428,7 +2428,7 @@ static PVRSRV_ERROR _RGXCreateHWRTDataSet2psKmHwRTDataSet1IntRelease(void *pvDat
 static_assert(RGXFW_MAX_FREELISTS <= IMG_UINT32_MAX,
 	      "RGXFW_MAX_FREELISTS must not be larger than IMG_UINT32_MAX");
 
-static IMG_INT
+static size_t
 PVRSRVBridgeRGXCreateHWRTDataSet2(IMG_UINT32 ui32DispatchTableEntry,
 				  IMG_UINT8 * psRGXCreateHWRTDataSet2IN_UI8,
 				  IMG_UINT8 * psRGXCreateHWRTDataSet2OUT_UI8,
@@ -2685,7 +2685,7 @@ RGXCreateHWRTDataSet2_exit:
 #endif
 		OSFreeMemNoStats(pArrayArgsBuffer);
 
-	return 0;
+	return offsetof(PVRSRV_BRIDGE_OUT_RGXCREATEHWRTDATASET2, eError);
 }
 
 /* ***************************************************************************
