@@ -1010,6 +1010,73 @@ unlock:
 }
 static DEVICE_ATTR_RW(flashlight_strobe);
 
+static ssize_t flashlight_strength_show(struct device *dev,
+                struct device_attribute *attr, char *buf)
+{
+        return scnprintf(buf, PAGE_SIZE,
+                        "[LEVEL]\n");
+}
+
+static ssize_t flashlight_strength_store(struct device *dev,
+		struct device_attribute *attr, const char *buf, size_t size)
+{
+	struct flashlight_dev *fdev;
+	struct flashlight_arg fl_arg;
+	int ret,val;
+
+	ret = kstrtoint(buf, 10, &val);
+	if (ret)
+		return ret;
+
+	/* Hardcode common definitons */
+	fl_arg.type = 0;
+	fl_arg.ct = 0;
+	fl_arg.part = 0;
+	fl_arg.dur = 0;
+	fl_arg.level = val;
+
+	/* verify data */
+	if (flashlight_verify_arg(fl_arg)) {
+		pr_info("Error arguments\n");
+		ret = -1;
+		goto unlock;
+	}
+
+	pr_debug("(%d, %d, %d), (%d, %d)\n",
+			fl_arg.type, fl_arg.ct, fl_arg.part,
+			fl_arg.level, fl_arg.dur);
+
+	/* call callback function */
+	mutex_lock(&fl_mutex);
+	fdev = flashlight_find_dev_by_full_index(
+			fl_arg.type, fl_arg.ct, fl_arg.part);
+	mutex_unlock(&fl_mutex);
+	if (!fdev) {
+		pr_info("Find no flashlight device\n");
+		ret = -1;
+		goto unlock;
+	}
+
+	fl_arg.channel = fdev->dev_id.channel;
+	fl_arg.decouple = fdev->dev_id.decouple;
+
+	pr_info("channel:%d decouple:%d\n",
+			fl_arg.channel, fl_arg.decouple);
+
+	if (fdev->ops) {
+		fdev->ops->flashlight_strength_store(fl_arg);
+		ret = size;
+	} else {
+		pr_info("Failed with no flashlight ops\n");
+		ret = -1;
+	}
+
+unlock:
+	return ret;
+}
+
+static DEVICE_ATTR_RW(flashlight_strength);
+
 /* pt status sysfs */
 static ssize_t flashlight_pt_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
@@ -1772,6 +1839,11 @@ static int flashlight_probe(struct platform_device *dev)
 		goto err_create_strobe_device_file;
 	}
 	if (device_create_file(flashlight_device,
+				&dev_attr_flashlight_strength)) {
+		pr_info("Failed to create device file(strength)\n");
+		goto err_create_strength_device_file;
+	}
+	if (device_create_file(flashlight_device,
 				&dev_attr_flashlight_pt)) {
 		pr_info("Failed to create device file(pt)\n");
 		goto err_create_pt_device_file;
@@ -1829,6 +1901,8 @@ err_create_pt_device_file:
 	device_remove_file(flashlight_device, &dev_attr_flashlight_strobe);
 err_create_strobe_device_file:
 	device_destroy(flashlight_class, flashlight_devno);
+err_create_strength_device_file:
+	device_remove_file(flashlight_device, &dev_attr_flashlight_strength);
 err_create_device:
 	class_destroy(flashlight_class);
 err_create_class:
@@ -1853,6 +1927,7 @@ static int flashlight_remove(struct platform_device *dev)
 	device_remove_file(flashlight_device, &dev_attr_flashlight_charger);
 	device_remove_file(flashlight_device, &dev_attr_flashlight_pt);
 	device_remove_file(flashlight_device, &dev_attr_flashlight_strobe);
+	device_remove_file(flashlight_device, &dev_attr_flashlight_strength);
 	/* remove device */
 	device_destroy(flashlight_class, flashlight_devno);
 	/* remove class */

@@ -128,6 +128,7 @@ struct flashlight_operations {
 	int (*flashlight_release)(void);
 	int (*flashlight_ioctl)(unsigned int cmd, unsigned long arg);
 	ssize_t (*flashlight_strobe_store)(struct flashlight_arg arg);
+	ssize_t (*flashlight_strength_store)(struct flashlight_arg arg);
 	int (*flashlight_set_driver)(int set);
 };
 

@@ -494,11 +494,25 @@ static ssize_t cancunf_strobe_store(struct flashlight_arg arg)
     return 0;
 }
 
+static ssize_t cancunf_strength_store(struct flashlight_arg arg)
+{
+    if (arg.level == -1) {
+        cancunf_disable(&flash_opdata);
+        cancunf_flashlight_set_driver(0);
+    } else {
+        cancunf_flashlight_set_driver(1);
+        cancunf_set_level(arg.level, &flash_opdata);
+        cancunf_enable(&flash_opdata);
+    }
+    return 0;
+}
+
 static struct flashlight_operations cancunf_flashlight_ops = {
     cancunf_open,
     cancunf_release,
     cancunf_ioctl,
     cancunf_strobe_store,
+    cancunf_strength_store,
     cancunf_flashlight_set_driver
 };
 
