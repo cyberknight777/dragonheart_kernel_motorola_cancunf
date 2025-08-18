@@ -1,10 +1,10 @@
-/* SPDX-License-Identifier: GPL-2.0 */
+/* SPDX-License-Identifier: GPL-2.0 WITH Linux-syscall-note */
 /*
  * Copyright (c) 2019 MediaTek Inc.
  */
 
-#ifndef _FLASHLIGHT_H
-#define _FLASHLIGHT_H
+#ifndef _UAPI_FLASHLIGHT_H
+#define _UAPI_FLASHLIGHT_H
 
 #include <linux/types.h>
 #include <linux/ioctl.h>
@@ -111,5 +111,5 @@ struct flashlight_user_arg {
 #define FLASH_IOC_GET_HW_FAULT             _IOR(FLASHLIGHT_MAGIC, 250, int)
 #define FLASH_IOC_GET_HW_FAULT2            _IOR(FLASHLIGHT_MAGIC, 251, int)
 
-#endif /* _FLASHLIGHT_H */
+#endif /* _UAPI_FLASHLIGHT_H */
 
