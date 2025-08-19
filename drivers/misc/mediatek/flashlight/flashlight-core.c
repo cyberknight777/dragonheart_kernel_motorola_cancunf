@@ -837,6 +837,23 @@ static long _flashlight_ioctl(
 		}
 		break;
 
+	case FLASH_IOC_GET_MAX_TORCH_DUTY:
+		if (fdev->ops) {
+			ret = fdev->ops->flashlight_ioctl(
+				cmd, (unsigned long)&fl_dev_arg);
+			fl_arg.arg = fl_dev_arg.arg;
+			if (copy_to_user((void __user *)arg, (void *)&fl_arg,
+					sizeof(struct flashlight_user_arg))) {
+				pr_info("Failed to copy arg to user cmd:%d\n",
+					_IOC_NR(cmd));
+				return -EFAULT;
+			}
+		} else {
+			pr_info("Failed with no flashlight ops\n");
+			return -ENOTTY;
+		}
+		break;
+
 	default:
 		if (fdev->ops)
 			ret = fdev->ops->flashlight_ioctl(
