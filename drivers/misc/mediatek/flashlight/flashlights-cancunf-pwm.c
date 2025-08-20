@@ -51,6 +51,7 @@
 #define CANCUNF_LEVEL_NUM                26
 #define CANCUNF_LEVEL_TORCH              7
 #define CANCUNF_HW_TIMEOUT              640
+static int cancunf_current_level = 0;
 
 enum cancunf_flash_opcode {
     CANCUNF_FLASH_OP_NULL,
@@ -403,6 +404,11 @@ static int cancunf_ioctl(unsigned int cmd, unsigned long arg)
         pr_debug("FLASH_IOC_GET_MAX_TORCH_DUTY(%d)\n", channel);
         fl_arg->arg = CANCUNF_LEVEL_TORCH - 1;
         break;
+    case FLASH_IOC_GET_CURRENT_TORCH_DUTY:
+        pr_debug("FLASH_IOC_GET_CURRENT_TORCH_DUTY(%d): %d\n",
+                channel, cancunf_current_level);
+        fl_arg->arg = cancunf_current_level;
+        break;
     case FLASH_IOC_GET_HW_TIMEOUT:
         pr_debug("FLASH_IOC_GET_HW_TIMEOUT(%d)\n", channel);
         fl_arg->arg = CANCUNF_HW_TIMEOUT;
@@ -416,6 +422,7 @@ static int cancunf_ioctl(unsigned int cmd, unsigned long arg)
     case FLASH_IOC_SET_DUTY:
         pr_debug("FLASH_IOC_SET_DUTY(%d): %d\n",
                 channel, (int)fl_arg->arg);
+        cancunf_current_level = cancunf_verify_level(fl_arg->arg);
         cancunf_set_level(fl_arg->arg, &flash_opdata);
         break;
 
