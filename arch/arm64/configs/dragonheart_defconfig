@@ -2491,7 +2491,7 @@ CONFIG_MTK_GATE_IC=y
 # CONFIG_MTK_LOAD_TRACKER is not set
 # CONFIG_MTK_PERF_IOCTL_MAGT is not set
 # CONFIG_MTK_PERF_COMMON is not set
-CONFIG_MTK_NET_RPS=m
+# CONFIG_MTK_NET_RPS is not set
 # CONFIG_MTK_TASK_TURBO is not set
 # end of Performance
 
