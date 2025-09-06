@@ -265,4 +265,8 @@ source "drivers/mmi_relay/Kconfig"
 
 source "drivers/sensors/Kconfig"
 
+comment "Lindroid DRM Loopback Driver"
+
+source "drivers/lindroid-drm-loopback/Kconfig"
+
 endmenu
