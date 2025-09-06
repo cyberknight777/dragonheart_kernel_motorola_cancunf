@@ -194,3 +194,6 @@ obj-$(CONFIG_MOST)		+= most/
 obj-y				+= backlight/
 obj-$(CONFIG_MMI_INFO)		+= mmi_info/
 obj-$(CONFIG_SENSORS_CLASS)	+= sensors/
+
+# Lindroid
+obj-$(CONFIG_DRM_LINDROID_EVDI) += lindroid-drm-loopback/
