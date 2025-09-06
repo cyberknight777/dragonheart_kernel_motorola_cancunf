@@ -7221,6 +7221,11 @@ CONFIG_LEDS_AW99703=m
 CONFIG_LEDS_SM5350=m
 CONFIG_MMI_INFO=m
 CONFIG_SENSORS_CLASS=m
+
+#
+# Lindroid DRM Loopback Driver
+#
+CONFIG_DRM_LINDROID_EVDI=y
 # end of Device Drivers
 
 #
