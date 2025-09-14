@@ -10,7 +10,6 @@ LOCAL_REQUIRED_MODULES := conninfra.ko
 LOCAL_REQUIRED_MODULES += connfem.ko
 include $(MTK_KERNEL_MODULE)
 BT_OPTS := BT_PLATFORM=$(BT_PLATFORM) LOG_TAG=$(LOG_TAG)
-$(info $(LOG_TAG) BT_OPTS = $(BT_OPTS))
 $(linked_module): OPTS += $(BT_OPTS)
 
 

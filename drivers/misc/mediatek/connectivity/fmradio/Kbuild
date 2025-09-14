@@ -45,26 +45,16 @@ endif
 
 ###############################################################################
 
-$(info [fm_drv:Kbuild] M = $(M))
-$(info [fm_drv:Kbuild] CFG_FM_PLAT = $(CFG_FM_PLAT))
-$(info [fm_drv:Kbuild] CFG_BUILD_CONNAC2 = $(CFG_BUILD_CONNAC2))
-$(info [fm_drv:Kbuild] CFG_FM_CHIP_ID = $(CFG_FM_CHIP_ID))
-$(info [fm_drv:Kbuild] CFG_FM_CHIP = $(CFG_FM_CHIP))
-
 MODULE_NAME := fmradio_drv_$(CFG_FM_PLAT)
 ifeq ($(CONFIG_WLAN_DRV_BUILD_IN),y)
-$(info [fm_drv:Kbuild] $(MODULE_NAME) build-in boot.img)
 obj-y += $(MODULE_NAME).o
 else
-$(info [fm_drv:Kbuild] $(MODULE_NAME) is kernel module)
 obj-m += $(MODULE_NAME).o
 endif
 
 ###############################################################################
 
 KO_CODE_PATH := $(if $(filter /%,$(src)),,$(srctree)/)$(src)
-$(info [fm_drv:Kbuild] src = $(src))
-$(info [fm_drv:Kbuild] KO_CODE_PATH = $(KO_CODE_PATH))
 
 ifeq ($(CFG_FM_CHIP),)
     FM_CHIP := mt6631_6635

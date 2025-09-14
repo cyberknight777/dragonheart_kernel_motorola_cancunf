@@ -49,10 +49,7 @@ $(MODULE_NAME)-objs += connfem_subsys_bt.o
 $(MODULE_NAME)-objs += connfem_subsys_wifi.o
 
 ifneq ($(wildcard $(TOP)/vendor/mediatek/internal/connfem_enable),)
-    $(info ConnFem: MTK internal load)
     $(MODULE_NAME)-objs += connfem_internal.o
-else
-    $(info ConnFem: Customer load)
 endif
 
 
