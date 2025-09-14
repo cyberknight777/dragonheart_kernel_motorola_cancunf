@@ -14,8 +14,6 @@
 ifneq ($(CONFIG_MTK_GPU_VERSION),"")
 MTK_GPU_VERSION = $(subst ",,$(CONFIG_MTK_GPU_VERSION))
 
-$(info MTK_GPU_VERSION = $(MTK_GPU_VERSION))
-
 ifneq ($(CONFIG_MTK_PLATFORM),)
 export MTK_PLATFORM = $(subst ",,$(CONFIG_MTK_PLATFORM))
 else

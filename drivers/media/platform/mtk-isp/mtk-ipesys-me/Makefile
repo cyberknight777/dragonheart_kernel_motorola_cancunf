@@ -21,7 +21,6 @@ ifneq ($(wildcard $(srctree)/include/dt-bindings/memory/mt6983-larb-port.h),)
 else ifneq ($(wildcard $(srctree)/include/dt-bindings/memory/mt6879-larb-port.h),)
 	subdir-ccflags-y += -DTF_DUMP_71_2
 endif
-$(info "imgsys, subdir-ccflags-y = $(subdir-ccflags-y)")
 
 mtk-ipesys-me-objs :=\
 mtk-ipesys-me.o
