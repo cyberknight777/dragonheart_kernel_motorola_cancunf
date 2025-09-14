@@ -55,18 +55,14 @@ CUSTOM_KERNEL_FLAGS := $(addprefix -D, $(shell echo $(CUSTOM_KERNEL_KNOWN_DRV) |
 subdir-ccflags-y += $(CUSTOM_KERNEL_FLAGS)
 
 ifneq ($(unknown_drv),)
-$(info unknown_drv: $(unknown_drv))
 endif
 ifneq ($(common_drv),)
-$(info common_drv : $(common_drv))
 $(foreach drv,$(common_drv),$(eval $(call add_subdrv,../common/$(COMMON_VERSION)/$(drv))))
 endif
 ifneq ($(platform_drv),)
-$(info platform_drv : $(platform_drv))
 $(foreach drv,$(platform_drv),$(eval $(call add_subdrv,$(drv))))
 endif
 ifneq ($(project_drv),)
-$(info project_drv : $(project_drv))
 $(foreach drv, $(project_drv), $(eval $(call add_subdrv,camera_project/$(MTK_SENSOR_PROJECT)/$(drv))))
 endif
 

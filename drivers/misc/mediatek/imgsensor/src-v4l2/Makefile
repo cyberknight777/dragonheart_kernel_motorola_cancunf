@@ -57,17 +57,13 @@ endef
 $(foreach drv,$(subst $\",,$(CONFIG_CUSTOM_KERNEL_IMGSENSOR)),$(eval $(call FILTER_DRV,$(drv))))
 
 ifneq ($(wildcard $(IMGSENSOR_DRIVER_PATH)/$(FRAME_SYNC)/frame_sync_drv.mk),)
-$(info framesync_drv: $(FRAME_SYNC))
 include $(IMGSENSOR_DRIVER_PATH)/$(FRAME_SYNC)/frame_sync_drv.mk
 else
-$(info framesync_drv: NOT FOUND)
 endif
 
 ifneq ($(wildcard $(IMGSENSOR_DRIVER_PATH)/$(VIRT_SENSOR)/virt-sensor.mk),)
-$(info virt-sensor: $(VIRT_SENSOR))
 include $(IMGSENSOR_DRIVER_PATH)/$(VIRT_SENSOR)/virt-sensor.mk
 else
-$(info virt-sensor: NOT FOUND)
 endif
 
 define add_subdrv
@@ -76,31 +72,25 @@ $(eval include $(src)/$1/subdrv.mk)
 endef
 
 ifneq ($(unknown_drv),)
-$(info unknown_drv: $(unknown_drv))
 endif
 
 ifneq ($(common_drv),)
-$(info common_drv : $(common_drv))
 $(foreach drv,$(common_drv),$(eval $(call add_subdrv,common/$(drv))))
 endif
 
 ifneq ($(project_drv),)
-$(info project_drv : $(project_drv))
 $(foreach drv,$(project_drv),$(eval $(call add_subdrv,camera_project/$(IMGSENSOR_PROJECT)/$(drv))))
 endif
 
 ifneq ($(alpha_drv),)
-$(info alpha_drv : $(alpha_drv))
 $(foreach drv,$(alpha_drv),$(eval $(call add_subdrv,camera_project/k6983v1_64_alpha/$(drv))))
 endif
 
 ifneq ($(alpha_drv_k6895),)
-$(info alpha_drv_k6895 : $(alpha_drv_k6895))
 $(foreach drv,$(alpha_drv_k6895),$(eval $(call add_subdrv,camera_project/k6895v1_64_95t_alpha/$(drv))))
 endif
 
 ifneq ($(6983_foldable_drv),)
-$(info 6983_foldable_drv : $(6983_foldable_drv))
 $(foreach drv,$(6983_foldable_drv),$(eval $(call add_subdrv,camera_project/k6983v1_64_foldable/$(drv))))
 endif
 
@@ -113,8 +103,6 @@ ifneq ($(IMGSENSOR_SUBDRVS),)
 subdir-ccflags-y += -D'IMGSENSOR_SUBDRVS=$(IMGSENSOR_SUBDRVS)'
 endif
 
-$(info imgsensor-objs : $(imgsensor-objs))
-$(info subdir-ccflags-y : $(subdir-ccflags-y))
 
 obj-$(CONFIG_MTK_V4L2_IMGSENSOR) += imgsensor-glue/
 obj-$(CONFIG_MTK_V4L2_IMGSENSOR) += imgsensor.o

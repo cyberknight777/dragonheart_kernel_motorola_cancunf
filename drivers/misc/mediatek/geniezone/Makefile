@@ -21,7 +21,6 @@ ccflags-y += -I$(srctree)/drivers/misc/mediatek/trusted_mem/public
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/trusted_mem/ssmr
 ccflags-y += -I$(srctree)/drivers/dma-buf/heaps
 
-$(info ************  drivers/trusty/mtee-kree mk ************)
 
 #ccflags-y := -I$(srctree)/drivers/misc/mediatek/geniezone/public -Werror $(ccflags-y)
 
