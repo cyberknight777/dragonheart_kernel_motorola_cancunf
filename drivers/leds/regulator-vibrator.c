@@ -85,7 +85,7 @@ static int vibr_power_set(struct reg_vibr *vibr)
 {
 	int ret;
 
-	pr_info("set voltage = %u-%u\n",
+	pr_debug("set voltage = %u-%u\n",
 		vibr->vibr_conf.min_volt, vibr->vibr_conf.max_volt);
 	ret = regulator_set_voltage(vibr->vibr_conf.reg,
 		vibr->vibr_conf.min_volt, vibr->vibr_conf.max_volt);
@@ -97,7 +97,7 @@ static int vibr_power_set(struct reg_vibr *vibr)
 
 static void vibr_enable(struct reg_vibr *vibr)
 {
-	pr_info("vibr enable\n");
+	pr_debug("vibr enable\n");
 
 	if (!atomic_read(&vibr->reg_status)) {
 		if (regulator_enable(vibr->vibr_conf.reg))
@@ -111,7 +111,7 @@ static void vibr_enable(struct reg_vibr *vibr)
 
 static void vibr_disable(struct reg_vibr *vibr)
 {
-	pr_info("vibr disable\n");
+	pr_debug("vibr disable\n");
 
 	if (atomic_read(&vibr->reg_status)) {
 		if (regulator_disable(vibr->vibr_conf.reg))
@@ -174,7 +174,7 @@ static int vib_probe(struct platform_device *pdev)
 	int ret;
 	struct reg_vibr *m_vibr;
 
-	pr_info("probe start +++");
+	pr_debug("probe start +++");
 	m_vibr = devm_kzalloc(&pdev->dev, sizeof(struct reg_vibr), GFP_KERNEL);
 	if (!m_vibr) {
 		ret = -ENOMEM;
@@ -229,7 +229,7 @@ static int vib_probe(struct platform_device *pdev)
 		pr_info("set voltage for regulator fail\n");
 		goto err;
 	}
-	pr_info("probe success, end ---");
+	pr_debug("probe success, end ---");
 	return 0;
 
 err:
@@ -265,7 +265,7 @@ static void vib_shutdown(struct platform_device *pdev)
 {
 	struct reg_vibr *vibr = platform_get_drvdata(pdev);
 
-	pr_info("shutdown: enter!\n");
+	pr_debug("shutdown: enter!\n");
 
 	atomic_set(&vibr->vibr_shutdown, 1);
 	if (atomic_read(&vibr->vibr_state)) {
