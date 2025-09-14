@@ -9,22 +9,8 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
-
-$(info "CONFIG_MICROTRUST_TEE_SUPPORT=$(CONFIG_MICROTRUST_TEE_SUPPORT)")
-$(info "CONFIG_MICROTRUST_TZ_DRIVER=$(CONFIG_MICROTRUST_TZ_DRIVER)")
-$(info "CONFIG_MICROTRUST_VFS_DRIVER=$(CONFIG_MICROTRUST_VFS_DRIVER)")
-$(info "CONFIG_MICROTRUST_FP_DRIVER=$(CONFIG_MICROTRUST_FP_DRIVER)")
-$(info "CONFIG_MICROTRUST_DEBUG=$(CONFIG_MICROTRUST_DEBUG)")
-$(info "CONFIG_MICROTRUST_TEST_DRIVERS=$(CONFIG_MICROTRUST_TEST_DRIVERS)")
-$(info "-----------CONFIG_MTPROF=$(CONFIG_MTPROF)")
-$(info "-----------MICROTRUST_TZ_DRIVER_MTK_BOOTPROF=$(MICROTRUST_TZ_DRIVER_MTK_BOOTPROF)")
-
-$(info "src=$(src)")
-
 subdir-ccflags-y  += -I$(srctree)/$(src)/common/include
 #ccflags-y  += -I$(src)/common/include
-$(info "subdir-ccflags-y=$(subdir-ccflags-y)")
-$(info "ccflags-y=$(ccflags-y)")
 subdir-ccflags-y  += \
 	-I$(srctree)/$(src)/tz_dcih \
 	-I$(srctree)/$(src)/public \
@@ -34,7 +20,6 @@ ifneq ($(filter y m, $(CONFIG_MTPROF)),)
 subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/mtprof/
 endif
 
-$(info "=----------------1---------------------------")
 subdir-ccflags-$(CONFIG_MICROTRUST_DEBUG) += -DDEBUG
 
 include $(srctree)/drivers/tee/gpapi/Makefile.impl.include
@@ -76,8 +61,6 @@ isee-y +=              teei_fp/fp_func.o
 #                       tests/xtest_main.o
 
 #isee-y +=              ut_tester/ut_tester.o
-
-$(info "=----------------2---------------------------")
 #obj-$(CONFIG_MICROTRUST_TZ_DRIVER) += tz_driver/
 #obj-$(CONFIG_MICROTRUST_VFS_DRIVER) += tz_vfs/
 #obj-$(CONFIG_MICROTRUST_FP_DRIVER) += teei_fp/
