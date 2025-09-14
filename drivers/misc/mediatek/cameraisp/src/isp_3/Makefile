@@ -38,4 +38,3 @@ obj-$(CONFIG_MTK_CAMERA_ISP_RAW_SUPPORT_ISP3_M) += camera_isp_3_m.o
 obj-$(CONFIG_MTK_CAMERA_ISP_RAW_SUPPORT_ISP3_Z) += camera_isp_3_z.o
 obj-$(CONFIG_MTK_CAMERA_ISP_RAW_SUPPORT_ISP3_M) += cam_qos_3.o
 
-$(info cameraisp drv by platform $(platform_drv))
