@@ -11,7 +11,6 @@
 # GNU General Public License for more details.
 #
 
-$(warning $(CONFIG_MTK_CAMERA_ISP_VER))
 
 ifeq ($(CONFIG_MTK_CAMERA_ISP_VER),"isp6s")
   obj-$(CONFIG_MTK_CAMERA_DIP_ISP6S) += isp_6s/
