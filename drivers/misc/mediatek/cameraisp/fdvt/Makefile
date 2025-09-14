@@ -2,7 +2,6 @@
 MTK_CUSTOM_PATH  := $(srctree)/drivers/misc/mediatek
 
 ifneq (, $(filter $(strip $(CONFIG_MTK_CAMERA_FD_VERSION40)),m y))
-  $(info FDVT LBJ: Drv use 4.0 folder)
   MTKCAM_FDVT_VERSION := 4.0
   MTKCAM_FDVT_PATH := $(MTK_CUSTOM_PATH)/cameraisp/fdvt/4.0
   subdir-ccflags-y += -I$(MTK_CUSTOM_PATH)/cameraisp/fdvt/4.0/inc
@@ -10,15 +9,12 @@ ifneq (, $(filter $(strip $(CONFIG_MTK_CAMERA_FD_VERSION40)),m y))
 endif
 
 ifneq (, $(filter $(strip $(CONFIG_MTK_CAMERA_FD_ISP6S)),m y))
-  $(info FDVT: Drv use 5.1 folder)
   MTKCAM_FDVT_VERSION := 5.1
   MTKCAM_FDVT_PATH := $(MTK_CUSTOM_PATH)/cameraisp/fdvt/5.1
   subdir-ccflags-y += -I$(MTK_CUSTOM_PATH)/cameraisp/fdvt/5.1/inc
-  $(info fdvt tina)
 endif
 
 ifneq (, $(filter $(strip $(CONFIG_MTK_CAMERA_FD_VERSION35)),m y))
-  $(info FDVT: Drv use 3.5 folder)
   MTKCAM_FDVT_VERSION := 3.5
   MTKCAM_FDVT_PATH := $(MTK_CUSTOM_PATH)/cameraisp/fdvt/3.5
   subdir-ccflags-y += -I$(MTK_CUSTOM_PATH)/cameraisp/fdvt/3.5/inc

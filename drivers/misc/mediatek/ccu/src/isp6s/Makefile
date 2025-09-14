@@ -3,9 +3,6 @@
 # Copyright (c) 2016 MediaTek Inc.
 #
 
-$(info $(MTK_PLATFORM))
-$(info $(platform))
-$(info $(srctree))
 
 #ion
 ccflags-y += -I$(srctree)/drivers/iommu/
