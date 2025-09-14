@@ -1,10 +1,6 @@
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
-$(info [fm_drv:Include.mk] BUILD_CONNAC2 = $(BUILD_CONNAC2))
-$(info [fm_drv:Include.mk] FM_CHIP_ID = $(FM_CHIP_ID))
-$(info [fm_drv:Include.mk] FM_CHIP = $(FM_CHIP))
-$(info [fm_drv:Include.mk] FM_PLAT = $(FM_PLAT))
 
 MODULE_NAME := fmradio_drv_$(FM_PLAT)
 LOCAL_INIT_RC := init.fmradio_drv.rc
