@@ -11,7 +11,6 @@
 
 ###############################################################################
 # Necessary Check
-$(warning build in gps_dl)
 ifeq ($(CONFIG_MTK_GPS_SUPPORT), y)
 
 ifeq ($(AUTOCONF_H),)
