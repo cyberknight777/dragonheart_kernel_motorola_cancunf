@@ -20,4 +20,3 @@ mot_dubai_ak7377a-objs += dw9781_circle_test.o
 mot_dubai_ak7377a-objs += dw9781_i2c.o
 mot_dubai_ak7377a-objs += dw9781.o
 
-$(info mot_dubai_ak7377a-objs : $(mot_dubai_ak7377a-objs))
