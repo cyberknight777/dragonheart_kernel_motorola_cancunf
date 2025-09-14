@@ -1,9 +1,6 @@
 LOCAL_PATH := $(call my-dir)
 MAIN_PATH := $(LOCAL_PATH)
 
-$(info [fm_drv:Android.mk] MTK_FM_SUPPORT = $(MTK_FM_SUPPORT))
-$(info [fm_drv:Android.mk] FM_CHIP_ID = $(FM_CHIP_ID))
-
 ifeq ($(strip $(MTK_FM_SUPPORT)), yes)
     # LD 1.0 should have FM_CHIP_ID
     # FM_CHIP/FM_PLAT is assigned by Android.mk
