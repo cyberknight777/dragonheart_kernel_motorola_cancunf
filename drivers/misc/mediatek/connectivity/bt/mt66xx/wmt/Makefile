@@ -26,13 +26,9 @@ ccflags-y += -D FW_LOG_DEFAULT_ON=0
 
 # platform
 ccflags-y += -D CONNAC1X_CHIPID=$(BT_PLATFORM)
-$(info $(LOG_TAG) BT_PLATFORM = $(BT_PLATFORM))
-$(info $(LOG_TAG) srctree = $(srctree))
-
 
 ###############################################################################
 # To add WMT dependent Macro and header file, will be removed later
-$(info $(LOG_TAG) BT_ENABLE_LOW_POWER_DEBUG=$(BT_ENABLE_LOW_POWER_DEBUG))
 ifeq ($(BT_ENABLE_LOW_POWER_DEBUG),y)
     ccflags-y += -D ENABLE_LOW_POWER_DEBUG=1
 else
