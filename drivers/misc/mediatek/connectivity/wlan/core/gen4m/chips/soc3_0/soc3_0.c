@@ -3198,7 +3198,6 @@ uint32_t soc3_0_wlanPowerOnDownload(
 		}
 
 #if (CFG_ROM_PATCH_NO_SEM_CTRL == 0)
-#pragma message("ROM code supports SEM-CTRL for ROM patch download")
 		if (wlanPatchIsDownloaded(prAdapter)) {
 			kalFirmwareImageUnmapping(prAdapter->prGlueInfo, NULL,
 						  prFwBuffer);
@@ -3206,8 +3205,6 @@ uint32_t soc3_0_wlanPowerOnDownload(
 				"No need to download patch\n");
 			return WLAN_STATUS_SUCCESS;
 		}
-#else
-#pragma message("ROM code supports no SEM-CTRL for ROM patch download")
 #endif
 
 		/* Patch DL */
