@@ -9,10 +9,6 @@ ccflags-$(LOCAL_MTK_GPU_PROTECTED_SUPPORT) += -DSUPPORT_TRUSTED_DEVICE
 
 RGX_TOP := $(if $(filter /%,$(src)),,$(srctree)/)$(src)
 
-$(info [GPU_DEBUG] MTK_PLATFORM = $(MTK_PLATFORM))
-$(info [GPU_DEBUG] RGX_TOP=$(RGX_TOP))
-$(info [GPU_DEBUG] LOCAL_MTK_GPU_PROTECTED_SUPPORT=$(LOCAL_MTK_GPU_PROTECTED_SUPPORT))
-
 ifeq ($(MTK_DDK_DEBUG),y)
 	ccflags-y += -include $(RGX_TOP)/include/config_kernel_debug_$(MTK_PLATFORM).h
 else ifeq ($(CONFIG_MTK_ENG_BUILD),y)
