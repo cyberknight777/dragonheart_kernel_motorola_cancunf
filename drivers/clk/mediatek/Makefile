@@ -12,8 +12,6 @@ obj-$(CONFIG_COMMON_CLK_MT6739) += clk-fmeter-mt6739.o
 clk-fmeter-mt6739-$(CONFIG_COMMON_CLK_MT6739) += clk-fmeter-mt6739.o
 obj-$(CONFIG_COMMON_CLK_MT6739) += clk-fixed-factor-mt6739.o
 clk-fixed-factor-mt6739-$(CONFIG_COMMON_CLK_MT6739) += clk-fixed-factor-mt6739.o
-$(warning go this for clk CONFIG_COMMON_CLK_MT6739="$(CONFIG_COMMON_CLK_MT6739)")
-$(warning go this for clk CONFIG_MTK_HANG_DETECT="$(CONFIG_MTK_HANG_DETECT)")
 
 ifeq ($(CONFIG_DEBUG_FS), y)
 obj-$(CONFIG_COMMON_CLK_MT6739) += clkdbg_mt6739.o
@@ -35,8 +33,6 @@ obj-$(CONFIG_COMMON_CLK_MT6761) += mt6761_clkmgr.o
 clk-clkmgr-mt6761-$(CONFIG_COMMON_CLK_MT6761) += mt6761_clkmgr.o
 obj-$(CONFIG_COMMON_CLK_MT6761) += clk-fmeter-mt6761.o
 clk-fmeter-mt6761-$(CONFIG_COMMON_CLK_MT6761) += clk-fmeter-mt6761.o
-$(warning go this for clk CONFIG_COMMON_CLK_MT6761="$(CONFIG_COMMON_CLK_MT6761)")
-$(warning go this for clk CONFIG_MTK_HANG_DETECT="$(CONFIG_MTK_HANG_DETECT)")
 
 ifeq ($(CONFIG_DEBUG_FS), y)
 obj-$(CONFIG_COMMON_CLK_MT6761) += clkdbg-mt6761.o
@@ -53,8 +49,6 @@ obj-$(CONFIG_COMMON_CLK_MT6765) += mt6765_clkmgr.o
 clk-clkmgr-mt6765-$(CONFIG_COMMON_CLK_MT6765) += mt6765_clkmgr.o
 obj-$(CONFIG_COMMON_CLK_MT6765) += clk-fmeter-mt6765.o
 clk-fmeter-mt6765-$(CONFIG_COMMON_CLK_MT6765) += clk-fmeter-mt6765.o
-$(warning go this for clk CONFIG_COMMON_CLK_MT6765="$(CONFIG_COMMON_CLK_MT6765)")
-$(warning go this for clk CONFIG_MTK_HANG_DETECT="$(CONFIG_MTK_HANG_DETECT)")
 
 ifeq ($(CONFIG_DEBUG_FS), y)
 obj-$(CONFIG_COMMON_CLK_MT6765) += clkdbg-mt6765.o
@@ -73,8 +67,6 @@ obj-$(CONFIG_COMMON_CLK_MT6768) += mt6768_clkmgr.o
 clk-clkmgr-mt6768-$(CONFIG_COMMON_CLK_MT6768) += mt6768_clkmgr.o
 obj-$(CONFIG_COMMON_CLK_MT6768) += clk-fmeter-mt6768.o
 clk-fmeter-mt6768-$(CONFIG_COMMON_CLK_MT6768) += clk-fmeter-mt6768.o
-$(warning go this for clk CONFIG_COMMON_CLK_MT6768="$(CONFIG_COMMON_CLK_MT6768)")
-$(warning go this for clk CONFIG_MTK_HANG_DETECT="$(CONFIG_MTK_HANG_DETECT)")
 
 ifeq ($(CONFIG_DEBUG_FS), y)
 obj-$(CONFIG_COMMON_CLK_MT6768) += clkdbg-mt6768.o
