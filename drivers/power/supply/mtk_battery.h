@@ -54,14 +54,14 @@ do {\
 #define bm_notice(fmt, args...)   \
 do {\
 	if (bat_get_debug_level() >= BMLOG_NOTICE_LEVEL) {\
-		pr_notice(fmt, ##args); \
+		pr_debug(fmt, ##args); \
 	}								   \
 } while (0)
 
 #define bm_info(fmt, args...)   \
 do {\
 	if (bat_get_debug_level() >= BMLOG_INFO_LEVEL) {\
-		pr_info(fmt, ##args); \
+		pr_debug(fmt, ##args); \
 	}								   \
 } while (0)
 
