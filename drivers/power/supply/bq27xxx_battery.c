@@ -728,6 +728,7 @@ static enum power_supply_property bq27541_props[] = {
 	POWER_SUPPLY_PROP_POWER_AVG,
 	POWER_SUPPLY_PROP_HEALTH,
 	POWER_SUPPLY_PROP_MANUFACTURER,
+	POWER_SUPPLY_PROP_CHARGE_COUNTER,
 };
 #define bq27542_props bq27541_props
 #define bq27546_props bq27541_props
@@ -1993,6 +1994,7 @@ static int bq27xxx_battery_get_property(struct power_supply *psy,
 {
 	int ret = 0;
 	struct bq27xxx_device_info *di = power_supply_get_drvdata(psy);
+	union  power_supply_propval online, status;
 
 	mutex_lock(&di->lock);
 	if (time_is_before_jiffies(di->last_update + 5 * HZ))
@@ -2004,6 +2006,31 @@ static int bq27xxx_battery_get_property(struct power_supply *psy,
 
 	switch (psp) {
 	case POWER_SUPPLY_PROP_STATUS:
+		if (IS_ERR_OR_NULL(di->chg_psy)) {
+			dev_info(di->dev, "%s retry to get chg_psy\n", __func__);
+			di->chg_psy =
+				devm_power_supply_get_by_phandle(di->dev, "charger");
+		}
+
+		if (IS_ERR_OR_NULL(di->chg_psy)) {
+			dev_info(di->dev, "%s Couldn't get chg_psy\n", __func__);
+			ret = -EINVAL;
+		} else {
+			ret = power_supply_get_property(di->chg_psy,
+				POWER_SUPPLY_PROP_ONLINE, &online);
+			ret = power_supply_get_property(di->chg_psy,
+				POWER_SUPPLY_PROP_STATUS, &status);
+
+			if (!online.intval)
+				val->intval = POWER_SUPPLY_STATUS_DISCHARGING;
+			else {
+				if (status.intval == POWER_SUPPLY_STATUS_NOT_CHARGING)
+					val->intval = status.intval;
+				else
+					val->intval = POWER_SUPPLY_STATUS_CHARGING;
+			}
+		}
+
 		ret = bq27xxx_battery_current_and_status(di, NULL, val, NULL);
 		break;
 	case POWER_SUPPLY_PROP_VOLTAGE_NOW:
@@ -2075,6 +2102,11 @@ static int bq27xxx_battery_get_property(struct power_supply *psy,
 	case POWER_SUPPLY_PROP_MANUFACTURER:
 		val->strval = BQ27XXX_MANUFACTURER;
 		break;
+	case POWER_SUPPLY_PROP_CHARGE_COUNTER:
+		ret = bq27xxx_simple_value(di->cache.capacity, val);
+		if (val->intval >= 0)
+			val->intval = ((val->intval) * 8000) / 100;
+		break;
 	default:
 		return -EINVAL;
 	}
@@ -2086,8 +2118,11 @@ static void bq27xxx_external_power_changed(struct power_supply *psy)
 {
 	struct bq27xxx_device_info *di = power_supply_get_drvdata(psy);
 
+	cancel_delayed_work_sync(&di->work);
+	schedule_delayed_work(&di->work, 0);
 	/* After charger plug in/out wait 0.5s for things to stabilize */
 	mod_delayed_work(system_wq, &di->work, HZ / 2);
+	power_supply_changed(di->bat);
 }
 
 int bq27xxx_battery_setup(struct bq27xxx_device_info *di)
@@ -2117,10 +2152,14 @@ int bq27xxx_battery_setup(struct bq27xxx_device_info *di)
 	psy_desc->get_property = bq27xxx_battery_get_property;
 	psy_desc->external_power_changed = bq27xxx_external_power_changed;
 
-	di->bat = power_supply_register_no_ws(di->dev, psy_desc, &psy_cfg);
+	di->bat = power_supply_register(di->dev, psy_desc, &psy_cfg);
 	if (IS_ERR(di->bat))
 		return dev_err_probe(di->dev, PTR_ERR(di->bat),
 				     "failed to register battery\n");
+
+	di->chg_psy = devm_power_supply_get_by_phandle(di->dev, "charger");
+	if (IS_ERR_OR_NULL(di->chg_psy))
+		dev_info(di->dev, "Couldn't get chg_psy\n");
 
 	bq27xxx_battery_settings(di);
 	bq27xxx_battery_update(di);

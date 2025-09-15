@@ -265,7 +265,6 @@ int __cpu_disable(void)
 #ifdef CONFIG_GENERIC_ARCH_TOPOLOGY
 	remove_cpu_topology(cpu);
 #endif
-
 	/*
 	 * Take this CPU offline.  Once we clear this, we can't return,
 	 * and we must not schedule until we're ready to give up the cpu.
@@ -867,3 +866,15 @@ void arch_trigger_cpumask_backtrace(const cpumask_t *mask, bool exclude_self)
 {
 	nmi_trigger_cpumask_backtrace(mask, exclude_self, raise_nmi);
 }
+
+int nr_ipi_get(void)
+{
+	return nr_ipi;
+}
+EXPORT_SYMBOL_GPL(nr_ipi_get);
+
+struct irq_desc **ipi_desc_get(void)
+{
+	return ipi_desc;
+}
+EXPORT_SYMBOL_GPL(ipi_desc_get);

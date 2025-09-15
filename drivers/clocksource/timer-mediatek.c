@@ -309,5 +309,6 @@ static int __init mtk_gpt_init(struct device_node *node)
 
 	return 0;
 }
+
 TIMER_OF_DECLARE(mtk_mt6577, "mediatek,mt6577-timer", mtk_gpt_init);
 TIMER_OF_DECLARE(mtk_mt6765, "mediatek,mt6765-timer", mtk_syst_init);

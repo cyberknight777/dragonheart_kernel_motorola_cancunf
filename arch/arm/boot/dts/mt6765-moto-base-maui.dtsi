@@ -1,0 +1,59 @@
+/*
+ * Things can done here:
+ * 	Add nodes or properties to root node
+ * 	Delete nodes or properties
+*/
+
+#include "mt6765-moto-base.dtsi"
+#include "tcpc_config.dtsi"
+#include "sgm7220.dtsi"
+
+/ {
+	key_google: key_google {
+	};
+
+        lk_charger: lk_charger {
+             /delete-property/ enable_pe_plus;
+        };
+
+        charger: charger {
+             /delete-property/ enable_dynamic_mivr;
+        };
+
+        charge_leds: charge_leds { };
+
+	flashlights_ocp8132: flashlights_ocp8132 {
+		compatible = "mediatek,flashlights_ocp8132";
+		ecouple = <0>;
+		channel@1 {
+			type = <0>;
+			ct = <0>;
+			part = <0>;
+		};
+	};
+
+	mtee_svp: mtee_svp {
+		svp: SecureVideoPath {
+			compatible = "mediatek,mtk_sec_video_path_support";
+		};
+	};
+};
+
+&mtk_charger_type {
+	/delete-property/ charger;
+};
+
+&extcon_usb {
+	/delete-property/ vbus-supply;
+	/delete-property/ charger;
+};
+
+/* Trustonic Mobicore real driver */
+&mobicore {
+	trustonic,real-drv = <1>;
+};
+
+/* regulator_vibrator needs label at kernel 5.10*/
+&regulator_vibrator {
+	label = "vibrator";
+};

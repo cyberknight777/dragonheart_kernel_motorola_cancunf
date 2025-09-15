@@ -1,0 +1,414 @@
+/*
+ * Copyright (c) 2019 MediaTek Inc.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&moto_chg_tcmd {
+                compatible = "mmi,moto-chg-tcmd";
+                status = "okay";
+
+                mmi,ntc_table = <1>;
+                mmi,ntc_v_ref = <1800000>;
+                mmi,ntc_r_pull = <100000>;
+
+                mmi,batid_v_ref = <1800000>;
+                mmi,batid_r_pull = <100000>;
+
+                mmi,adc-channel-cpu = <0>;
+                mmi,adc-channel-charger = <2>;
+                mmi,adc-channel-pa = <1>;
+                mmi,adc-channel-batid = <3>;
+                mmi,adc-channel-vbat = <100>;
+};
+
+&pd_adapter {
+	status = "disabled";
+};
+
+&pe5 {
+	status = "disabled";
+};
+
+&pe4 {
+	status = "disabled";
+};
+
+&pdc {
+	status = "disabled";
+};
+
+&pe2 {
+	status = "disabled";
+};
+
+&pe {
+	status = "disabled";
+};
+
+&rt5133 {
+	status = "disabled";
+};
+
+&mt6375 {
+	status = "disabled";
+};
+
+&lk_charger{
+    usb_charger_current = <500000>;
+    ac_charger_current = <1500000>;
+    ac_charger_input_current = <1500000>;
+    non_std_ac_charger_current = <1000000>;
+    charging_host_input_current = <1500000>;
+    charging_host_charger_current = <1000000>;
+
+    boot_battery_voltage = <3600000>;
+    fast_charge_voltage = <3000000>;
+    temp_t4_threshold = <60>;
+};
+
+&charger {
+        /* common */
+        battery_cv = <4450000>;
+        max_charger_voltage = <12000000>;
+        min_charger_voltage = <4600000>;
+
+        /* charging current */
+        usb_charger_current_suspend = <0>;
+        usb_charger_current_unconfigured = <70000>;
+        usb_charger_current_configured = <500000>;
+        usb_charger_current = <500000>;
+        ac_charger_current = <2500000>;
+        ac_charger_input_current = <2000000>;
+        non_std_ac_charger_current = <1000000>;
+        charging_host_charger_current = <1500000>;
+        apple_1_0a_charger_current = <650000>;
+        apple_2_1a_charger_current = <800000>;
+        ta_ac_charger_current = <2000000>;
+        typec_limit_aicr = <2000000>;
+	mmi,vfloat-comp-uv = <16000>;
+        //mmi config
+        mmi,iterm-ma = <243>;
+	mmi,mmi-temp-zones = <0  4200 1000 0>,
+			<10 4250 3000 1000>,
+			<15 0 3000 3000>,
+			<25 0 5800 4000>,
+			<35 0 5800 4000>,
+			<46 0 5800 4000>,
+			<60 4200 4000 0>;
+
+	mmi,mmi-ffc-zones = <0 4200 243>,
+			<10 4450 243>,
+			<15 4450 243>,
+			<25 4480 575>,
+			<35 4480 635>,
+			<45 4480 661>,
+			<60 4200 243>;
+
+        mmi,enable-charging-limit;
+        mmi,upper-limit-capacity = <65>;
+        mmi,lower-limit-capacity = <60>;
+};
+
+&i2c6 {
+        bq2597x-standalone@66 {
+                compatible = "ti,bq2597x-standalone";
+                reg = <0x66>;
+                interrupt-parent = <&pio>;
+
+                ti,bq2597x,bat-ovp-alarm-disable;
+                ti,bq2597x,bat-ucp-alarm-disable;
+                ti,bq2597x,bat-ucp-disable;
+
+                ti,bq2597x,bat-therm-disable;
+                ti,bq2597x,bus-therm-disable;
+                ti,bq2597x,die-therm-disable;
+
+                ti,bq2597x,bat-ovp-threshold = <4525>;
+                ti,bq2597x,bat-ovp-alarm-threshold = <4490>;
+                ti,bq2597x,bat-ocp-threshold = <7000>;
+                ti,bq2597x,bat-ocp-alarm-threshold = <6000>;
+
+                ti,bq2597x,bus-ovp-threshold = <12000>;
+                ti,bq2597x,bus-ovp-alarm-threshold = <11000>;
+                ti,bq2597x,bus-ocp-threshold = <3750>;
+                ti,bq2597x,bus-ocp-alarm-threshold = <3500>;
+
+
+                ti,bq2597x,bat-therm-threshold = <0x15>;/*4.1%*/
+                ti,bq2597x,bus-therm-threshold = <0x15>;/*4.1%*/
+                ti,bq2597x,die-therm-threshold = <145>;
+
+                ti,bq2597x,ac-ovp-threshold = <14>;
+                ti,bq2597x,sense-resistor-mohm = <5>;
+
+                sc8551,ac-ovp-threshold = <13>;
+        };
+};
+
+
+&i2c6 {
+	clock-frequency = <400000>;
+	sgm4154x_charger: sgm4154x@3B {
+		status = "okay";
+		compatible = "sgm,sgm41542";
+		reg = <0x3B>;
+		interrupt-parent = <&pio>;
+		interrupts = <4 0>;            //irq num base on hardware design
+		sgm,irq-gpio = <&pio 4 0>;     //irq num base on hardware design
+		sgm,chg-en-gpio = <&pio 64 0>;   //gpio num base on hardware design  1.MTK parent node name is pio  2.QUALCOMM parent node name is tlmm or other
+
+		chg_name = "primary_chg";
+		input-voltage-limit-microvolt = <4700000>;
+		input-current-limit-microamp = <500000>;
+
+		typec-support;
+
+		/* sw jeita  parameter customer defined*/
+		enable_sw_jeita;
+		jeita_temp_above_t4_cv = <0>;
+		jeita_temp_t3_to_t4_cv = <4100000>;
+		jeita_temp_t2_to_t3_cv = <4350000>;
+		jeita_temp_t1_to_t2_cv = <4350000>;
+		jeita_temp_t0_to_t1_cv = <0>;
+		jeita_temp_below_t0_cv = <0>;
+
+		jeita_temp_above_t4_cc_current = <0>;
+		jeita_temp_t3_to_t4_cc_current = <1000000>;
+		jeita_temp_t2_to_t3_cc_current = <1250000>;
+		jeita_temp_t1_to_t2_cc_current = <1000000>;
+		jeita_temp_below_t0_cc_current = <0>;
+
+		temp_t4_thres = <50>;
+		temp_t4_thres_minus_x_degree = <48>;
+		temp_t3_thres = <45>;
+		temp_t3_thres_minus_x_degree = <45>;
+		temp_t2_thres = <20>;
+		temp_t2_thres_plus_x_degree = <15>;
+		temp_t1_thres = <0>;
+		temp_t1_thres_plus_x_degree = <0>;
+		temp_t0_thres = <0>;
+		temp_t0_thres_plus_x_degree = <2>;
+		temp_neg_10_thres = <0>;
+	};
+
+	usb_type_c: wusb3801@60 {
+		compatible = "mediatek,usb_type_c";
+		reg = <0x60>;
+		interrupt-parent = <&pio>;
+		interrupts = <5 0>;
+		wusb3801,irq-gpio = <&pio 5 0x0>;
+
+		status = "okay";
+	};
+};
+
+
+&i2c6 {
+	sgm41543d_charger: sgm41543d@0B {
+                status = "okay";
+                compatible = "sgm,sgm41543D";
+                reg = <0x0B>;
+                interrupt-parent = <&pio>;
+                interrupts = <4 0>;            //irq num base on hardware design
+                sgm,irq-gpio = <&pio 4 0>;     //irq num base on hardware design
+                sgm,chg-en-gpio = <&pio 64 0>;   //gpio num base on hardware design  1.MTK parent node name is pio  2.QUALCOMM parent node name is tlmm or other
+
+                chg_name = "primary_chg";
+                input-voltage-limit-microvolt = <4700000>;
+		input-current-limit-microamp = <500000>;
+
+                /* sw jeita  parameter customer defined*/
+                enable_sw_jeita;
+                jeita_temp_above_t4_cv = <0>;
+                jeita_temp_t3_to_t4_cv = <4100000>;
+                jeita_temp_t2_to_t3_cv = <4350000>;
+                jeita_temp_t1_to_t2_cv = <4350000>;
+                jeita_temp_t0_to_t1_cv = <0>;
+                jeita_temp_below_t0_cv = <0>;
+
+                jeita_temp_above_t4_cc_current = <0>;
+                jeita_temp_t3_to_t4_cc_current = <1000000>;
+                jeita_temp_t2_to_t3_cc_current = <1250000>;
+                jeita_temp_t1_to_t2_cc_current = <1000000>;
+                jeita_temp_below_t0_cc_current = <0>;
+
+                temp_t4_thres = <50>;
+                temp_t4_thres_minus_x_degree = <48>;
+                temp_t3_thres = <45>;
+                temp_t3_thres_minus_x_degree = <45>;
+                temp_t2_thres = <20>;
+                temp_t2_thres_plus_x_degree = <15>;
+                temp_t1_thres = <0>;
+                temp_t1_thres_plus_x_degree = <0>;
+                temp_t0_thres = <0>;
+                temp_t0_thres_plus_x_degree = <2>;
+                temp_neg_10_thres = <0>;
+                bc12_sel = <&mtk_ctd>;
+                boot_mode = <&chosen>;
+                phys = <&u2port0 PHY_TYPE_USB2>;
+                phy-names = "usb2-phy";
+                usb = <&usb>;
+                sgm41543d_otg_vbus: otg {
+                        regulator-compatible = "sgm4154x,otg-vbus";
+                        regulator-name = "usb-otg-vbus";
+                        regulator-min-microvolt = <4850000>;
+                        regulator-max-microvolt = <5300000>;
+                        regulator-min-microamp = <1000000>;
+                        regulator-max-microamp = <2200000>;
+                };
+	};
+};
+
+&mtk_gauge {
+	charger = <&sgm4154x_charger>;
+        charger_2nd = <&sgm41543d_charger>;
+
+	CAR_TUNE_VALUE = <(100)>;
+	COM_FG_METER_RESISTANCE = <(80)>;
+	FG_CURRENT_PN_LABEL = <(1)>;
+	EMBEDDED_SEL = <(1)>;
+	DIFFERENCE_FULLOCV_ITH = <(243)>;
+	g_Q_MAX_row = <4>;
+	g_Q_MAX_col = <10>;
+	g_Q_MAX = <
+		/*bat1,   bat2,   bat3,    bat4*/
+		4866 4866 4866 4658/*T0*/
+		4912 4912 4912 4903/*T1*/
+		4995 4995 4995 4804/*T2*/
+		4926 4926 4926 4785/*T3*/
+		4937 4937 4937 4691/*T4*/
+		4914 4890 4914 5542/*T5*/
+		3488 3488 3488 3488/*T6*/
+		3488 3488 3488 3488/*T7*/
+		3488 3488 3488 3488/*T8*/
+		3488 3488 3488 3488/*T9*/
+	>;
+	g_Q_MAX_H_CURRENT_row = <4>;
+	g_Q_MAX_H_CURRENT_col = <10>;
+	g_Q_MAX_H_CURRENT = <
+		/*bat1,   bat2,   bat3,    bat4*/
+		4832 4832 4832 4658/*T0*/
+		4876 4876 4876 4903/*T1*/
+		4900 4900 4900 4804/*T2*/
+		4466 4466 4466 4785/*T3*/
+		3405 3405 3405 4691/*T4*/
+		4914 4890 4914 5542/*T5*/
+		3488 3488 3488 3488/*T6*/
+		3488 3488 3488 3488/*T7*/
+		3488 3488 3488 3488/*T8*/
+		3488 3488 3488 3488/*T9*/
+	>;
+	/* Pseudo percentage */
+	g_FG_PSEUDO100 = <
+		/*bat1,   bat2,   bat3,    bat4*/
+		93   93  93  93/*T0*/
+		93   93  93  93/*T1*/
+		93   93  93  93/*T2*/
+		93   93  93  93/*T3*/
+		93   93  93  93/*T4*/
+		100 100 100 100/*T5*/
+		100 100 100 100/*T6*/
+		100 100 100 100/*T7*/
+		100 100 100 100/*T8*/
+		100 100 100 100/*T9*/
+	>;
+
+	g_QMAX_SYS_VOL = <
+		32950  32950  32950  32950
+		32950  32950  32950  32950
+		33000  33000  33000  33000
+		33000  33000  33000  33000
+		34250  34250  34250  34250
+		32500  32500  32500  32500
+		32800  32800  32800  32800
+		32800  32800  32800  32800
+		32800  32800  32800  32800
+		32800  32800  32800  32800
+	>;
+	df-serialnum = "SB18D50387";
+	#include "bat_setting/mt6789_battery_table_ATL1.dtsi"
+	#include "bat_setting/mt6789_battery_table_ATL2.dtsi"
+	#include "bat_setting/mt6789_battery_table_ATL3.dtsi"
+	#include "bat_setting/mt6789_battery_table_SCUD.dtsi"
+};
+
+&mtk_gauge {
+	io-channels = <&pmic_auxadc AUXADC_BAT_TEMP>,
+			<&pmic_auxadc AUXADC_BATADC>,
+			<&pmic_auxadc AUXADC_VBIF>,
+			<&pmic_auxadc AUXADC_IMP>,
+			<&pmic_auxadc AUXADC_VCDT>,
+			<&pmic_auxadc AUXADC_IMIX_R>;
+	io-channel-names = "pmic_battery_temp",
+			"pmic_battery_voltage",
+			"pmic_bif_voltage",
+			"pmic_ptim_voltage",
+			"pmic_charger_vbus",
+			"pmic_ptim_r";
+};
+
+&charger {
+	charger = <&sgm4154x_charger>;
+        charger_2nd = <&sgm41543d_charger>;
+};
+
+&mtk_ctd {
+	bc12 = <&sgm4154x_charger>;
+	bc12_sel = <2>;
+        bc12_2nd = <&sgm41543d_charger>;
+};
+
+&odm {
+	mmi_chrg_manager {
+		compatible = "mmi,chrg-manager";
+		mmi,pps-volt-steps = <20000>;
+		mmi,pps-curr-steps = <40000>;
+		mmi,pd-volt-max = <12000000>;
+		mmi,pd-curr-max = <3000000>;
+		mmi,batt-curr-boost = <300000>;
+		mmi,batt-ovp-lmt = <4550000>;
+		mmi,pl-chrg-vbatt-min = <3000000>;
+		mmi,typec-middle-current = <800000>;
+		mmi,step-first-current-comp = <0>;
+		mmi,dont-rerun-aicl;
+		mmi,chrg-temp-zones-num = <5>;
+		mmi,mmi-chrg-temp-zones =
+					<0 4200 1000  0 0>,
+					<10 4250 3000 4450 1000>,
+					<15 4450 3000 0 0>,
+					<45 4350 5800 4480 4000>,
+					<60 4200 4000 0 0>;
+
+		mmi,mmi-ffc-zones = <4200 243>,
+				<4250 243>,
+				<4450 243>,
+				<4480 575>,
+				<4480 635>,
+				<4480 661>,
+				<4200 243>;
+
+		mmi,thermal-min-level = <1500000>;
+		charger_device_0 {
+			chrg-name = "pmic-sw";
+			psy-name = "battery";
+			charging-curr-limited = <500000>;
+		};
+		charger_device_1 {
+			chrg-name = "cp-master";
+			psy-name = "bq2597x-standalone";
+			charging-curr-min = <1500000>;
+		};
+	};
+};
+
+&usb_type_c {
+    bootmode = <&chosen>;
+};

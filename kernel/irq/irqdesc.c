@@ -677,11 +677,19 @@ int __handle_domain_irq(struct irq_domain *domain, unsigned int hwirq,
 	int ret = 0;
 
 #ifdef CONFIG_IRQ_DOMAIN
+#if defined(CONFIG_MTK_FIX_IRQ_RCU_DEAD_LOCK) && defined(CONFIG_ARM)
+	if (lookup) {
+		irq_enter();
+		irq = irq_find_mapping(domain, hwirq);
+		irq_exit();
+	}
+#else
 	if (lookup) {
 		__irq_enter_raw();
 		irq = irq_find_mapping(domain, hwirq);
 		__irq_exit_raw();
 	}
+#endif//CONFIG_MTK_FIX_IRQ_RCU_DEAD_LOCK
 #endif
 
 	/*

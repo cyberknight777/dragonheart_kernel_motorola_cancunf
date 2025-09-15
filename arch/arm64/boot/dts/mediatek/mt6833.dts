@@ -1,0 +1,1813 @@
+// SPDX-License-Identifier: (GPL-2.0 OR MIT)
+/*
+ * Copyright (C) 2021 MediaTek Inc.
+ */
+/dts-v1/;
+#include <dt-bindings/clock/mt6833-clk.h>
+#include <dt-bindings/gce/mt6833-gce.h>
+#include <dt-bindings/interrupt-controller/arm-gic.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/spmi/spmi.h>
+#include <dt-bindings/pinctrl/mt6833-pinfunc.h>
+#include <dt-bindings/power/mt6833-power.h>
+#include <dt-bindings/soc/mediatek,boot-mode.h>
+#include <dt-bindings/interconnect/mtk,mt6873-emi.h>
+#include <dt-bindings/phy/phy.h>
+#include <dt-bindings/memory/mt6833-larb-port.h>
+#include <dt-bindings/reset/ti-syscon.h>
+#include <dt-bindings/thermal/thermal.h>
+/ {
+	model = "MT6833";
+	compatible = "mediatek,MT6833";
+	interrupt-parent = <&gic>;
+	#address-cells = <2>;
+	#size-cells = <2>;
+	aliases {
+		i2c0 = &i2c0;
+		i2c1 = &i2c1;
+		i2c2 = &i2c2;
+		i2c3 = &i2c3;
+		i2c4 = &i2c4;
+		i2c5 = &i2c5;
+		i2c6 = &i2c6;
+		i2c7 = &i2c7;
+		i2c8 = &i2c8;
+		i2c9 = &i2c9;
+		ovl0  = &disp_ovl0;
+		ovl3  = &disp_ovl0_2l;
+		rdma0 = &disp_rdma0;
+		wdma0 = &disp_wdma0;
+		dsi0  = &dsi0;
+		color0 = &disp_color0;
+		ccorr0 = &disp_ccorr0;
+		aal0 = &disp_aal0;
+		gamma0 = &disp_gamma0;
+		dither0 = &disp_dither0;
+		postmask0 = &disp_postmask0;
+	};
+	/* chosen */
+	chosen: chosen {
+		bootargs = "console=tty0 console=ttyS0,921600n1 root=/dev/ram \
+			8250.nr_uarts=4 \
+			vmalloc=400M swiotlb=noforce \
+			firmware_class.path=/vendor/firmware \
+			androidboot.hardware=mt6833";
+		kaslr-seed = <0 0>;
+	};
+	clkitg: clkitg {
+		compatible = "simple-bus";
+	};
+	disable_unused: disable_unused {
+		compatible = "simple-bus";
+	};
+	clocks {
+		clk32k: clk32k {
+			compatible = "fixed-clock";
+			#clock-cells = <0>;
+			clock-frequency = <32000>;
+		};
+		clk26m: clk26m {
+			compatible = "fixed-clock";
+			#clock-cells = <0>;
+			clock-frequency = <26000000>;
+		};
+		clk13m: clk13m {
+			compatible = "fixed-clock";
+			#clock-cells = <0>;
+			clock-frequency = <13000000>;
+		};
+		ulposc: ulposc {
+			compatible = "fixed-clock";
+			#clock-cells = <0>;
+			clock-frequency = <260000000>;
+		};
+	};
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		cpu0: cpu@000 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a55";
+			reg = <0x0000>;
+			enable-method = "psci";
+		};
+		cpu1: cpu@001 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a55";
+			reg = <0x0100>;
+			enable-method = "psci";
+			clock-frequency = <2000000000>;
+		};
+		cpu2: cpu@002 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a55";
+			reg = <0x0200>;
+			enable-method = "psci";
+		};
+		cpu3: cpu@003 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a55";
+			reg = <0x0300>;
+			enable-method = "psci";
+		};
+		cpu4: cpu@004 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a55";
+			reg = <0x0400>;
+			enable-method = "psci";
+		};
+		cpu5: cpu@005 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a55";
+			reg = <0x0500>;
+			enable-method = "psci";
+		};
+		cpu6: cpu@100 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a76";
+			reg = <0x0600>;
+			enable-method = "psci";
+		};
+		cpu7: cpu@101 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a76";
+			reg = <0x0700>;
+			enable-method = "psci";
+		};
+		cpu-map {
+			cluster0 {
+				core0 {
+					cpu = <&cpu0>;
+				};
+				core1 {
+					cpu = <&cpu1>;
+				};
+				core2 {
+					cpu = <&cpu2>;
+				};
+				core3 {
+					cpu = <&cpu3>;
+				};
+				core4 {
+					cpu = <&cpu4>;
+				};
+				core5 {
+					cpu = <&cpu5>;
+				};
+			};
+			cluster1 {
+				core0 {
+					cpu = <&cpu6>;
+				};
+				core1 {
+					cpu = <&cpu7>;
+				};
+			};
+		};
+	};
+	psci {
+		compatible = "arm,psci-1.0";
+		method = "smc";
+	};
+	lastbus: lastbus {
+		compatible = "mediatek,lastbus";
+		enabled = <1>;
+		sw_version = <1>;
+		timeout_ms = <200>;
+		timeout_type = <0>;
+		monitors {
+			monitor1 {
+				monitor_name = "debug_ctrl_ao_INFRA_AO";
+				base = <0x10023000>;
+				num_ports = <25>;
+				bus_freq_mhz = <156>;
+			};
+			monitor2 {
+				monitor_name = "debug_ctrl_ao_PERI_AO";
+				base = <0x1002b000>;
+				num_ports = <34>;
+				bus_freq_mhz = <156>;
+			};
+			monitor3 {
+				monitor_name = "debug_ctrl_ao_PERI_AO2";
+				base = <0x1002e000>;
+				num_ports = <19>;
+				bus_freq_mhz = <156>;
+			};
+			monitor4 {
+				monitor_name = "debug_ctrl_ao_PERI_PAR_AO";
+				base = <0x10040000>;
+				num_ports = <6>;
+				bus_freq_mhz = <156>;
+			};
+			monitor5 {
+				monitor_name = "debug_ctrl_ao_FMEM_AO";
+				base = <0x10042000>;
+				num_ports = <20>;
+				bus_freq_mhz = <533>;
+			};
+		};
+	};
+	memory {
+		device_type = "memory";
+		reg = <0 0x40000000 0 0x3e605000>;
+	};
+	reserved_memory: reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+		ssmr_cma_mem: ssmr-reserved-cma_memory {
+			compatible = "shared-dma-pool";
+			reusable;
+			size = <0 0x10000000>;
+			alignment = <0 0x1000000>;
+		};
+		wifi_mem: wifi-reserve-memory {
+			compatible = "shared-dma-pool";
+			no-map;
+			size = <0 0x600000>;
+			alignment = <0 0x1000000>;
+			alloc-ranges = <0 0x40000000 0 0x80000000>;
+		};
+		consys_mem: consys-reserve-memory {
+			compatible = "mediatek,consys-reserve-memory";
+			no-map;
+			size = <0 0x500000>;
+			alignment = <0 0x1000000>;
+			alloc-ranges = <0 0x40000000 0 0x80000000>;
+		};
+		reserve-memory-scp_share {  /* TODO: remove after lk2 ready */
+			compatible = "mediatek,reserve-memory-scp_share";
+			no-map;
+			size = <0 0x003A0000>; /*3MB + 128K share mem size */
+			alignment = <0 0x1000000>;
+			alloc-ranges = <0 0x50000000 0 0x40000000>;
+		};
+	};
+	memory_ssmr_features: memory-ssmr-features {
+		compatible = "mediatek,memory-ssmr-features";
+		svp-region-based-size = <0 0x6000000>;
+		tui-size = <0 0x4000000>;
+		wfd-region-based-size = <0 0x4000000>;
+		prot-region-based-size = <0 0x8000000>;
+	};
+	ssmr {
+		compatible = "mediatek,trusted_mem";
+		memory-region = <&ssmr_cma_mem>;
+	};
+	device_mpu_low@1021a000 {
+		compatible = "mediatek,device_mpu_low";
+		reg = <0 0x1021a000 0 0x1000>;
+		prot-base = <0x0 0x40000000>;
+		prot-size = <0x4 0x00000000>;
+		page-size = <0x200000>;
+		interrupts = <GIC_SPI 188 IRQ_TYPE_LEVEL_HIGH>;
+	};
+	gic: interrupt-controller {
+		compatible = "arm,gic-v3";
+		#interrupt-cells = <3>;
+		#address-cells = <2>;
+		#size-cells = <2>;
+		#redistributor-regions = <1>;
+		interrupt-parent = <&gic>;
+		interrupt-controller;
+		reg = <0 0x0c000000 0 0x40000>, // distributor
+		      <0 0x0c040000 0 0x200000>; // redistributor
+		interrupts = <GIC_PPI 9 IRQ_TYPE_LEVEL_HIGH>;
+	};
+	timer: timer {
+		compatible = "arm,armv8-timer";
+		interrupt-parent = <&gic>;
+		interrupts = <GIC_PPI 13 IRQ_TYPE_LEVEL_HIGH>,
+			<GIC_PPI 14 IRQ_TYPE_LEVEL_HIGH>,
+			<GIC_PPI 11 IRQ_TYPE_LEVEL_HIGH>,
+			<GIC_PPI 10 IRQ_TYPE_LEVEL_HIGH>;
+		clock-frequency = <13000000>;
+	};
+	soc {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		compatible = "simple-bus";
+		ranges;
+		drm:drm@1000d000 {
+			compatible = "mediatek,dbgtop-drm";
+			reg = <0 0x1000d000 0 0x1000>;
+			rgu_timeout = <0xea60>; // for ddr-reserved mode
+			ver = <1>;
+		};
+		dfd_mcu: dfd_mcu@0c020000 {
+			compatible = "mediatek,dfd_mcu";
+			enabled = <1>;
+			hw_version = <30>;
+			sw_version = <1>;
+			dfd_timeout = <0x2710>;
+			buf_addr_align = <0x1000000>;
+			buf_length = <0x100000>;
+			nr_max_core = <8>;
+			nr_big_core = <2>;
+			nr_rs_entry_little = <8>;
+			nr_rs_entry_big = <0>;
+			nr_header_row = <0>;
+			chip_id_offset = <0x18>;
+			check_pattern_offset = <0x0>;
+			/* dfd_disable_efuse = <25 12>; */
+			dfd_disable_efuse = <(-1) (-1)>;
+			dfd_cache: dfd_cache {
+				enabled = <0>;
+				dfd_timeout = <0x1770>;
+				buf_length = <0x2000000>;
+				tap_en = <0x43ff>;
+			};
+		};
+	};
+	mcupm: mcupm@0c540000 {
+		compatible = "mediatek,mcupm";
+		reg = <0 0x0c540000 0 0x22000>,
+		      <0 0x0c55fb00 0 0xa0>,
+		      <0 0x0c562004 0 0x4>,
+		      <0 0x0c560074 0 0x4>,
+		      <0 0x0c562000 0 0x4>,
+		      <0 0x0c560078 0 0x4>,
+		      <0 0x0c55fba0 0 0xa0>,
+		      <0 0x0c562004 0 0x4>,
+		      <0 0x0c560074 0 0x4>,
+		      <0 0x0c562000 0 0x4>,
+		      <0 0x0c560078 0 0x4>,
+		      <0 0x0c55fc40 0 0xa0>,
+		      <0 0x0c562004 0 0x4>,
+		      <0 0x0c560074 0 0x4>,
+		      <0 0x0c562000 0 0x4>,
+		      <0 0x0c560078 0 0x4>,
+		      <0 0x0c55fce0 0 0xa0>,
+		      <0 0x0c562004 0 0x4>,
+		      <0 0x0c560074 0 0x4>,
+		      <0 0x0c562000 0 0x4>,
+		      <0 0x0c560078 0 0x4>,
+		      <0 0x0c55fd80 0 0xa0>,
+		      <0 0x0c562004 0 0x4>,
+		      <0 0x0c560074 0 0x4>,
+		      <0 0x0c562000 0 0x4>,
+		      <0 0x0c560078 0 0x4>,
+		      <0 0x0c55fe20 0 0xa0>,
+		      <0 0x0c562004 0 0x4>,
+		      <0 0x0c560074 0 0x4>,
+		      <0 0x0c562000 0 0x4>,
+		      <0 0x0c560078 0 0x4>,
+		      <0 0x0c55fec0 0 0xa0>,
+		      <0 0x0c562004 0 0x4>,
+		      <0 0x0c560074 0 0x4>,
+		      <0 0x0c562000 0 0x4>,
+		      <0 0x0c560078 0 0x4>,
+		      <0 0x0c55ff60 0 0xa0>,
+		      <0 0x0c562004 0 0x4>,
+		      <0 0x0c560074 0 0x4>,
+		      <0 0x0c562000 0 0x4>,
+		      <0 0x0c560078 0 0x4>;
+		reg-names = "mcupm_base",
+			    "mbox0_base",
+			    "mbox0_set",
+			    "mbox0_clr",
+			    "mbox0_send",
+			    "mbox0_recv",
+			    "mbox1_base",
+			    "mbox1_set",
+			    "mbox1_clr",
+			    "mbox1_send",
+			    "mbox1_recv",
+			    "mbox2_base",
+			    "mbox2_set",
+			    "mbox2_clr",
+			    "mbox2_send",
+			    "mbox2_recv",
+			    "mbox3_base",
+			    "mbox3_set",
+			    "mbox3_clr",
+			    "mbox3_send",
+			    "mbox3_recv",
+			    "mbox4_base",
+			    "mbox4_set",
+			    "mbox4_clr",
+			    "mbox4_send",
+			    "mbox4_recv",
+			    "mbox5_base",
+			    "mbox5_set",
+			    "mbox5_clr",
+			    "mbox5_send",
+			    "mbox5_recv",
+			    "mbox6_base",
+			    "mbox6_set",
+			    "mbox6_clr",
+			    "mbox6_send",
+			    "mbox6_recv",
+			    "mbox7_base",
+			    "mbox7_set",
+			    "mbox7_clr",
+			    "mbox7_send",
+			    "mbox7_recv";
+		interrupts = <GIC_SPI 33 IRQ_TYPE_LEVEL_HIGH>,
+			     <GIC_SPI 34 IRQ_TYPE_LEVEL_HIGH>,
+			     <GIC_SPI 35 IRQ_TYPE_LEVEL_HIGH>,
+			     <GIC_SPI 36 IRQ_TYPE_LEVEL_HIGH>,
+			     <GIC_SPI 37 IRQ_TYPE_LEVEL_HIGH>,
+			     <GIC_SPI 38 IRQ_TYPE_LEVEL_HIGH>,
+			     <GIC_SPI 39 IRQ_TYPE_LEVEL_HIGH>,
+			     <GIC_SPI 40 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "mbox0",
+				  "mbox1",
+				  "mbox2",
+				  "mbox3",
+				  "mbox4",
+				  "mbox5",
+				  "mbox6",
+				  "mbox7";
+	};
+	topckgen_clk: syscon@10000000 {
+		compatible = "mediatek,mt6833-topckgen", "syscon";
+		reg = <0 0x10000000 0 0x1000>;
+		#clock-cells = <1>;
+	};
+	atf_logger: atf_logger {
+		compatible = "mediatek,tfa_debug";
+	};
+	dcm: dcm@10001000 {
+		compatible = "mediatek,mt6833-dcm";
+		reg = <0 0x10001000 0 0x1000>,
+			<0 0x10022000 0 0x1000>,
+			<0 0xc530000 0 0x5000>,
+			<0 0xc538000 0 0x5000>,
+			<0 0xc53a800 0 0x1000>,
+			<0 0xc53c000 0 0x1000>;
+		reg-names = "infracfg_ao",
+			"infra_ao_bcrm",
+			"mcusys_par_wrap",
+			"mp_cpusys_top",
+			"cpccfg_reg",
+			"mcusys_cfg_reg";
+	};
+	infracfg_ao_clk: syscon@10001000 {
+		compatible = "mediatek,mt6833-infracfg_ao", "syscon", "simple-mfd";
+		reg = <0 0x10001000 0 0x1000>;
+		#clock-cells = <1>;
+		infracfg_rst: reset-controller {
+			compatible = "ti,syscon-reset";
+			#reset-cells = <1>;
+			ti,reset-bits = <
+				0x120 0 0x124 0 0 0
+				(ASSERT_SET | DEASSERT_SET | STATUS_NONE) /* 0: lvts_ap */
+				0x730 12 0x734 12 0 0
+				(ASSERT_SET | DEASSERT_SET | STATUS_NONE) /* 1: lvts_mcu */
+				/* ufs reset */
+				0x130 15 0x134 15 0 0
+				(ASSERT_SET | DEASSERT_SET | STATUS_NONE) /* 2: ufshci */
+				0x140  7 0x144  7 0 0
+				(ASSERT_SET | DEASSERT_SET | STATUS_NONE) /* 3: unipro */
+				0x150 21 0x154 21 0 0
+				(ASSERT_SET | DEASSERT_SET | STATUS_NONE) /* 4: ufs-crypto */
+				>;
+		};
+	};
+	sleep_sram@1001e000 {
+		compatible = "mediatek,sleep_sram";
+		reg = <0 0x1001e000 0 0x4000>;
+	};
+	scp_infra: scp_infra@10001000 {
+		compatible = "mediatek,scpinfra";
+		reg = <0 0x10001000 0 0x1000>;  /* infracfg_ao */
+		#clock-cells = <1>;
+	};
+	pericfg_clk: syscon@10003000 {
+		compatible = "mediatek,mt6833-pericfg", "syscon";
+		reg = <0 0x10003000 0 0x1000>;
+		#clock-cells = <1>;
+	};
+	scpsys: power-controller@10006000 {
+		compatible = "mediatek,mt6833-scpsys", "syscon";
+		reg = <0 0x10006000 0 0x1000>;
+		#power-domain-cells = <1>;
+		clocks = <&topckgen_clk CLK_TOP_MFG_REF_SEL>,
+			<&topckgen_clk CLK_TOP_MFG_PLL_SEL>,
+			<&topckgen_clk CLK_TOP_IMG1_SEL>,
+			<&topckgen_clk CLK_TOP_IMG2_SEL>,
+			<&topckgen_clk CLK_TOP_IPE_SEL>,
+			<&topckgen_clk CLK_TOP_VDEC_SEL>,
+			<&topckgen_clk CLK_TOP_VENC_SEL>,
+			<&topckgen_clk CLK_TOP_MDP_SEL>,
+			<&topckgen_clk CLK_TOP_DISP_SEL>,
+			<&topckgen_clk CLK_TOP_AUD_INTBUS_SEL>,
+			<&topckgen_clk CLK_TOP_ADSP_SEL>,
+			<&topckgen_clk CLK_TOP_CAM_SEL>,
+			<&imgsys1_clk CLK_IMGSYS1_GALS>,
+			<&imgsys1_clk CLK_IMGSYS1_LARB9>,
+			<&imgsys2_clk CLK_IMGSYS2_GALS>,
+			<&imgsys2_clk CLK_IMGSYS2_LARB9>,
+			<&imgsys2_clk CLK_IMGSYS2_LARB10>,
+			<&ipesys_clk CLK_IPE_SMI_SUBCOM>,
+			<&ipesys_clk CLK_IPE_GALS>,
+			<&ipesys_clk CLK_IPE_LARB19>,
+			<&ipesys_clk CLK_IPE_LARB20>,
+			<&vdec_gcon_base_clk CLK_VDE2_VDEC_CKEN>,
+			<&vdec_gcon_base_clk CLK_VDE2_LARB1_CKEN>,
+			<&venc_gcon_clk CLK_VEN1_CKE1_VENC>,
+			<&mdpsys_config_clk CLK_MDP_SMI0>,
+			<&dispsys_config_clk CLK_MM_SMI_INFRA>,
+			<&dispsys_config_clk CLK_MM_SMI_COMMON>,
+			<&dispsys_config_clk CLK_MM_SMI_GALS>,
+			<&dispsys_config_clk CLK_MM_SMI_IOMMU>,
+			<&infracfg_ao_clk CLK_IFRAO_AUDIO_26M_BCLK>,
+			<&infracfg_ao_clk CLK_IFRAO_AUDIO>,
+			<&camsys_main_clk CLK_CAM_M_LARB13>,
+			<&camsys_main_clk CLK_CAM_M_LARB14>,
+			<&camsys_main_clk CLK_CAM_M_CCU_GALS>,
+			<&camsys_main_clk CLK_CAM_M_CAM2MM_GALS>,
+			<&camsys_rawa_clk CLK_CAM_RA_LARBX>,
+			<&camsys_rawb_clk CLK_CAM_RB_LARBX>;
+		clock-names = "mfg1", "mfg2", "isp", "isp2", "ipe",
+			"vdec", "venc", "mdp", "disp",
+			"audio", "adsp", "cam", "isp-0",
+			"isp-1", "isp2-0", "isp2-1", "isp2-2",
+			"ipe-0", "ipe-1", "ipe-2", "ipe-3",
+			"vdec-0", "vdec-1", "venc-0", "disp_lp-0",
+			"disp-0", "disp-1", "disp-2", "disp-3",
+			"audio-0", "audio-1", "cam-0", "cam-1",
+			"cam-2", "cam-3", "cam_rawa-0", "cam_rawb-0";
+		infracfg = <&infracfg_ao_clk>;
+	};
+	eint: apirq@1000b000 {
+		compatible = "mediatek,mtk-eint";
+		reg = <0 0x1000b000 0 0x1000>;
+		reg-name = "eint";
+		interrupts = <GIC_SPI 212 IRQ_TYPE_LEVEL_HIGH 0>;
+		mediatek,total-pin-number = <121>;
+	};
+	apmixedsys_clk: syscon@1000C000 {
+		compatible = "mediatek,mt6833-apmixedsys", "syscon";
+		reg = <0 0x1000C000 0 0x1000>;
+		#clock-cells = <1>;
+	};
+	fhctl: fhctl@1000ce00 {
+		compatible = "mediatek,mt6853-fhctl";
+		reg = <0 0x1000ce00 0 0x200>,
+			<0 0x1000c000 0 0xe00>;
+		map0 {
+			domain = "top";
+			method = "fhctl-mcupm";
+			armpll_ll {
+				fh-id = <0>;
+				pll-id = <999>;
+				perms = <0x1C>;
+			};
+			armpll_bl0 {
+				fh-id = <1>;
+				pll-id = <999>;
+				perms = <0x1C>;
+			};
+			armpll_bl1 {
+				fh-id = <2>;
+				pll-id = <999>;
+				perms = <0x1C>;
+			};
+			armpll_bl2 {
+				fh-id = <3>;
+				pll-id = <999>;
+				perms = <0x1C>;
+			};
+			npupll {
+				fh-id = <4>;
+				pll-id = <CLK_APMIXED_NPUPLL>;
+			};
+			ccipll {
+				fh-id = <5>;
+				pll-id = <999>;
+				perms = <0x1C>;
+			};
+			mfgpll {
+				fh-id = <6>;
+				pll-id = <CLK_APMIXED_MFGPLL>;
+			};
+			mpll {
+				fh-id = <8>;
+				pll-id = <999>;
+				perms = <0x1C>;
+			};
+			mmpll {
+				fh-id = <9>;
+				pll-id = <CLK_APMIXED_MMPLL>;
+			};
+			mainpll {
+				fh-id = <10>;
+				pll-id = <CLK_APMIXED_MAINPLL>;
+			};
+			msdcpll {
+				fh-id = <11>;
+				pll-id = <CLK_APMIXED_MSDCPLL>;
+			};
+			adsppll {
+				fh-id = <12>;
+				pll-id = <CLK_APMIXED_ADSPPLL>;
+			};
+			tvdpll {
+				fh-id = <14>;
+				pll-id = <CLK_APMIXED_TVDPLL>;
+			};
+		};
+	};
+	seninf1@1a004000 {
+		compatible = "mediatek,seninf1";
+		reg = <0 0x1a004000 0 0x1000>;
+	};
+	seninf2@1a005000 {
+		compatible = "mediatek,seninf2";
+		reg = <0 0x1a005000 0 0x1000>;
+	};
+	seninf3@1a006000 {
+		compatible = "mediatek,seninf3";
+		reg = <0 0x1a006000 0 0x1000>;
+	};
+	seninf4@1a007000 {
+		compatible = "mediatek,seninf4";
+		reg = <0 0x1a007000 0 0x1000>;
+	};
+	seninf5@1a008000 {
+		compatible = "mediatek,seninf5";
+		reg = <0 0x1a008000 0 0x1000>;
+	};
+	seninf6@1a009000 {
+		compatible = "mediatek,seninf6";
+		reg = <0 0x1a009000 0 0x1000>;
+	};
+	seninf_top:seninf_top@1a004000 {
+		compatible = "mediatek,seninf_top";
+		reg = <0 0x1a004000 0 0x1000>;
+		power-domains = <&scpsys MT6833_POWER_DOMAIN_CAM>;
+		mediatek,platform = "mt6833";
+		mediatek,seninf_max_num = "6";
+		clocks = <&camsys_main_clk CLK_CAM_M_SENINF>,
+			<&topckgen_clk CLK_TOP_SENINF_SEL>,
+			<&topckgen_clk CLK_TOP_SENINF1_SEL>,
+			<&topckgen_clk CLK_TOP_SENINF2_SEL>,
+			<&topckgen_clk CLK_TOP_CAMTG_SEL>,
+			<&topckgen_clk CLK_TOP_CAMTG2_SEL>,
+			<&topckgen_clk CLK_TOP_CAMTG3_SEL>,
+			<&topckgen_clk CLK_TOP_CAMTG4_SEL>,
+			<&topckgen_clk CLK_TOP_CAMTG5_SEL>,
+			<&topckgen_clk CLK_TOP_TCK_26M_MX9>,
+			<&topckgen_clk CLK_TOP_UNIVPLL_192M_D8>,
+			<&topckgen_clk CLK_TOP_UNIVPLL_D6_D8>,
+			<&topckgen_clk CLK_TOP_UNIVPLL_192M_D4>,
+			<&topckgen_clk CLK_TOP_F26M_CK_D2>,
+			<&topckgen_clk CLK_TOP_UNIVPLL_192M_D16>,
+			<&topckgen_clk CLK_TOP_UNIVPLL_192M_D32>;
+		clock-names = "CAMSYS_SENINF_CGPDN",
+			"TOP_MUX_SENINF",
+			"TOP_MUX_SENINF1",
+			"TOP_MUX_SENINF2",
+			"TOP_MUX_CAMTG",
+			"TOP_MUX_CAMTG2",
+			"TOP_MUX_CAMTG3",
+			"TOP_MUX_CAMTG4",
+			"TOP_MUX_CAMTG5",
+			"TOP_CLK26M",
+			"TOP_UNIVP_192M_D8",
+			"TOP_UNIVPLL_D6_D8",
+			"TOP_UNIVP_192M_D4",
+			"TOP_F26M_CK_D2",
+			"TOP_UNIVP_192M_D16",
+			"TOP_UNIVP_192M_D32";
+		operating-points-v2 = <&opp_table_cam>;
+		dvfsrc-vcore-supply = <&dvfsrc_vcore>;
+	};
+	kd_camera_hw1:kd_camera_hw1@1a004000 {
+		compatible = "mediatek,imgsensor";
+	};
+	pd_adapter: pd_adapter {
+		compatible = "mediatek,pd_adapter";
+		boot_mode = <&chosen>;
+		adapter_name = "pd_adapter";
+		force_cv;
+		phys = <&u2port0 PHY_TYPE_USB2>;
+		phy-names = "usb2-phy";
+	};
+	mtk_ctd: mtk_ctd {
+		compatible = "mediatek,mtk_ctd";
+		bc12 = <&mt6360_chg>;
+		bc12_sel = <0>;
+	};
+	cam_qos_legacy {
+			/* non-v4l2 legacy camera */
+			compatible = "mediatek,cam_qos_legacy";
+			operating-points-v2 = <&opp_table_cam>;
+			dvfsrc-vcore-supply = <&dvfsrc_vcore>;
+			l13_cam_mrawi = <M4U_PORT_L13_CAM_MRAWI>;
+			l13_cam_mrawo0 = <M4U_PORT_L13_CAM_MRAWO0>;
+			l13_cam_mrawo1 = <M4U_PORT_L13_CAM_MRAWO1>;
+			l13_cam_camsv4 = <M4U_PORT_L13_CAM_CAMSV4>;
+			l13_cam_camsv5 = <M4U_PORT_L13_CAM_CAMSV5>;
+			l13_cam_camsv6 = <M4U_PORT_L13_CAM_CAMSV6>;
+			l16_cam_imgo_r1_a  = <M4U_PORT_L16_CAM_IMGO_R1_A>;
+			l16_cam_rrzo_r1_a  = <M4U_PORT_L16_CAM_RRZO_R1_A>;
+			l16_cam_cqi_r1_a   = <M4U_PORT_L16_CAM_CQI_R1_A>;
+			l16_cam_bpci_r1_a  = <M4U_PORT_L16_CAM_BPCI_R1_A>;
+			l16_cam_yuvo_r1_a  = <M4U_PORT_L16_CAM_YUVO_R1_A>;
+			l16_cam_ufdi_r2_a  = <M4U_PORT_L16_CAM_UFDI_R2_A>;
+			l16_cam_rawi_r2_a  = <M4U_PORT_L16_CAM_RAWI_R2_A>;
+			l16_cam_rawi_r3_a  = <M4U_PORT_L16_CAM_RAWI_R3_A>;
+			l16_cam_aao_r1_a   = <M4U_PORT_L16_CAM_AAO_R1_A>;
+			l16_cam_afo_r1_a   = <M4U_PORT_L16_CAM_AFO_R1_A>;
+			l16_cam_flko_r1_a  = <M4U_PORT_L16_CAM_FLKO_R1_A>;
+			l16_cam_lceso_r1_a = <M4U_PORT_L16_CAM_LCESO_R1_A>;
+			l16_cam_crzo_r1_a  = <M4U_PORT_L16_CAM_CRZO_R1_A>;
+			l16_cam_ltmso_r1_a = <M4U_PORT_L16_CAM_LTMSO_R1_A>;
+			l16_cam_rsso_r1_a  = <M4U_PORT_L16_CAM_RSSO_R1_A>;
+			l16_cam_aaho_r1_a  = <M4U_PORT_L16_CAM_AAHO_R1_A>;
+			l16_cam_lsci_r1_a  = <M4U_PORT_L16_CAM_LSCI_R1_A>;
+			l17_cam_imgo_r1_b  = <M4U_PORT_L17_CAM_IMGO_R1_B>;
+			l17_cam_rrzo_r1_b  = <M4U_PORT_L17_CAM_RRZO_R1_B>;
+			l17_cam_cqi_r1_b   = <M4U_PORT_L17_CAM_CQI_R1_B>;
+			l17_cam_bpci_r1_b  = <M4U_PORT_L17_CAM_BPCI_R1_B>;
+			l17_cam_yuvo_r1_b  = <M4U_PORT_L17_CAM_YUVO_R1_B>;
+			l17_cam_ufdi_r2_b  = <M4U_PORT_L17_CAM_UFDI_R2_B>;
+			l17_cam_rawi_r2_b  = <M4U_PORT_L17_CAM_RAWI_R2_B>;
+			l17_cam_rawi_r3_b  = <M4U_PORT_L17_CAM_RAWI_R3_B>;
+			l17_cam_aao_r1_b   = <M4U_PORT_L17_CAM_AAO_R1_B>;
+			l17_cam_afo_r1_b   = <M4U_PORT_L17_CAM_AFO_R1_B>;
+			l17_cam_flko_r1_b  = <M4U_PORT_L17_CAM_FLKO_R1_B>;
+			l17_cam_lceso_r1_b = <M4U_PORT_L17_CAM_LCESO_R1_B>;
+			l17_cam_crzo_r1_b  = <M4U_PORT_L17_CAM_CRZO_R1_B>;
+			l17_cam_ltmso_r1_b = <M4U_PORT_L17_CAM_LTMSO_R1_B>;
+			l17_cam_rsso_r1_b  = <M4U_PORT_L17_CAM_RSSO_R1_B>;
+			l17_cam_aaho_r1_b  = <M4U_PORT_L17_CAM_AAHO_R1_B>;
+			l17_cam_lsci_r1_b  = <M4U_PORT_L17_CAM_LSCI_R1_B>;
+		};
+		cam_mem {
+			compatible = "mediatek,cam_mem";
+			dma-ranges = <0x2 0x0 0x2 0x0 0x1 0x0>;
+			iommus = /* imgsys_config, msf_b and wpe */
+				<&iommu0 M4U_PORT_L9_IMG_IMGI_D1>,
+				<&iommu0 M4U_PORT_L9_IMG_IMGBI_D1>,
+				<&iommu0 M4U_PORT_L9_IMG_DMGI_D1>,
+				<&iommu0 M4U_PORT_L9_IMG_DEPI_D1>,
+				<&iommu0 M4U_PORT_L9_IMG_ICE_D1>,
+				<&iommu0 M4U_PORT_L9_IMG_SMTI_D1>,
+				<&iommu0 M4U_PORT_L9_IMG_SMTO_D2>,
+				<&iommu0 M4U_PORT_L9_IMG_SMTO_D1>,
+				<&iommu0 M4U_PORT_L9_IMG_CRZO_D1>,
+				<&iommu0 M4U_PORT_L9_IMG_IMG3O_D1>,
+				<&iommu0 M4U_PORT_L9_IMG_VIPI_D1>,
+				<&iommu0 M4U_PORT_L9_IMG_SMTI_D5>,
+				<&iommu0 M4U_PORT_L9_IMG_TIMGO_D1>,
+				<&iommu0 M4U_PORT_L9_IMG_UFBC_W0>,
+				<&iommu0 M4U_PORT_L9_IMG_UFBC_R0>,
+				<&iommu0 M4U_PORT_L9_IMG_WPE_RDMA1>,
+				<&iommu0 M4U_PORT_L9_IMG_WPE_RDMA0>,
+				<&iommu0 M4U_PORT_L9_IMG_WPE_WDMA>,
+				<&iommu0 M4U_PORT_L9_IMG_MFB_RDMA0>,
+				<&iommu0 M4U_PORT_L9_IMG_MFB_RDMA1>,
+				<&iommu0 M4U_PORT_L9_IMG_MFB_RDMA2>,
+				<&iommu0 M4U_PORT_L9_IMG_MFB_RDMA3>,
+				<&iommu0 M4U_PORT_L9_IMG_MFB_RDMA4>,
+				<&iommu0 M4U_PORT_L9_IMG_MFB_RDMA5>,
+				<&iommu0 M4U_PORT_L9_IMG_MFB_WDMA0>,
+				<&iommu0 M4U_PORT_L9_IMG_MFB_WDMA1>,
+				<&iommu0 M4U_PORT_L11_IMG_IMGI_D1>,
+				<&iommu0 M4U_PORT_L11_IMG_IMGBI_D1>,
+				<&iommu0 M4U_PORT_L11_IMG_DMGI_D1>,
+				<&iommu0 M4U_PORT_L11_IMG_DEPI_D1>,
+				<&iommu0 M4U_PORT_L11_IMG_ICE_D1>,
+				<&iommu0 M4U_PORT_L11_IMG_SMTI_D1>,
+				<&iommu0 M4U_PORT_L11_IMG_SMTO_D2>,
+				<&iommu0 M4U_PORT_L11_IMG_SMTO_D1>,
+				<&iommu0 M4U_PORT_L11_IMG_CRZO_D1>,
+				<&iommu0 M4U_PORT_L11_IMG_IMG3O_D1>,
+				<&iommu0 M4U_PORT_L11_IMG_VIPI_D1>,
+				<&iommu0 M4U_PORT_L11_IMG_SMTI_D5>,
+				<&iommu0 M4U_PORT_L11_IMG_TIMGO_D1>,
+				<&iommu0 M4U_PORT_L11_IMG_UFBC_W0>,
+				<&iommu0 M4U_PORT_L11_IMG_UFBC_R0>,
+				<&iommu0 M4U_PORT_L11_IMG_WPE_RDMA1>,
+				<&iommu0 M4U_PORT_L11_IMG_WPE_RDMA0>,
+				<&iommu0 M4U_PORT_L11_IMG_WPE_WDMA>,
+				<&iommu0 M4U_PORT_L11_IMG_MFB_RDMA0>,
+				<&iommu0 M4U_PORT_L11_IMG_MFB_RDMA1>,
+				<&iommu0 M4U_PORT_L11_IMG_MFB_RDMA2>,
+				<&iommu0 M4U_PORT_L11_IMG_MFB_RDMA3>,
+				<&iommu0 M4U_PORT_L11_IMG_MFB_RDMA4>,
+				<&iommu0 M4U_PORT_L11_IMG_MFB_RDMA5>,
+				<&iommu0 M4U_PORT_L11_IMG_MFB_WDMA0>,
+				<&iommu0 M4U_PORT_L11_IMG_MFB_WDMA1>,
+				/* mraw */
+				<&iommu0 M4U_PORT_L13_CAM_MRAWI>,
+				<&iommu0 M4U_PORT_L13_CAM_MRAWO0>,
+				<&iommu0 M4U_PORT_L13_CAM_MRAWO1>,
+				/* camsv */
+				<&iommu0 M4U_PORT_L13_CAM_CAMSV4>,
+				<&iommu0 M4U_PORT_L13_CAM_CAMSV5>,
+				<&iommu0 M4U_PORT_L13_CAM_CAMSV6>,
+				/* isp p1 */
+				<&iommu0 M4U_PORT_L16_CAM_IMGO_R1_A>,
+				<&iommu0 M4U_PORT_L16_CAM_RRZO_R1_A>,
+				<&iommu0 M4U_PORT_L16_CAM_CQI_R1_A>,
+				<&iommu0 M4U_PORT_L16_CAM_BPCI_R1_A>,
+				<&iommu0 M4U_PORT_L16_CAM_YUVO_R1_A>,
+				<&iommu0 M4U_PORT_L16_CAM_UFDI_R2_A>,
+				<&iommu0 M4U_PORT_L16_CAM_RAWI_R2_A>,
+				<&iommu0 M4U_PORT_L16_CAM_RAWI_R3_A>,
+				<&iommu0 M4U_PORT_L16_CAM_AAO_R1_A>,
+				<&iommu0 M4U_PORT_L16_CAM_AFO_R1_A>,
+				<&iommu0 M4U_PORT_L16_CAM_FLKO_R1_A>,
+				<&iommu0 M4U_PORT_L16_CAM_LCESO_R1_A>,
+				<&iommu0 M4U_PORT_L16_CAM_CRZO_R1_A>,
+				<&iommu0 M4U_PORT_L16_CAM_LTMSO_R1_A>,
+				<&iommu0 M4U_PORT_L16_CAM_RSSO_R1_A>,
+				<&iommu0 M4U_PORT_L16_CAM_AAHO_R1_A>,
+				<&iommu0 M4U_PORT_L16_CAM_LSCI_R1_A>,
+				<&iommu0 M4U_PORT_L17_CAM_IMGO_R1_B>,
+				<&iommu0 M4U_PORT_L17_CAM_RRZO_R1_B>,
+				<&iommu0 M4U_PORT_L17_CAM_CQI_R1_B>,
+				<&iommu0 M4U_PORT_L17_CAM_BPCI_R1_B>,
+				<&iommu0 M4U_PORT_L17_CAM_YUVO_R1_B>,
+				<&iommu0 M4U_PORT_L17_CAM_UFDI_R2_B>,
+				<&iommu0 M4U_PORT_L17_CAM_RAWI_R2_B>,
+				<&iommu0 M4U_PORT_L17_CAM_RAWI_R3_B>,
+				<&iommu0 M4U_PORT_L17_CAM_AAO_R1_B>,
+				<&iommu0 M4U_PORT_L17_CAM_AFO_R1_B>,
+				<&iommu0 M4U_PORT_L17_CAM_FLKO_R1_B>,
+				<&iommu0 M4U_PORT_L17_CAM_LCESO_R1_B>,
+				<&iommu0 M4U_PORT_L17_CAM_CRZO_R1_B>,
+				<&iommu0 M4U_PORT_L17_CAM_LTMSO_R1_B>,
+				<&iommu0 M4U_PORT_L17_CAM_RSSO_R1_B>,
+				<&iommu0 M4U_PORT_L17_CAM_AAHO_R1_B>,
+				<&iommu0 M4U_PORT_L17_CAM_LSCI_R1_B>;
+		};
+		camisp_legacy: camisp_legacy@1a000000 {
+			/* non-v4l2 legacy camera */
+			compatible = "mediatek,camisp_legacy";
+			reg = <0 0x1a000000 0 0x10000>;
+			dma-ranges = <0x2 0x0 0x2 0x0 0x1 0x0>;
+			power-domains = <&scpsys MT6833_POWER_DOMAIN_CAM>;
+			mediatek,larbs = <&smi_larb13 &smi_larb14>;
+			mediatek,platform = "mt6833";
+			#clock-cells = <1>;
+			/* Camera CCF */
+			clocks = <&camsys_main_clk CLK_CAM_M_CAM>,
+				 <&camsys_main_clk CLK_CAM_M_CAMTG>,
+				 <&camsys_main_clk CLK_CAM_M_CAMSV1>,
+				 <&camsys_main_clk CLK_CAM_M_CAMSV2>,
+				 <&camsys_main_clk CLK_CAM_M_CAMSV3>,
+				 <&camsys_main_clk CLK_CAM_M_LARB13>,
+				 <&camsys_main_clk CLK_CAM_M_LARB14>,
+				 <&camsys_main_clk CLK_CAM_M_CCU0>,
+				 <&camsys_main_clk CLK_CAM_M_SENINF>,
+				 <&camsys_main_clk CLK_CAM_M_CAM2MM_GALS>,
+				 <&camsys_rawa_clk CLK_CAM_RA_LARBX>,
+				 <&camsys_rawa_clk CLK_CAM_RA_CAM>,
+				 <&camsys_rawa_clk CLK_CAM_RA_CAMTG>,
+				 <&camsys_rawb_clk CLK_CAM_RB_LARBX>,
+				 <&camsys_rawb_clk CLK_CAM_RB_CAM>,
+				 <&camsys_rawb_clk CLK_CAM_RB_CAMTG>,
+				 <&topckgen_clk CLK_TOP_CCU_SEL>,
+				 <&topckgen_clk CLK_TOP_CAMTM_SEL>;
+			clock-names = "CAMSYS_CAM_CGPDN",
+				      "CAMSYS_CAMTG_CGPDN",
+				      "CAMSYS_CAMSV1_CGPDN",
+				      "CAMSYS_CAMSV2_CGPDN",
+				      "CAMSYS_CAMSV3_CGPDN",
+				      "CAMSYS_LARB13_CGPDN",
+				      "CAMSYS_LARB14_CGPDN",
+				      "CAMSYS_CCU0_CGPDN",
+				      "CAMSYS_SENINF_CGPDN",
+				      "CAMSYS_MAIN_CAM2MM_GALS_CGPDN",
+				      "CAMSYS_RAWALARB16_CGPDN",
+				      "CAMSYS_RAWACAM_CGPDN",
+				      "CAMSYS_RAWATG_CGPDN",
+				      "CAMSYS_RAWBLARB17_CGPDN",
+				      "CAMSYS_RAWBCAM_CGPDN",
+				      "CAMSYS_RAWBTG_CGPDN",
+				      "TOPCKGEN_TOP_MUX_CCU",
+				      "TOPCKGEN_TOP_MUX_CAMTM";
+		};
+		cam1_legacy: cam1_legacy@1a030000 {
+			/* non-v4l2 legacy camera */
+			compatible = "mediatek,cam1_legacy";
+			reg = <0 0x1a030000 0 0x8000>;
+			dma-ranges = <0x2 0x0 0x2 0x0 0x1 0x0>;
+			interrupts = <GIC_SPI 320 IRQ_TYPE_LEVEL_HIGH 0>;
+			power-domains = <&scpsys MT6833_POWER_DOMAIN_CAM_RAWA>;
+			mediatek,larb = <&smi_larb16>;
+		};
+		cam1_inner_legacy@1a038000 {
+			/* non-v4l2 legacy camera */
+			compatible = "mediatek,cam1_inner_legacy";
+			reg = <0 0x1a038000 0 0x8000>;
+		};
+		camsys_rawa_legacy: camsys_rawa_legacy@1a04f000 {
+			/* non-v4l2 legacy camera */
+			compatible = "mediatek,camsys_rawa_legacy";
+			reg = <0 0x1a04f000 0 0x1000>;
+			#clock-cells = <1>;
+		};
+		cam2_legacy: cam2_legacy@1a050000 {
+			/* non-v4l2 legacy camera */
+			compatible = "mediatek,cam2_legacy";
+			reg = <0 0x1a050000 0 0x8000>;
+			dma-ranges = <0x2 0x0 0x2 0x0 0x1 0x0>;
+			interrupts = <GIC_SPI 321 IRQ_TYPE_LEVEL_HIGH 0>;
+			power-domains = <&scpsys MT6833_POWER_DOMAIN_CAM_RAWB>;
+			mediatek,larb = <&smi_larb17>;
+		};
+		cam2_inner_legacy@1a058000 {
+			/* non-v4l2 legacy camera */
+			compatible = "mediatek,cam2_inner_legacy";
+			reg = <0 0x1a058000 0 0x8000>;
+		};
+		camsys_rawb_legacy: camsys_rawb_legacy@1a06f000 {
+			/* non-v4l2 legacy camera */
+			compatible = "mediatek,camsys_rawb_legacy";
+			reg = <0 0x1a06f000 0 0x1000>;
+			#clock-cells = <1>;
+		};
+		/* Dummy */
+		cam3_legacy: cam3_legacy@1a070000 {
+			/* non-v4l2 legacy camera */
+			compatible = "mediatek,cam3_legacy";
+			reg = <0 0x1a070000 0 0x8000>;
+		};
+		/* Dummy */
+		cam3_inner_legacy@1a078000 {
+			/* non-v4l2 legacy camera */
+			compatible = "mediatek,cam3_inner_legacy";
+			reg = <0 0x1a078000 0 0x8000>;
+		};
+		/* Dummy */
+		camsys_rawc_legacy: camsys_rawc_legacy@1a08f000 {
+			/* non-v4l2 legacy camera */
+			compatible = "mediatek,camsys_rawc_legacy";
+			reg = <0 0x1a08f000 0 0x1000>;
+			#clock-cells = <1>;
+		};
+		camsv2_legacy: camsv2_legacy@1a092000 {
+			/* non-v4l2 legacy camera */
+			compatible = "mediatek,camsv2_legacy";
+			reg = <0 0x1a092000 0 0x1000>;
+			dma-ranges = <0x2 0x0 0x2 0x0 0x1 0x0>;
+			interrupts = <GIC_SPI 327 IRQ_TYPE_LEVEL_HIGH 0>;
+		};
+		camsv3_legacy: camsv3_legacy@1a093000 {
+			/* non-v4l2 legacy camera */
+			compatible = "mediatek,camsv3_legacy";
+			reg = <0 0x1a093000 0 0x1000>;
+			dma-ranges = <0x2 0x0 0x2 0x0 0x1 0x0>;
+			interrupts = <GIC_SPI 328 IRQ_TYPE_LEVEL_HIGH 0>;
+		};
+		camsv4_legacy: camsv4_legacy@1a094000 {
+			/* non-v4l2 legacy camera */
+			compatible = "mediatek,camsv4_legacy";
+			reg = <0 0x1a094000 0 0x1000>;
+			dma-ranges = <0x2 0x0 0x2 0x0 0x1 0x0>;
+			interrupts = <GIC_SPI 329 IRQ_TYPE_LEVEL_HIGH 0>;
+		};
+		camsv5_legacy: camsv5_legacy@1a095000 {
+			/* non-v4l2 legacy camera */
+			compatible = "mediatek,camsv5_legacy";
+			reg = <0 0x1a095000 0 0x1000>;
+			dma-ranges = <0x2 0x0 0x2 0x0 0x1 0x0>;
+			interrupts = <GIC_SPI 330 IRQ_TYPE_LEVEL_HIGH 0>;
+		};
+		camsv6_legacy: camsv6_legacy@1a096000 {
+			/* non-v4l2 legacy camera */
+			compatible = "mediatek,camsv6_legacy";
+			reg = <0 0x1a096000 0 0x1000>;
+			dma-ranges = <0x2 0x0 0x2 0x0 0x1 0x0>;
+			interrupts = <GIC_SPI 334 IRQ_TYPE_LEVEL_HIGH 0>;
+		};
+		camsv7_legacy: camsv7_legacy@1a097000 {
+			/* non-v4l2 legacy camera */
+			compatible = "mediatek,camsv7_legacy";
+			reg = <0 0x1a097000 0 0x1000>;
+			dma-ranges = <0x2 0x0 0x2 0x0 0x1 0x0>;
+			interrupts = <GIC_SPI 335 IRQ_TYPE_LEVEL_HIGH 0>;
+		};
+	subpmic_pmu_eint:subpmic_pmu_eint {
+	};
+
+	ccu: ccu@1a101000 {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		compatible = "mediatek,ccu";
+		power-domains = <&scpsys MT6833_POWER_DOMAIN_CAM>;
+		dma-ranges = <0x2 0x0 0x2 0x0 0x1 0x0>;
+		iommus = <&iommu0 M4U_PORT_L13_CAM_CCUI>,
+			 <&iommu0 M4U_PORT_L13_CAM_CCUO>;
+		reg = <0 0x1a101000 0 0x1000>;
+		interrupts = <GIC_SPI 331 IRQ_TYPE_LEVEL_HIGH 0>;
+		clocks = <&topckgen_clk CLK_TOP_CCU_SEL>,
+			<&camsys_main_clk CLK_CAM_M_CAM>,
+			<&camsys_main_clk CLK_CAM_M_LARB13>,
+			<&camsys_main_clk CLK_CAM_M_CCU0>,
+			<&camsys_main_clk CLK_CAM_M_CAM2MM_GALS>,
+			<&camsys_main_clk CLK_CAM_M_CCU_GALS>;
+		clock-names = "TOP_CCU_CLK",
+			"CCU_CLK_CAM_CAM",
+			"CCU_CLK_CAM_LARB13",
+			"CCU_CLK_CAM_CCU0",
+			"CCU_CLK_CAM_GALS",
+			"CCU_CLK_CAM_CCU_GALS";
+		mediatek,larbs = <&smi_larb13>;
+		mediatek,ccu1 = <&ccu1>;
+		interconnects =
+			<&mmqos SLAVE_LARB(21) &mmqos SLAVE_COMMON(0)>,
+			<&mmqos MASTER_LARB_PORT(M4U_PORT_L13_CAM_CCUI) &mmqos SLAVE_COMMON(0)>,
+			<&mmqos MASTER_LARB_PORT(M4U_PORT_L13_CAM_CCUO) &mmqos SLAVE_COMMON(0)>;
+		interconnect-names =
+				"ccu_g",
+				"ccu_i",
+				"ccu_o";
+		operating-points-v2 = <&opp_table_ccu>;
+		dvfsrc-vcore-supply = <&dvfsrc_vcore>;
+	};
+
+	ccu1: ccu1@1a181000 {
+		compatible = "mediatek,ccu1";
+		dma-ranges = <0x2 0x0 0x2 0x0 0x1 0x0>;
+		iommus = <&iommu0 M4U_PORT_L14_CAM_CCUI>,
+			 <&iommu0 M4U_PORT_L14_CAM_CCUO>;
+	};
+
+	btif@1100c000 {
+		compatible = "mediatek,btif";
+			/*btif base*/
+		reg = <0 0x1100c000 0 0x1000>,
+			/*btif tx dma base*/
+			<0 0x10217d80 0 0x80>,
+			/*btif rx dma base*/
+			<0 0x10217e00 0 0x80>;
+			/*btif irq, IRQS_Sync ID, btif_irq_b*/
+		interrupts = <GIC_SPI 158 IRQ_TYPE_LEVEL_HIGH>,
+			/*btif tx dma irq*/
+			<GIC_SPI 152 IRQ_TYPE_LEVEL_HIGH>,
+			/*btif rx dma irq*/
+			<GIC_SPI 153 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&infracfg_ao_clk CLK_IFRAO_BTIF>,
+			/*btif clock*/
+			<&infracfg_ao_clk CLK_IFRAO_AP_DMA>;
+			/*ap dma clock*/
+		clock-names = "btifc","apdmac";
+	};
+	consys: consys@18002000 {
+		compatible = "mediatek,mt6833-consys";
+		#address-cells = <2>;
+		#size-cells = <2>;
+			/*CONN_MCU_CONFIG_BASE */
+		reg = <0 0x18002000 0 0x1000>,
+			/*TOP_RGU_BASE */
+			<0 0x10007000 0 0x0100>,
+			/*INFRACFG_AO_BASE */
+			<0 0x10001000 0 0x1000>,
+			/*SPM_BASE */
+			<0 0x10006000 0 0x1000>,
+			/*ONN_HIF_ON_BASE */
+			<0 0x18007000 0 0x1000>,
+			/*CONN_TOP_MISC_OFF_BASE */
+			<0 0x180b1000 0 0x1000>,
+			/*CONN_MCU_CFG_ON_BASE */
+			<0 0x180a3000 0 0x1000>,
+			/*CONN_MCU_CIRQ_BASE */
+			<0 0x180a5000 0 0x800>,
+			/*CONN_TOP_MISC_ON_BASE */
+			<0 0x180c1000 0 0x1000>,
+			/*CONN_HIF_PDMA_BASE */
+			<0 0x18004000 0 0x1000>,
+			/* INFRASYS_COMMON AP2MD_PCCIF4_BASE */
+			<0 0x1024C000 0 0x40>,
+			/*INFRA_AO_PERICFG_BASE */
+			<0 0x10003000 0 0x1000>;
+			/*BGF_EINT */
+		interrupts = <GIC_SPI 378 IRQ_TYPE_LEVEL_HIGH>,
+			/*WDT_EINT */
+			<GIC_SPI 79 IRQ_TYPE_LEVEL_HIGH>,
+			/*conn2ap_sw_irq*/
+			<GIC_SPI 379 IRQ_TYPE_LEVEL_HIGH>;
+		power-domains = <&scpsys MT6833_POWER_DOMAIN_CONN>;
+		pmic = <&pmic>;
+		/*clocks = <&infracfg_ao_clk CLK_IFRAO_CCIF4_AP>;*/
+		/*clock-names = "ccif";*/
+		memory-region = <&consys_mem>;
+	};
+	auxadc: auxadc@11001000 {
+		compatible = "mediatek,mt6765-auxadc";
+		reg = <0 0x11001000 0 0x1000>;
+		interrupts = <GIC_SPI 64 IRQ_TYPE_EDGE_RISING>;
+		clocks = <&infracfg_ao_clk CLK_IFRAO_AUXADC>;
+		clock-names = "main";
+		#io-channel-cells = <1>;
+		/* Auxadc efuse calibration */
+		/* 1. Auxadc cali on/off bit shift */
+		mediatek,cali-en-bit = <20>;
+		/* 2. Auxadc cali ge bits shift */
+		mediatek,cali-ge-bit = <10>;
+		/* 3. Auxadc cali oe bits shift */
+		mediatek,cali-oe-bit = <0>;
+		/* 4. Auxadc cali efuse reg offset */
+		mediatek,cali-efuse-reg-offset = <0x1c4>;
+		nvmem = <&efuse>;
+		nvmem-names = "mtk_efuse";
+		#interconnect-cells = <1>;
+	};
+	gpio: gpio@10005000 {
+		compatible = "mediatek,gpio";
+		reg = <0 0x10005000 0 0x1000>;
+	};
+	iocfg_rb: iocfg_rb@11c30000 {
+		compatible = "mediatek,iocfg_rb";
+		reg = <0 0x11c30000 0 0x1000>;
+	};
+	iocfg_bm: iocfg_bm@11d10000 {
+		compatible = "mediatek,iocfg_bm";
+		reg = <0 0x11d10000 0 0x1000>;
+	};
+	iocfg_br: iocfg_br@11d40000 {
+		compatible = "mediatek,iocfg_br";
+		reg = <0 0x11d40000 0 0x1000>;
+	};
+	iocfg_lm: iocfg_lm@11e20000 {
+		compatible = "mediatek,iocfg_lm";
+		reg = <0 0x11e20000 0 0x1000>;
+	};
+	iocfg_bl: iocfg_bl@11e60000 {
+		compatible = "mediatek,iocfg_bl";
+		reg = <0 0x11e60000 0 0x1000>;
+	};
+	iocfg_rt: iocfg_rt@11ea0000 {
+		compatible = "mediatek,iocfg_rt";
+		reg = <0 0x11ea0000 0 0x1000>;
+	};
+	pio: pinctrl {
+		compatible = "mediatek,mt6833-pinctrl";
+		reg = <0 0x10005000 0 0x1000>,
+		      <0 0x11c30000 0 0x1000>,
+		      <0 0x11d10000 0 0x1000>,
+		      <0 0x11d40000 0 0x1000>,
+		      <0 0x11e20000 0 0x1000>,
+		      <0 0x11e60000 0 0x1000>,
+		      <0 0x11ea0000 0 0x1000>;
+		reg-names = "gpio",
+			    "iocfg_rb",
+			    "iocfg_bm",
+			    "iocfg_br",
+			    "iocfg_lm",
+			    "iocfg_bl",
+			    "iocfg_rt";
+		gpio-controller;
+		gpio-ranges = <&pio 0 0 201>;
+		#gpio-cells = <2>;
+		interrupt-controller;
+		interrupts = <GIC_SPI 212 IRQ_TYPE_LEVEL_HIGH 0>;
+		#interrupt-cells = <2>;
+		mediatek,eint = <&eint>;
+	};
+	keypad:kp@10010000 {
+		compatible = "mediatek,kp";
+		reg = <0 0x10010000 0 0x1000>;
+		interrupts = <GIC_SPI 74 IRQ_TYPE_EDGE_RISING>;
+		mediatek,key-debounce-ms = <1024>;
+		mediatek,hw-map-num = <72>;
+		mediatek,hw-init-map = <114 0 0 0 0 0 0 0 0 0 0 0 0
+					0 0 0 0 0 0 0 0 0 0 0 0 0 0
+					0 0 0 0 0 0 0 0 0 0 0 0 0 0
+					0 0 0 0 0 0 0 0 0 0 0 0 0 0
+					0 0 0 0 0 0 0 0 0 0 0 0 0 0
+					0 0 0>;
+		clocks = <&clk26m>;
+		clock-names = "kpd";
+	};
+	dvfsrc: dvfsrc@10012000 {
+		compatible = "mediatek,mt6833-dvfsrc";
+		reg = <0 0x10012000 0 0x1000>;
+		reg-names = "dvfsrc";
+		dvfsrc,bringup = <1>;
+		dvfsrc_flag = <0x3>;
+		#interconnect-cells = <1>;
+		dvfsrc_vcore: dvfsrc-vcore {
+			regulator-name = "dvfsrc-vcore";
+			regulator-min-microvolt = <550000>;
+			regulator-max-microvolt = <725000>;
+			regulator-always-on;
+		};
+		dvfsrc_vscp: dvfsrc-vscp {
+			regulator-name = "dvfsrc-vscp";
+			regulator-min-microvolt = <550000>;
+			regulator-max-microvolt = <725000>;
+			regulator-always-on;
+		};
+		dvfsrc_freq_opp7: opp7 {
+			opp-peak-KBps = <0>;
+		};
+		dvfsrc_freq_opp6: opp6 {
+			opp-peak-KBps = <1200000>;
+		};
+		dvfsrc_freq_opp5: opp5 {
+			opp-peak-KBps = <2500000>;
+		};
+		dvfsrc_freq_opp4: opp4 {
+			opp-peak-KBps = <3800000>;
+		};
+		dvfsrc_freq_opp3: opp3 {
+			opp-peak-KBps = <5100000>;
+		};
+		dvfsrc_freq_opp2: opp2 {
+			opp-peak-KBps = <5900000>;
+		};
+		dvfsrc_freq_opp1: opp1 {
+			opp-peak-KBps = <7600000>;
+		};
+		dvfsrc_freq_opp0: opp0 {
+			opp-peak-KBps = <10200000>;
+		};
+		dvfsrc-helper {
+			compatible = "mediatek,dvfsrc-helper";
+			vcore-supply = <&mt6359p_vcore_reg>;
+			rc-vcore-supply = <&dvfsrc_vcore>;
+			rc-vscp-supply = <&dvfsrc_vscp>;
+			interconnects = <&dvfsrc MT6873_MASTER_DBGIF
+					 &dvfsrc MT6873_SLAVE_DDR_EMI>,
+					<&dvfsrc MT6873_MASTER_DBGIF
+					 &dvfsrc MT6873_SLAVE_DDR_EMI>,
+					<&dvfsrc MT6873_MASTER_HRT_DBGIF
+					 &dvfsrc MT6873_SLAVE_HRT_DDR_EMI>;
+			interconnect-names = "icc-bw", "icc-perf-bw", "icc-hrt-bw";
+			required-opps = <&dvfsrc_freq_opp0>,
+					<&dvfsrc_freq_opp1>,
+					<&dvfsrc_freq_opp2>,
+					<&dvfsrc_freq_opp3>,
+					<&dvfsrc_freq_opp4>,
+					<&dvfsrc_freq_opp5>,
+					<&dvfsrc_freq_opp6>,
+					<&dvfsrc_freq_opp7>;
+		};
+		dvfsrc-met {
+			compatible = "mediatek,dvfsrc-met";
+		};
+	};
+	infracfg_ao_mem@10002000 {
+		compatible = "mediatek,infracfg_ao_mem";
+		reg = <0 0x10002000 0 0x1000>;
+	};
+	sleep:sleep@10006000 {
+		compatible = "mediatek,sleep", "syscon";
+		reg = <0 0x10006000 0 0x1000>;
+		interrupts = <GIC_SPI 222 IRQ_TYPE_LEVEL_HIGH>;
+	};
+	dpmaif:dpmaif@10014000 {
+		compatible = "mediatek,dpmaif";
+		reg = <0 0x10014000 0 0x1000>, /*AO_UL*/
+			<0 0x1022d000 0 0x1000>, /*PD_UL*/
+			<0 0x1022c000 0 0x1000>, /*PD_MD_MISC*/
+			<0 0x1022e000 0 0x1000>; /*SRAM*/
+		interrupts = <GIC_SPI 209 IRQ_TYPE_LEVEL_HIGH>;
+		mediatek,dpmaif_cap = <6>;
+		clocks = <&infracfg_ao_clk CLK_IFRAO_DPMAIF_MAIN>,
+			<&infracfg_ao_clk CLK_IFRAO_CLDMA_BCLK>;
+		clock-names = "infra-dpmaif-clk",
+				"infra-dpmaif-blk-clk";
+		interconnects = <&dvfsrc MT6873_MASTER_NETSYS &dvfsrc MT6873_SLAVE_DDR_EMI>;
+		interconnect-names = "icc-dpmaif-bw";
+		required-opps = <&dvfsrc_freq_opp0>,
+					<&dvfsrc_freq_opp1>;
+		net_spd_ver = <2>;
+		mediatek,ap_plat_info = <6833>;
+	};
+	ccifdriver:ccifdriver@10209000 {
+		compatible = "mediatek,ccci_ccif";
+		reg = <0 0x10209000 0 0x1000>, /*AP_CCIF_BASE*/
+			<0 0x1020a000 0 0x1000>; /*MD_CCIF_BASE*/
+		mediatek,sram_size = <512>;
+		/*CCIF0 174/206, CCIF0 175/207*/
+		interrupts = <GIC_SPI 194 IRQ_TYPE_LEVEL_HIGH>,
+			     <GIC_SPI 195 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&infracfg_ao_clk CLK_IFRAO_CCIF_AP>,
+			<&infracfg_ao_clk CLK_IFRAO_CCIF_MD>,
+			<&infracfg_ao_clk CLK_IFRAO_CCIF1_AP>,
+			<&infracfg_ao_clk CLK_IFRAO_CCIF1_MD>,
+			<&infracfg_ao_clk CLK_IFRAO_CCIF4_MD>,
+			<&infracfg_ao_clk CLK_IFRAO_CCIF5_MD>;
+		clock-names = "infra-ccif-ap",
+			"infra-ccif-md",
+			"infra-ccif1-ap",
+			"infra-ccif1-md",
+			"infra-ccif4-md",
+			"infra-ccif5-md";
+		ccif-pericfg = <&pericfg_clk>;
+	};
+	mddriver:mddriver {
+		compatible = "mediatek,mddriver";
+		/* bit0~3: CLDMA|CCIF|DPMAIF */
+		mediatek,mdhif_type = <6>;
+		mediatek,md_id = <0>;
+		mediatek,ap_plat_info = <6833>;
+		mediatek,md_generation = <6297>;
+		mediatek,offset_epon_md1 = <0x2844>;
+		mediatek,cldma_capability = <14>;
+		/* bit0~1: srcclkena|srclken_o1_on */
+		mediatek,power_flow_config = <2>;
+		/* srclken_o1 set value |= 1<<21 */
+		mediatek,srclken_o1 = <0x200000>;
+		/* MDWDT; CCIF0 194/226; CCIF0 195/227 */
+		interrupts = <GIC_SPI 78 IRQ_TYPE_EDGE_RISING>,
+			     <GIC_SPI 194 IRQ_TYPE_LEVEL_HIGH>,
+			     <GIC_SPI 195 IRQ_TYPE_LEVEL_HIGH>;
+		md_vmodem-supply = <&mt6315_3_vbuck1>;
+		md_vsram-supply = <&mt6315_3_vbuck4>;
+		md_vdigrf-supply = <&mt6359p_vpu_reg>;
+		power-domains = <&scpsys MT6833_POWER_DOMAIN_MD>;
+		ccci-infracfg = <&infracfg_ao_clk>;
+		ccci-topckgen = <&topckgen_clk>;
+		ccci_spmsleep = <&sleep>;
+	};
+	md_auxadc:md_auxadc {
+		compatible = "mediatek,md_auxadc";
+		io-channels = <&auxadc 2>;
+		io-channel-names = "md-channel";
+	};
+	md_ccci_rtc:md_ccci_rtc {
+		compatible = "mediatek,md_ccci_rtc";
+		nvmem-cells = <&ext_32k>;
+		nvmem-cell-names = "external-32k";
+	};
+	ccci_scp:ccci_scp {
+		compatible = "mediatek,ccci_md_scp";
+		clocks = <&infracfg_ao_clk CLK_IFRAO_CCIF2_AP>,
+			<&infracfg_ao_clk CLK_IFRAO_CCIF2_MD>;
+		clock-names = "infra-ccif2-ap",
+			"infra-ccif2-md";
+	};
+	gpio_usage_mapping:gpio_usage_mapping {
+		compatible = "mediatek,gpio_usage_mapping";
+	};
+	md1_sim1_hot_plug_eint:MD1_SIM1_HOT_PLUG_EINT {
+	};
+	md1_sim2_hot_plug_eint:MD1_SIM2_HOT_PLUG_EINT {
+	};
+	watchdog: watchdog@10007000 {
+		compatible = "mediatek,mt6833-wdt",
+				"mediatek,mt6589-wdt",
+				"syscon", "simple-mfd";
+		mediatek,rg_dfd_timeout = <0xea60>;
+		reg = <0 0x10007000 0 0x100>;
+		reboot-mode {
+			compatible = "syscon-reboot-mode";
+			offset = <0x24>;
+			mask = <0xf>;
+			mode-charger = <BOOT_CHARGER>;
+			mode-recovery = <BOOT_RECOVERY>;
+			mode-bootloader = <BOOT_BOOTLOADER>;
+			mode-dm-verity-dev-corrupt = <BOOT_DM_VERITY>;
+			mode-kpoc = <BOOT_KPOC>;
+			mode-ddr-reserve = <BOOT_DDR_RSVD>;
+			mode-meta = <BOOT_META>;
+			mode-rpmbpk = <BOOT_RPMBPK>;
+		};
+	};
+	systimer: systimer@10017000 {
+		compatible = "mediatek,mt6833-timer",
+				"mediatek,mt6765-timer";
+		reg = <0 0x10017000 0 0x1000>;
+		interrupts = <GIC_SPI 233 IRQ_TYPE_LEVEL_HIGH 0>;
+		clocks = <&clk13m>;
+	};
+	devapc@10207000 {
+		compatible = "mediatek,mt6833-devapc";
+		reg = <0 0x10207000 0 0x1000>, /* infra pd */
+			<0 0x10274000 0 0x1000>, /* peri pd */
+			<0 0x10275000 0 0x1000>, /* peri2 pd */
+			<0 0x11020000 0 0x1000>, /* peri_par pd */
+			<0 0x10030000 0 0x1000>, /* infra ao */
+			<0 0x1020e000 0 0x1000>, /* infracfg */
+			<0 0x10033000 0 0x1000>, /* swp */
+			<0 0x0010c000 0 0x1000>; /* sramrom */
+		interrupts = <GIC_SPI 187 IRQ_TYPE_LEVEL_HIGH>; /* infra irq */
+	};
+	/* Trustonic Mobicore SW IRQ number 115 = 32 + 83 */
+	mobicore: mobicore {
+		compatible = "trustonic,mobicore";
+		interrupts = <GIC_SPI 83 IRQ_TYPE_EDGE_RISING 0>;
+	};
+	apdma: dma-controller@10217a80 {
+		compatible = "mediatek,mt6779-uart-dma";
+		reg = <0 0x10217a80 0 0x80>,
+			  <0 0x10217b00 0 0x80>,
+			  <0 0x10217b80 0 0x80>,
+			  <0 0x10217c00 0 0x80>;
+		interrupts = <GIC_SPI 146 IRQ_TYPE_LEVEL_HIGH>,
+				 <GIC_SPI 147 IRQ_TYPE_LEVEL_HIGH>,
+				 <GIC_SPI 148 IRQ_TYPE_LEVEL_HIGH>,
+				 <GIC_SPI 149 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&infracfg_ao_clk CLK_IFRAO_AP_DMA>;
+		clock-names = "apdma";
+		dma-requests = <4>;
+		#dma-cells = <1>;
+		dma-bits = <34>;
+	};
+	gce: gce_mbox@10228000 {
+		compatible = "mediatek,mt6833-gce";
+		reg = <0 0x10228000 0 0x4000>;
+		interrupts = <GIC_SPI 203 IRQ_TYPE_LEVEL_HIGH 0>;
+		#mbox-cells = <3>;
+		#gce-event-cells = <1>;
+		#gce-subsys-cells = <2>;
+		default_tokens = /bits/ 16 <CMDQ_SYNC_TOKEN_GPR_SET_0>,
+				 /bits/ 16 <CMDQ_SYNC_TOKEN_GPR_SET_1>,
+				 /bits/ 16 <CMDQ_SYNC_TOKEN_GPR_SET_2>,
+				 /bits/ 16 <CMDQ_SYNC_TOKEN_GPR_SET_3>,
+				 /bits/ 16 <CMDQ_SYNC_TOKEN_GPR_SET_4>,
+				 /bits/ 16 <CMDQ_SYNC_RESOURCE_WROT0>,
+				 /bits/ 16 <CMDQ_SYNC_RESOURCE_WROT1>;
+		clocks = <&infracfg_ao_clk CLK_IFRAO_GCE>,
+			 <&infracfg_ao_clk CLK_IFRAO_GCE_26M>;
+		clock-names = "gce", "gce-timer";
+	};
+	gce_sec: gce_mbox_sec@10228000 {
+		compatible = "mediatek,mailbox-gce-sec";
+		reg = <0 0x10228000 0 0x4000>;
+		#mbox-cells = <3>;
+		mboxes = <&gce 15 CMDQ_NO_TIMEOUT CMDQ_THR_PRIO_1>;
+		clocks = <&infracfg_ao_clk CLK_IFRAO_GCE>;
+		clock-names = "gce";
+	};
+	cmdq-test {
+		compatible = "mediatek,cmdq-test";
+		mediatek,gce = <&gce>;
+		// mmsys_config = <&dispsys_config>;
+		mediatek,gce-subsys = <99>, <SUBSYS_1400XXXX>;
+		mboxes = <&gce 23 0 CMDQ_THR_PRIO_1>,
+			 <&gce 10 CMDQ_NO_TIMEOUT CMDQ_THR_PRIO_1>;
+		token_user0 = /bits/ 16 <CMDQ_SYNC_TOKEN_USER_0>;
+		token_gpr_set4 = /bits/ 16 <CMDQ_SYNC_TOKEN_GPR_SET_4>;
+	};
+	apuart0: serial@11002000 {
+		compatible = "mediatek,mt6577-uart";
+		reg = <0 0x11002000 0 0x1000>;
+		interrupts = <GIC_SPI 109 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&clk26m>, <&infracfg_ao_clk CLK_IFRAO_UART0>;
+			clock-names = "baud", "bus";
+		dmas = <&apdma 0
+				&apdma 1>;
+		dma-names = "tx", "rx";
+	};
+	apuart1: serial@11003000 {
+		compatible = "mediatek,mt6577-uart";
+		reg = <0 0x11003000 0 0x1000>;
+		interrupts = <GIC_SPI 110 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&clk26m>, <&infracfg_ao_clk CLK_IFRAO_UART1>;
+			clock-names = "baud", "bus";
+		dmas = <&apdma 2
+				&apdma 3>;
+		dma-names = "tx", "rx";
+	};
+	goodix_fp: fingerprint {
+		compatible = "mediatek,goodix-fp";
+	};
+	touch:touch {
+		compatible = "goodix,touch";
+	};
+	/* Microtrust SW IRQ number 87(119 - 32) ~ 88(120 - 32) */
+	utos: utos {
+		compatible = "microtrust,utos";
+		interrupts = <GIC_SPI 88 IRQ_TYPE_EDGE_RISING 0>;
+	};
+	utos_tester {
+		compatible = "microtrust,tester-v1";
+	};
+	disp_pwm: disp_pwm0@1100e000 {
+		compatible = "mediatek,disp_pwm0",
+				"mediatek,mt6833-disp-pwm";
+		reg = <0 0x1100e000 0 0x1000>;
+		interrupts = <GIC_SPI 171 IRQ_TYPE_LEVEL_HIGH>;
+		#pwm-cells = <2>;
+		clocks = <&infracfg_ao_clk CLK_IFRAO_DISP_PWM>,
+			<&topckgen_clk CLK_TOP_DISP_PWM_SEL>,
+			<&topckgen_clk CLK_TOP_OSC_D4>;
+		clock-names = "main", "mm", "pwm_src";
+	};
+	efuse: efuse@11c10000 {
+		compatible = "mediatek,devinfo";
+		reg = <0 0x11c10000 0 0x10000>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+		efuse_segment: segment@78 {
+			reg = <0x78 0x4>;
+		};
+		lvts_e_data1: data1 {
+			reg = <0x1D0 0x10>;
+		};
+		lvts_e_data2: data2 {
+			reg = <0x2F8 0x48>;
+		};
+	};
+	ufshci: ufshci@11270000 {
+		compatible = "mediatek,mt8183-ufshci";
+		reg = <0 0x11270000 0 0x2300>;
+		interrupts = <GIC_SPI 105 IRQ_TYPE_LEVEL_HIGH 0>;
+		clocks =
+			<&infracfg_ao_clk CLK_IFRAO_UFS>,
+			<&infracfg_ao_clk CLK_IFRAO_UNIPRO_SYSCLK>,
+			<&infracfg_ao_clk CLK_IFRAO_UFS_SAP_BCLK>,
+			<&infracfg_ao_clk CLK_IFRAO_UFS_AES>,
+			<&topckgen_clk CLK_TOP_AES_UFSFDE_SEL>,
+			<&topckgen_clk CLK_TOP_UNIVPLL_D6>,
+			<&topckgen_clk CLK_TOP_MAINPLL_D4>;
+		clock-names =
+			"ufs-clk",
+			"ufs-unipro-clk",
+			"ufs-mp-clk",
+			"ufs-crypto-clk",
+			"ufs-vendor-crypto-clk-mux",
+			"ufs-vendor-crypto-normal-parent-clk",
+			"ufs-vendor-crypto-perf-parent-clk";
+		freq-table-hz =
+			<0 0>,
+			<0 0>,
+			<0 0>,
+			<0 0>,
+			<0 0>,
+			<0 0>,
+			<0 0>;
+		resets = <&infracfg_rst 2>, <&infracfg_rst 3>,
+			 <&infracfg_rst 4>;
+		reset-names = "hci_rst", "unipro_rst", "crypto_rst";
+		vcc-supply = <&mt6359p_vemc_reg>;
+		mediatek,ufs-boost-crypt;
+		dvfsrc-vcore-supply = <&dvfsrc_vcore>;
+		boost-crypt-vcore-min = <600000>;
+		/* Reference clock control mode */
+		/* SW mode: 0, Half-HW mode: 1, HW mode: 2 */
+		mediatek,refclk_ctrl = <1>;
+		mediatek,ufs-disable-ah8;
+		bootmode = <&chosen>;
+		mediatek,ufs-qos;
+	};
+	scp@10500000 {
+		compatible = "mediatek,scp";
+		status = "okay";
+		reg = <0 0x10500000 0 0xc0000>, /* tcm */
+		<0 0x10724000 0 0x1000>,	 /* cfg */
+		<0 0x10721000 0 0x1000>,	 /* clk*/
+		<0 0x10730000 0 0x3000>,	 /* cfg core0 */
+		<0 0x10740000 0 0x1000>,	 /* cfg core1 */
+		<0 0x10752000 0 0x1000>,	 /* bus tracker */
+		<0 0x10760000 0 0x40000>,	 /* llc */
+		<0 0x107a5000 0 0x4>,		 /* cfg_sec */
+		<0 0x107fb000 0 0x100>,		 /* mbox0 base */
+		<0 0x107fb100 0 0x4>,		 /* mbox0 set */
+		<0 0x107fb10c 0 0x4>,		 /* mbox0 clr */
+		<0 0x107a5020 0 0x4>,		 /* mbox0 init */
+		<0 0x107fc000 0 0x100>,		 /* mbox1 base */
+		<0 0x107fc100 0 0x4>,		 /* mbox1 set */
+		<0 0x107fc10c 0 0x4>,		 /* mbox1 clr */
+		<0 0x107a5024 0 0x4>,		 /* mbox1 init */
+		<0 0x107fd000 0 0x100>,		 /* mbox2 base */
+		<0 0x107fd100 0 0x4>,		 /* mbox2 set */
+		<0 0x107fd10c 0 0x4>,		 /* mbox2 clr */
+		<0 0x107a5028 0 0x4>,		 /* mbox2 init */
+		<0 0x107fe000 0 0x100>,		 /* mbox3 base */
+		<0 0x107fe100 0 0x4>,		 /* mbox3 set */
+		<0 0x107fe10c 0 0x4>,		 /* mbox3 clr */
+		<0 0x107a502c 0 0x4>,		 /* mbox3 init */
+		<0 0x107ff000 0 0x100>,		 /* mbox4 base */
+		<0 0x107ff100 0 0x4>,		 /* mbox4 set */
+		<0 0x107ff10c 0 0x4>,		 /* mbox4 clr */
+		<0 0x107a5030 0 0x4>;		 /* mbox4 init */
+		reg-names = "scp_sram_base",
+			"scp_cfgreg",
+			"scp_clkreg",
+			"scp_cfgreg_core0",
+			"scp_cfgreg_core1",
+			"scp_bus_tracker",
+			"scp_l1creg",
+			"scp_cfgreg_sec",
+			"mbox0_base",
+			"mbox0_set",
+			"mbox0_clr",
+			"mbox0_init",
+			"mbox1_base",
+			"mbox1_set",
+			"mbox1_clr",
+			"mbox1_init",
+			"mbox2_base",
+			"mbox2_set",
+			"mbox2_clr",
+			"mbox2_init",
+			"mbox3_base",
+			"mbox3_set",
+			"mbox3_clr",
+			"mbox3_init",
+			"mbox4_base",
+			"mbox4_set",
+			"mbox4_clr",
+			"mbox4_init";
+		interrupts = <GIC_SPI 434 IRQ_TYPE_LEVEL_HIGH>,
+			<GIC_SPI 435 IRQ_TYPE_LEVEL_HIGH>,
+			<GIC_SPI 436 IRQ_TYPE_LEVEL_HIGH>,
+			<GIC_SPI 437 IRQ_TYPE_LEVEL_HIGH>,
+			<GIC_SPI 438 IRQ_TYPE_LEVEL_HIGH>,
+			<GIC_SPI 439 IRQ_TYPE_LEVEL_HIGH>,
+			<GIC_SPI 440 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "ipc0",
+			"ipc1",
+			"mbox0",
+			"mbox1",
+			"mbox2",
+			"mbox3",
+			"mbox4";
+		core_0 = "enable";
+		scp_sramSize = <0x000c0000>;
+		core_nums = <1>;	/* core number */
+		twohart = <1>;		/* two hart arch */
+		mbox_count = <5>;
+		/* id, mbox, send_size*/
+		send_table =
+		< 0 0  9>, /* IPI_OUT_AUDIO_VOW_1 */
+		< 3 1  2>, /* IPI_OUT_APCCCI_0 */
+		< 4 1  1>, /* IPI_OUT_DVFS_SET_FREQ_0 */
+		< 5 1  2>, /* IPI_OUT_C_SLEEP_0 */
+		< 6 1  1>, /* IPI_OUT_TEST_0 */
+		<26 1  9>, /* IPI_OUT_AUDIO_ULTRA_SND_0 */
+		<11 2  4>, /* IPI_OUT_SCP_MPOOL_0 */
+		<29 2 16>, /* IPI_OUT_SENSOR_CTRL */
+		<31 2  7>, /* IPI_OUT_SENSOR_NOTIFY */
+		<14 3  1>, /* IPI_OUT_DVFS_SET_FREQ_1 */
+		<15 3  2>, /* IPI_OUT_C_SLEEP_1 */
+		<16 3  1>, /* IPI_OUT_TEST_1 */
+		<17 3  6>, /* IPI_OUT_LOGGER_CTRL */
+		<18 3  2>, /* IPI_OUT_SCPCTL_1 */
+		<24 4  4>; /* IPI_OUT_SCP_MPOOL_1 */
+		/* id, mbox, recv_size, recv_opt */
+		recv_table =
+		< 1 0  2 0>, /* IPI_IN_AUDIO_VOW_ACK_1 */
+		< 2 0 26 0>, /* IPI_IN_AUDIO_VOW_1 */
+		< 7 1  2 0>, /* IPI_IN_APCCCI_0 */
+		< 8 1 10 0>, /* IPI_IN_SCP_ERROR_INFO_0 */
+		< 9 1  1 0>, /* IPI_IN_SCP_READY_0 */
+		<10 1  2 0>, /* IPI_IN_SCP_RAM_DUMP_0 */
+		<27 1  2 0>, /* IPI_IN_AUDIO_ULTRA_SND_ACK_0 */
+		<28 1  5 0>, /* IPI_IN_AUDIO_ULTRA_SND_0 */
+		< 5 1  1 1>, /* IPI_OUT_C_SLEEP_0 */
+		<12 2  4 0>, /* IPI_IN_SCP_MPOOL_0 */
+		<30 2  2 0>, /* IPI_IN_SENSOR_CTRL */
+		<32 2  7 0>, /* IPI_IN_SENSOR_NOTIFY */
+		<20 3 10 0>, /* IPI_IN_SCP_ERROR_INFO_1 */
+		<21 3  6 0>, /* IPI_IN_LOGGER_CTRL */
+		<22 3  1 0>, /* IPI_IN_SCP_READY_1 */
+		<23 3  2 0>, /* IPI_IN_SCP_RAM_DUMP_1 */
+		<15 3  1 1>, /* IPI_OUT_C_SLEEP_1 */
+		<25 4  4 0>; /* IPI_IN_SCP_MPOOL_1 */
+		/* feature, frequecy, coreid */
+		scp_feature_tbl =
+		< 0   5 1>,	/* vow */
+		< 1  29 0>,	/* sensor */
+		< 2  26 0>,	/* flp */
+		< 3   0 0>,	/* rtos */
+		< 4 200 1>,	/* speaker */
+		< 5   0 0>,	/* vcore */
+		< 6 120 1>,	/* barge in */
+		< 7  10 1>,	/* vow dump */
+		< 8  80 1>,	/* vow vendor M */
+		< 9  43 1>,	/* vow vendor A */
+		<10  22 1>,	/* vow vendor G */
+		<11  20 1>,	/* vow dual mic */
+		<12 135 1>,	/* vow dual mic barge in */
+		<13 200 0>;	/* ultrasound */
+		debug_dumptimeout = "enable"; /*core dump timeout debug*/
+		secure_dump = "disable";	/* enable dump via secure world */
+		secure_dump_size = <0x280000>;
+		scp_mem_key = "mediatek,reserve-memory-scp_share";
+		/* feature ID, size, alignment */
+		scp_mem_tbl =
+		< 0 0x0      0x0>,      /* secure dump, its size is in secure_dump_size */
+		< 1 0x4E300  0x0>,  /* vow, 297KB (2 model size)*/
+		< 2 0x100000 0x0>, /* ensor main, 1 MB */
+		< 3 0x180000 0x0>, /* logger, 1.5 MB */
+		< 4 0x19000  0x0>,  /* audio, 100 KB */
+		< 5 0x5A00   0x0>,   /* vow bargein, 22.5KB */
+		< 6 0x100    0x0>,    /* scp parames, 256 bytes */
+		< 7 0x19000  0x0>,   /* ultrasound */
+		< 8 0x10000  0x0>,  /* sensor supper, 64 KB */
+		< 9 0x1000   0x0>,   /* sensor list, 4 KB */
+		<10 0x2000   0x0>,  /* sensor debug, 8 KB */
+		<11 0x100    0x0>,   /* sensor custom writer, 256 bytes */
+		<12 0x100    0x0>;   /* sensor custom reader, 256 bytes */
+		memorydump =
+		<0x0c0000>, /* l2tcm */
+		<0x03c000>, /* l1c */
+		<0x003c00>, /* regdump */
+		<0x000400>, /* trace buffer */
+		<0x100000>; /* dram */
+	};
+	scp_clk_ctrl: scp_clk_ctrl@10721000 {
+		compatible = "mediatek,scp_clk_ctrl", "syscon";
+		reg = <0 0x10721000 0 0x1000>;
+	};
+	scp_gpio: scp_gpio@10005000 {
+		compatible = "mediatek,scp_gpio", "syscon";
+		reg = <0 0x10005000 0 0x1000>;
+	};
+	mmc0: mmc@11230000 {
+		compatible = "mediatek,mt6779-mmc";
+		reg = <0 0x11230000 0 0x10000>,
+		      <0 0x11f50000 0 0x1000>;
+		interrupts = <GIC_SPI 99 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&topckgen_clk CLK_TOP_MSDC50_0_HCLK>,
+			 <&topckgen_clk CLK_TOP_MSDC50_0>,
+			 <&infracfg_ao_clk CLK_IFRAO_MSDC0>,
+			 <&infracfg_ao_clk CLK_IFRAO_MSDC0_SRC>;
+		clock-names = "bus_clk", "source", "hclk", "source_cg";
+		status = "disabled";
+	};
+	mmc1: mmc@11240000 {
+		compatible = "mediatek,mt6779-mmc";
+		reg = <0 0x11240000 0 0x1000>,
+		      <0 0x11c70000 0 0x1000>;
+		interrupts = <GIC_SPI 103 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&topckgen_clk CLK_TOP_MSDC30_1_SEL>,
+			 <&infracfg_ao_clk CLK_IFRAO_MSDC1>,
+			 <&infracfg_ao_clk CLK_IFRAO_MSDC1_SRC>;
+		clock-names = "source", "hclk", "source_cg";
+		status = "disabled";
+	};
+	scp_dvfs {
+		compatible = "mediatek,scp_dvfs";
+		/*scp-dvfs-disable;*/
+		clocks =
+			<&topckgen_clk CLK_TOP_SCP_SEL>,
+			<&topckgen_clk CLK_TOP_TCK_26M_MX9>,
+			<&topckgen_clk CLK_TOP_UNIVPLL_D4>,
+			<&topckgen_clk CLK_TOP_NPUPLL>,
+			<&topckgen_clk CLK_TOP_MAINPLL_D6>,
+			<&topckgen_clk CLK_TOP_UNIVPLL_D6>,
+			<&topckgen_clk CLK_TOP_MAINPLL_D4_D2>,
+			<&topckgen_clk CLK_TOP_MAINPLL_D4>,
+			<&topckgen_clk CLK_TOP_MAINPLL_D7>;
+		clock-names =
+			"clk_mux",
+			"clk_pll_0",
+			"clk_pll_1",
+			"clk_pll_2",
+			"clk_pll_3",
+			"clk_pll_4",
+			"clk_pll_5",
+			"clk_pll_6",
+			"clk_pll_7";
+		dvfs-opp =
+		/* vcore vsram dvfsrc spm   freq  mux resource */
+		<550000 750000	 0    0x10   250   0    0>,
+		<600000 750000	 1    0x108  330   7	0>,
+		<650000 750000	 2    0x204  400   3	0>,
+		<725000 750000	 3    0x302  624   1	0x3>;
+		gpio-base = <&scp_gpio>;
+		gpio-vreq-mode = <1>;
+		gpio-vreq = <0x420 0x7 4>;
+		scp-cores = <1>;
+		pmic = <&pmic>;
+		dvfsrc-vscp-supply = <&dvfsrc_vscp>;
+		do-ulposc-cali;
+		fmeter_clksys = <&topckgen_clk>;
+		ulposc_clksys = <&apmixedsys_clk>;
+		scp_clk_ctrl = <&scp_clk_ctrl>;
+		scp-clk-hw-ver = "v1";
+		ulposc-cali-ver = "v1";
+		ulposc-cali-num = <3>;
+		ulposc-cali-target = <250 330 400>;
+		ulposc-cali-config =
+			/* con0		con1		con2 */
+			<0x38a940	0x2900		0x41>,
+			<0x52a940	0x2900		0x41>,
+			<0x5ea940	0x2900		0x41>;
+		clk-dbg-ver = "v1";
+		ccf-fmeter-support;
+		secure_access = "enable"; /* enable: need to secure access scp */
+	};
+	firmware: firmware {
+		scmi: scmi {
+			compatible = "arm,scmi";
+			mboxes = <&tinysys_mbox 0>, <&tinysys_mbox 1>;
+			shmem = <&scmi_tx_shmem>, <&scmi_rx_shmem>;
+			mbox-names = "tx", "rx";
+			#address-cells = <1>;
+			#size-cells = <0>;
+			scmi_tinysys: protocol@80 {
+				reg = <0x80>;
+				scmi_qos = <1>;
+				scmi_pmic = <2>;
+				scmi_met = <3>;
+				scmi_thermal = <4>;
+				scmi_gpupm = <6>;
+				scmi_plt = <7>;
+				scmi_smi = <8>;
+				scmi_cm = <9>;
+				scmi_slbc = <10>;
+			};
+		};
+	};
+	sspm: sspm@10400000 {
+		compatible = "mediatek,sspm";
+		reg = <0 0x10400000 0 0x30000>,
+			<0 0x10440000 0 0x10000>,
+			<0 0x10480000 0 0x80>;

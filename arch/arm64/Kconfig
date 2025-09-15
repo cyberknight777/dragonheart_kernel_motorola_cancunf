@@ -2133,3 +2133,35 @@ source "arch/arm64/kvm/Kconfig"
 if CRYPTO
 source "arch/arm64/crypto/Kconfig"
 endif
+
+config FAKE_ASYM32_CPU
+	bool "simulate only partial cpus support 32bit application"
+	help
+	  This feature simulate that the cpus in fake_cpu_32bit_el0_mask have
+	  the capability to run 32bit user space program.
+	  This feature should not be enabled in MP project. If you don't know,
+	  say N.
+
+config AW_RAMPING_SUPPORT
+	bool "aw dual smart pa ramping"
+	default n
+	help
+	Enable it only for dual smart pa.
+
+config DUMMY_SND_CARD_SUPPORT
+	bool "no smart pa,dummy snd card"
+	default n
+	help
+	Enable it only for not smart pa on board.
+
+config FSA4480_SENS_TO_GND
+	bool "fsa4480 sens connect to gnd"
+	default n
+	help
+	Enable it only for fsa4480 sens connect to gnd.
+
+config AW_MTK_RCV_SUPPORT
+	bool "two smart pa but use mtk receiver path"
+	default n
+	help
+	Enable it only for two smart pa but use mtk receiver path.
