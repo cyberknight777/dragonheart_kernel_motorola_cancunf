@@ -5938,9 +5938,11 @@ static int32_t wlanProbe(void *pvData, void *pvDriverData)
 		DBGLOG(INIT, ERROR, "wlanProbe: probe failed, reason:%d\n",
 		       eFailReason);
 		switch (eFailReason) {
+#if (CFG_MET_PACKET_TRACE_SUPPORT == 1)
 		case FAIL_BY_RESET:
 		case FAIL_MET_INIT_PROCFS:
 			kalMetRemoveProcfs();
+#endif
 		case PROC_INIT_FAIL:
 			wlanNetUnregister(prWdev);
 			/* Unregister notifier callback */
