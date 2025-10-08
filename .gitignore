@@ -156,3 +156,11 @@ x509.genkey
 
 # Documentation toolchain
 sphinx_*/
+
+# AK3 & toolchain
+anykernel3*/
+clang*/
+gcc*/
+
+# Log files
+log.txt
