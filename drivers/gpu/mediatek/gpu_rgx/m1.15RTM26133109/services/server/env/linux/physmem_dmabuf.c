@@ -87,6 +87,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "kernel_compatibility.h"
 
+#define IS_PMR_READABLE(ui64PMRFlags)  (PVRSRV_CHECK_CPU_READABLE(ui64PMRFlags)        || \
+                                        PVRSRV_CHECK_CPU_READ_PERMITTED(ui64PMRFlags)  || \
+                                        PVRSRV_CHECK_GPU_READABLE(ui64PMRFlags)        || \
+                                        PVRSRV_CHECK_GPU_READ_PERMITTED(ui64PMRFlags))
+#define IS_PMR_WRITEABLE(ui64PMRFlags) (PVRSRV_CHECK_CPU_WRITEABLE(ui64PMRFlags)       || \
+                                        PVRSRV_CHECK_CPU_WRITE_PERMITTED(ui64PMRFlags) || \
+                                        PVRSRV_CHECK_GPU_WRITEABLE(ui64PMRFlags)       || \
+                                        PVRSRV_CHECK_GPU_WRITE_PERMITTED(ui64PMRFlags))
+
 /*
  * dma_buf_ops
  *
@@ -964,6 +973,41 @@ PhysmemGetDmaBuf(PMR *psPMR)
 	return NULL;
 }
 
+static PVRSRV_ERROR
+_CanPMRBeExported(PMR *psPMR)
+{
+	/* Exporting a PMR which was originally created from an imported DmaBuf
+	 * or EXTMEM is not supported.
+	 */
+	if (PMR_GetType(psPMR) ==  PMR_TYPE_DMABUF ||
+	    PMR_GetType(psPMR) ==  PMR_TYPE_EXTMEM)
+	{
+		PVR_DPF((PVR_DBG_ERROR, "%s: PMRs that wrap external memory cannot be exported."
+		         "psPMR->eFlavour = %d",
+		         __func__,
+		         PMR_GetType(psPMR)));
+		return PVRSRV_ERROR_PMR_WRONG_PMR_TYPE;
+	}
+
+#if !defined(PVR_ENABLE_DMABUF_UPSTREAM_COMPAT)
+	/* To avoid mismatches in usage expectations by third-party upstream
+	 * drivers, a PMR that is read-only or write-only should not be
+	 * exported as a GEM object or dma_buf.
+	 */
+	if (!(IS_PMR_READABLE(PMR_Flags(psPMR)) &&
+	      IS_PMR_WRITEABLE(PMR_Flags(psPMR))))
+	{
+		PVR_DPF((PVR_DBG_ERROR, "%s: Read-only or write-only PMR cannot be exported. "
+		         "ui64PMRFlags = 0x%" PVRSRV_MEMALLOCFLAGS_FMTSPEC,
+		         __func__,
+		         PMR_Flags(psPMR)));
+		return PVRSRV_ERROR_INVALID_FLAGS;
+	}
+#endif
+
+	return PVRSRV_OK;
+}
+
 PVRSRV_ERROR
 PhysmemExportDmaBuf(CONNECTION_DATA *psConnection,
                     PVRSRV_DEVICE_NODE *psDevNode,
@@ -974,19 +1018,12 @@ PhysmemExportDmaBuf(CONNECTION_DATA *psConnection,
 	IMG_DEVMEM_SIZE_T uiPMRSize;
 	PVRSRV_ERROR eError;
 	IMG_INT iFd;
-	IMG_INT iDmaBufFlags = 0;
-	PVRSRV_MEMALLOCFLAGS_T ui64Flags = 0;
-	IMG_BOOL bIsPMRReadable = IMG_FALSE;
-	IMG_BOOL bIsPMRWritable = IMG_FALSE;
-
-	/* Exporting a PMR which was originally created from an imported DmaBuf
-	 * is not supported.
-	 */
-	PVR_RETURN_IF_FALSE(PMR_GetType(psPMR) != PMR_TYPE_DMABUF,
-	                    PVRSRV_ERROR_PMR_WRONG_PMR_TYPE);
 
 	eError = PMR_IsExportable(psPMR);
 	PVR_LOG_RETURN_IF_ERROR(eError, "PMR_IsExportable");
+
+	eError = _CanPMRBeExported(psPMR);
+	PVR_LOG_RETURN_IF_ERROR(eError, "_CanPMRBeExported");
 
 	PMRFactoryLock();
 
@@ -998,29 +1035,9 @@ PhysmemExportDmaBuf(CONNECTION_DATA *psConnection,
 		goto fail_pmr_ref;
 	}
 
-	ui64Flags = PMR_Flags(psPMR);
-	bIsPMRReadable = PVRSRV_CHECK_CPU_READABLE(ui64Flags)        ||
-	                 PVRSRV_CHECK_CPU_READ_PERMITTED(ui64Flags)  ||
-	                 PVRSRV_CHECK_GPU_READABLE(ui64Flags)        ||
-	                 PVRSRV_CHECK_GPU_READ_PERMITTED(ui64Flags);
-	bIsPMRWritable = PVRSRV_CHECK_CPU_WRITEABLE(ui64Flags)       ||
-	                 PVRSRV_CHECK_CPU_WRITE_PERMITTED(ui64Flags) ||
-	                 PVRSRV_CHECK_GPU_WRITEABLE(ui64Flags)       ||
-	                 PVRSRV_CHECK_GPU_WRITE_PERMITTED(ui64Flags);
-
-	if (bIsPMRReadable && bIsPMRWritable)
-	{
-		iDmaBufFlags = O_RDWR;
-	}
-	else if (bIsPMRWritable)
-	{
-		iDmaBufFlags = O_WRONLY;
-	}
-	else
-	{
-		iDmaBufFlags = O_RDONLY;
-	}
-
+	/* Since _CanPMRBeExported() has already validated the PMR flags,
+	 * the dma_buf flags are guaranteed to be O_RDWR.
+	 */
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 1, 0))
 	{
 		DEFINE_DMA_BUF_EXPORT_INFO(sDmaBufExportInfo);
@@ -1028,16 +1045,16 @@ PhysmemExportDmaBuf(CONNECTION_DATA *psConnection,
 		sDmaBufExportInfo.priv  = psPMR;
 		sDmaBufExportInfo.ops   = &sPVRDmaBufOps;
 		sDmaBufExportInfo.size  = uiPMRSize;
-		sDmaBufExportInfo.flags = iDmaBufFlags;
+		sDmaBufExportInfo.flags = O_RDWR;
 
 		psDmaBuf = dma_buf_export(&sDmaBufExportInfo);
 	}
 #elif (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 17, 0))
 	psDmaBuf = dma_buf_export(psPMR, &sPVRDmaBufOps,
-	                          uiPMRSize, iDmaBufFlags, NULL);
+	                          uiPMRSize, O_RDWR, NULL);
 #else
 	psDmaBuf = dma_buf_export(psPMR, &sPVRDmaBufOps,
-	                          uiPMRSize, iDmaBufFlags);
+	                          uiPMRSize, O_RDWR);
 #endif
 
 	if (IS_ERR_OR_NULL(psDmaBuf))
@@ -1048,7 +1065,7 @@ PhysmemExportDmaBuf(CONNECTION_DATA *psConnection,
 		goto fail_pmr_ref;
 	}
 
-	iFd = dma_buf_fd(psDmaBuf, iDmaBufFlags);
+	iFd = dma_buf_fd(psDmaBuf, O_RDWR);
 	if (iFd < 0)
 	{
 		PVR_DPF((PVR_DBG_ERROR, "%s: Failed to get dma-buf fd (err=%d)",
@@ -1079,59 +1096,102 @@ fail_pmr_ref:
 }
 
 /* Validate permissions of dma_buf FD against PMR flags */
-static PVRSRV_ERROR
-ValidateDmaBufFdFlags(struct file *psFile,
-                      PVRSRV_MEMALLOCFLAGS_T uiFlags)
+static void
+ValidatePMRFlags(fmode_t uiDmaBufFileMode,
+                 PVRSRV_MEMALLOCFLAGS_T ui64PMRFlags)
 {
-	PVRSRV_ERROR eError = PVRSRV_OK;
 	IMG_BOOL bIsPMRReadable = IMG_FALSE;
 	IMG_BOOL bIsPMRWritable = IMG_FALSE;
 
-	bIsPMRReadable = PVRSRV_CHECK_CPU_READABLE(uiFlags)        ||
-	                 PVRSRV_CHECK_CPU_READ_PERMITTED(uiFlags)  ||
-	                 PVRSRV_CHECK_GPU_READABLE(uiFlags)        ||
-	                 PVRSRV_CHECK_GPU_READ_PERMITTED(uiFlags);
-	bIsPMRWritable = PVRSRV_CHECK_CPU_WRITEABLE(uiFlags)       ||
-	                 PVRSRV_CHECK_CPU_WRITE_PERMITTED(uiFlags) ||
-	                 PVRSRV_CHECK_GPU_WRITEABLE(uiFlags)       ||
-	                 PVRSRV_CHECK_GPU_WRITE_PERMITTED(uiFlags);
-
-	/* Requested flags must have either READ or WRITE or both permissions */
-	if (!bIsPMRReadable && !bIsPMRWritable)
-	{
-		PVR_DPF((PVR_DBG_ERROR, "%s: Invalid flags! "
-		         "dma_buf cannot be imported to PMR without any R/W flags. "
-		         "uiFlags = 0x%" PVRSRV_MEMALLOCFLAGS_FMTSPEC,
-		         __func__,
-		         uiFlags));
-		return PVRSRV_ERROR_INVALID_FLAGS;
-	}
+#if defined(PVR_ENABLE_DMABUF_UPSTREAM_COMPAT)
+	/* Upstream drivers grant DMA-BUFs GPU read/write access by default.
+	 * To maintain compatibility, only CPU access flags are validated.
+	 */
+	bIsPMRReadable = PVRSRV_CHECK_CPU_READABLE(ui64PMRFlags)        ||
+	                 PVRSRV_CHECK_CPU_READ_PERMITTED(ui64PMRFlags);
+	bIsPMRWritable = PVRSRV_CHECK_CPU_WRITEABLE(ui64PMRFlags)       ||
+	                 PVRSRV_CHECK_CPU_WRITE_PERMITTED(ui64PMRFlags);
+#else
+	bIsPMRReadable = IS_PMR_READABLE(ui64PMRFlags);
+	bIsPMRWritable = IS_PMR_WRITEABLE(ui64PMRFlags);
+#endif
 
 	/* Check for read permission mismatch between DmaBuf and PMR */
-	if (!(psFile->f_mode & FMODE_READ) && bIsPMRReadable)
+	if (!(uiDmaBufFileMode & FMODE_READ) && bIsPMRReadable)
 	{
-		PVR_DPF((PVR_DBG_ERROR, "%s: Read permission does not match! "
-		         "psFile->f_mode = 0x%x, "
-		         "uiFlags = 0x%" PVRSRV_MEMALLOCFLAGS_FMTSPEC,
+		PVR_DPF((PVR_DBG_WARNING, "%s: PMR read requested, but dma_buf is not readable! "
+		         "psDmaBuf->file->f_mode = 0x%x, "
+		         "ui64PMRFlags = 0x%" PVRSRV_MEMALLOCFLAGS_FMTSPEC,
 		         __func__,
-		         psFile->f_mode,
-		         uiFlags));
-		eError = PVRSRV_ERROR_INVALID_FLAGS;
+		         uiDmaBufFileMode,
+		         ui64PMRFlags));
 	}
 
 	/* Check for write permission mismatch between DmaBuf and PMR */
-	if (!(psFile->f_mode & FMODE_WRITE) && bIsPMRWritable)
+	if (!(uiDmaBufFileMode & FMODE_WRITE) && bIsPMRWritable)
 	{
-		PVR_DPF((PVR_DBG_ERROR, "%s: Write permission does not match! "
-		         "psFile->f_mode = 0x%x, "
-		         "uiFlags = 0x%" PVRSRV_MEMALLOCFLAGS_FMTSPEC,
+		PVR_DPF((PVR_DBG_WARNING, "%s: PMR write requested, but dma_buf is not writable! "
+		         "psDmaBuf->file->f_mode = 0x%x, "
+		         "ui64PMRFlags = 0x%" PVRSRV_MEMALLOCFLAGS_FMTSPEC,
 		         __func__,
-		         psFile->f_mode,
-		         uiFlags));
-		eError = PVRSRV_ERROR_INVALID_FLAGS;
+		         uiDmaBufFileMode,
+		         ui64PMRFlags));
+	}
+}
+
+static PVRSRV_MEMALLOCFLAGS_T
+GetAdjustedPMRAccessFlags(fmode_t uiDmaBufFileMode,
+                          PVRSRV_MEMALLOCFLAGS_T ui64PMRFlags)
+{
+	IMG_UINT64 ui64TempFlag;
+
+	/* The PMR's READ and WRITE flags should ideally be derived from the actual
+	 * permissions of psDmaBuf, rather than relying on values passed from userspace.
+	 * Historically, userspace provided these access flags together with other PMR
+	 * attributes (e.g., cache-related flags).
+	 *
+	 * To ensure correctness, the READ and WRITE flags should be set based on the
+	 * permissions of the underlying psDmaBuf.
+	 */
+	ui64TempFlag = PVRSRV_MEMALLOCFLAG_CPU_READABLE       |
+	               PVRSRV_MEMALLOCFLAG_GPU_READABLE       |
+	               PVRSRV_MEMALLOCFLAG_CPU_READ_PERMITTED |
+	               PVRSRV_MEMALLOCFLAG_GPU_READ_PERMITTED;
+	if (uiDmaBufFileMode & FMODE_READ)
+	{
+		ui64PMRFlags |= ui64TempFlag;
+	}
+	else
+	{
+		ui64PMRFlags &= (~ui64TempFlag);
 	}
 
-	return eError;
+	ui64TempFlag = PVRSRV_MEMALLOCFLAG_CPU_WRITEABLE       |
+	               PVRSRV_MEMALLOCFLAG_GPU_WRITEABLE       |
+	               PVRSRV_MEMALLOCFLAG_CPU_WRITE_PERMITTED |
+	               PVRSRV_MEMALLOCFLAG_GPU_WRITE_PERMITTED;
+	if (uiDmaBufFileMode & FMODE_WRITE)
+	{
+		ui64PMRFlags |= ui64TempFlag;
+	}
+	else
+	{
+		ui64PMRFlags &= (~ui64TempFlag);
+	}
+
+#if defined(PVR_ENABLE_DMABUF_UPSTREAM_COMPAT)
+	/* In upstream DRM drivers, DMA-BUFs are always treated as GPU-readable and
+	 * GPU-writable, regardless of the access mode of their file descriptors.
+	 * Therefore, GPU read and write flags are set unconditionally to ensure
+	 * compatibility with upstream expectations.
+	 */
+	ui64PMRFlags |= PVRSRV_MEMALLOCFLAG_GPU_READABLE       |
+	                PVRSRV_MEMALLOCFLAG_GPU_WRITEABLE      |
+	                PVRSRV_MEMALLOCFLAG_GPU_READ_PERMITTED |
+	                PVRSRV_MEMALLOCFLAG_GPU_WRITE_PERMITTED;
+#endif
+
+	return ui64PMRFlags;
 }
 
 PVRSRV_ERROR
@@ -1161,9 +1221,6 @@ PhysmemImportDmaBuf(CONNECTION_DATA *psConnection,
 	}
 
 	uiSize = psDmaBuf->size;
-	eError = ValidateDmaBufFdFlags(psDmaBuf->file, uiFlags);
-	PVR_LOG_GOTO_IF_ERROR(eError, "ValidateDmaBufFdFlags", errDmaBufPut);
-
 	eError = PhysmemImportSparseDmaBuf(psConnection,
 	                                 psDevNode,
 	                                 fd,
@@ -1177,6 +1234,7 @@ PhysmemImportDmaBuf(CONNECTION_DATA *psConnection,
 	                                 ppsPMRPtr,
 	                                 puiSize,
 	                                 puiAlign);
+	PVR_LOG_GOTO_IF_ERROR(eError, "PhysmemImportSparseDmaBuf", errDmaBufPut);
 
 errDmaBufPut:
 	dma_buf_put(psDmaBuf);
@@ -1271,6 +1329,9 @@ PhysmemImportSparseDmaBuf(CONNECTION_DATA *psConnection,
 		eError = PVRSRV_ERROR_BAD_MAPPING;
 		goto errUnlockReturn;
 	}
+
+	ValidatePMRFlags(psDmaBuf->file->f_mode, uiFlags);
+	uiFlags = GetAdjustedPMRAccessFlags(psDmaBuf->file->f_mode, uiFlags);
 
 	if (psDmaBuf->ops == &sPVRDmaBufOps)
 	{
