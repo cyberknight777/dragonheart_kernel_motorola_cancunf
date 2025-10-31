@@ -195,6 +195,12 @@ struct _RGX_FREELIST_ {
 #if defined(SUPPORT_WORKLOAD_ESTIMATION)
 	HASH_TABLE*				psWorkloadHashTable;
 #endif
+
+#if defined(RGX_FORCE_FREELIST_CLEANUP)
+	IMG_UINT32				uiStillReferencedRetryCount;
+	IMG_UINT32				uiStillReferencedRetryCountCT;
+	IMG_UINT32				uiFWRequestCleanupRetryCount;
+#endif /* defined(RGX_FORCE_FREELIST_CLEANUP) */
 };
 
 struct _RGX_PMR_NODE_ {
