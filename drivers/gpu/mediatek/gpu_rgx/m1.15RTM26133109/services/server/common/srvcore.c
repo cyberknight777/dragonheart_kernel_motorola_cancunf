@@ -1395,6 +1395,12 @@ unlock_and_return_error:
 #if !defined(INTEGRITY_OS)
 	if (hBridgeBufferPoolToken != NULL)
 	{
+		/* Clear the buffer before putting it back in to the pool. This is to
+		 * ensure that another bridge call that acquires this buffer and for
+		 * example errors before initialising all of it doesn't end up
+		 * dereferencing any dangling pointers. */
+		OSCachedMemSet(psBridgeIn, 0, psBridgePackageKM->ui32InBufferSize);
+
 		err = PVRSRVPoolPut(g_psBridgeBufferPool,
 				hBridgeBufferPoolToken);
 		PVR_LOG_IF_ERROR(err, "PVRSRVPoolPut");

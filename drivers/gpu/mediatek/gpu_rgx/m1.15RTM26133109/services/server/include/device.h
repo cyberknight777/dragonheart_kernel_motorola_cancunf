@@ -568,6 +568,10 @@ static INLINE IMG_BOOL PVRSRVHasCounter32Advanced(IMG_UINT32 uiCurrent,
 	    (((uiRequired - uiCurrent) > 0xF0000000UL) ? IMG_TRUE : IMG_FALSE);
 }
 
+#define PVRSRVIsStatusRecoverable(eStatus) \
+	(((eStatus == PVRSRV_DEVICE_HEALTH_STATUS_DEAD)) ? \
+	 IMG_FALSE : IMG_TRUE)
+
 #endif /* DEVICE_H */
 
 /******************************************************************************

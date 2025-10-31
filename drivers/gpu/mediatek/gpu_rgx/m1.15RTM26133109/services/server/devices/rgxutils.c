@@ -486,6 +486,76 @@ void UnrefAndReleaseCriticalBuffer(DEVMEMINT_RESERVATION2* psReservation)
 	DevmemIntReservationRelease(psReservation);
 }
 
+IMG_BOOL RGXIsErrorAndDeviceRecoverable(PVRSRV_DEVICE_NODE *psDeviceNode, PVRSRV_ERROR *peError)
+{
+	IMG_BOOL bRecoverable = IMG_TRUE;
+
+	if (*peError == PVRSRV_OK)
+	{
+		/* No recovery required */
+		return IMG_FALSE;
+	}
+
+	if (!PVRSRVIsStatusRecoverable(OSAtomicRead(&psDeviceNode->eHealthStatus)))
+	{
+		bRecoverable = IMG_FALSE;
+	}
+	else
+	{
+		RGXUpdateHealthStatus(psDeviceNode, IMG_FALSE);
+
+		if (!PVRSRVIsStatusRecoverable(OSAtomicRead(&psDeviceNode->eHealthStatus)))
+		{
+			bRecoverable = IMG_FALSE;
+		}
+	}
+
+	if (bRecoverable && !PVRSRVIsRetryError(*peError))
+	{
+		PVR_DPF((PVR_DBG_WARNING,
+				 "%s: Device is recoverable. Changing error type (%s) to retry.",
+				 __func__, PVRSRVGetErrorString(*peError)));
+		*peError = PVRSRV_ERROR_RETRY;
+	}
+
+	if (!bRecoverable && PVRSRVIsRetryError(*peError))
+	{
+		PVR_DPF((PVR_DBG_WARNING,
+				 "%s: Device is not recoverable. Error type should not be retry (%s).",
+				 __func__, PVRSRVGetErrorString(*peError)));
+		*peError = PVRSRV_ERROR_INVALID_PARAMS;
+	}
+
+	return bRecoverable;
+}
+
+/* The upper bound comes from theoretical maximum range that PM can address
+ * when accessing tail ptr buffer.
+ * The size is bound by:
+ *     - maximum number of RTA layers (at most 2048)
+ *     - TPC stride (at most 16384 pages).
+ * The address is also offset in FW by half of the buffer size
+ * when TRP is enabled so maximum upper bound is:
+ * 2048 * 16384 pages * 1.5 = 192GB
+ */
+#define PM_BUFFER_SIZE_UPPER_BOUND (0x3000000000)
+
+static_assert(RGX_PMMETA_PROTECT_HEAP_BASE - (RGX_GENERAL_HEAP_BASE + RGX_GENERAL_HEAP_SIZE) > PM_BUFFER_SIZE_UPPER_BOUND,
+			  "Distance between PMMETA_PROTECT and GENERAL heaps is less than PM buffer size upper bound");
+PVRSRV_ERROR ValidatePMAddrs(IMG_DEV_VIRTADDR* psDevVAddr, IMG_UINT32 ui32NumAddr)
+{
+	IMG_UINT32 i;
+
+	for (i=0; i<ui32NumAddr; i++)
+	{
+		if (psDevVAddr[i].uiAddr >= (RGX_GENERAL_HEAP_BASE + RGX_GENERAL_HEAP_SIZE))
+		{
+			return PVRSRV_ERROR_INVALID_PARAMS;
+		}
+	}
+
+	return PVRSRV_OK;
+}
 /******************************************************************************
  End of file (rgxutils.c)
 ******************************************************************************/

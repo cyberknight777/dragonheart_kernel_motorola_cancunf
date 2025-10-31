@@ -196,7 +196,7 @@ PVRSRVNotifyCommandCompletion(PVRSRV_CMDCOMP_HANDLE hCmdCompCallerHandle)
 }
 
 inline void
-PVRSRVSignalGlobalEO(void)
+PVRSRVSignalDriverWideEO(void)
 {
 	PVRSRV_DATA *psPVRSRVData = PVRSRVGetPVRSRVData();
 
@@ -218,7 +218,7 @@ inline void
 PVRSRVCheckStatus(PVRSRV_CMDCOMP_HANDLE hCmdCompCallerHandle)
 {
 	PVRSRVNotifyCommandCompletion(hCmdCompCallerHandle);
-	PVRSRVSignalGlobalEO();
+	PVRSRVSignalDriverWideEO();
 }
 
 /*************************************************************************/ /*!
