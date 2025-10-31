@@ -409,13 +409,16 @@ static INLINE DLLIST_NODE *_CleanupThreadWorkListPop(PVRSRV_DATA *psPVRSRVData,
 
 /* Process the cleanup thread work list */
 static IMG_BOOL _CleanupThreadProcessWorkList(PVRSRV_DATA *psPVRSRVData,
-                                              IMG_BOOL *pbUseGlobalEO)
+                                              IMG_BOOL *pbUseHWTimeout)
 {
 	DLLIST_NODE *psNodeIter, *psNodeLast;
 	PVRSRV_ERROR eError;
 	IMG_BOOL bNeedRetry = IMG_FALSE;
 	OS_SPINLOCK_FLAGS uiFlags;
 	PVRSRV_DEVICE_NODE *psDeviceNode = NULL;
+
+	/* Reset HWTimeout Flag */
+	*pbUseHWTimeout = IMG_FALSE;
 
 	psNodeLast = _CleanupThreadWorkListLast(psPVRSRVData);
 	if (psNodeLast == NULL)
@@ -450,7 +453,6 @@ static IMG_BOOL _CleanupThreadProcessWorkList(PVRSRV_DATA *psPVRSRVData,
 		 */
 		pfnFree = psData->pfnFree;
 
-		*pbUseGlobalEO = psData->bDependsOnHW;
 		eError = pfnFree(psData->pvData);
 
 		if (eError != PVRSRV_OK)
@@ -464,19 +466,41 @@ static IMG_BOOL _CleanupThreadProcessWorkList(PVRSRV_DATA *psPVRSRVData,
 				{
 					bNeedRetry = IMG_TRUE;
 					bRetry = IMG_TRUE;
+					/* If any items require retry and are HW dependent
+					 * use the HW timeout
+					 */
+					if (psData->bDependsOnHW)
+					{
+						*pbUseHWTimeout = psData->bDependsOnHW;
+					}
 				}
 			}
 			else
 			{
-				if (psData->ui32RetryCount-- > 0)
+				if (psData->ui32RetryCount > 0)
 				{
+					psData->ui32RetryCount--;
 					bNeedRetry = IMG_TRUE;
 					bRetry = IMG_TRUE;
+					/* If any items require retry and are HW dependent
+					 * use the HW timeout
+					 */
+					if (psData->bDependsOnHW)
+					{
+						*pbUseHWTimeout = psData->bDependsOnHW;
+					}
 				}
 			}
 
-			if (bRetry)
+			/* If the work depends on HW then we should add it to the back of the list,
+			 * the cleanup thread will sleep for longer if required and the next MISR
+			 * from the device will wake the task again in which it might be ready.
+			 */
+			if (bRetry || psData->bDependsOnHW)
 			{
+				/* If any items on the work list depend on HW
+				 * and didnt get cleaned up.
+				 */
 				OSSpinLockAcquire(psPVRSRVData->hCleanupThreadWorkListLock, uiFlags);
 				dllist_add_to_tail(&psDeviceNode->sCleanupThreadWorkList, psNodeIter);
 				OSSpinLockRelease(psPVRSRVData->hCleanupThreadWorkListLock, uiFlags);
@@ -527,11 +551,11 @@ static void CleanupThread(void *pvData)
 {
 	PVRSRV_DATA *psPVRSRVData = pvData;
 	IMG_BOOL     bRetryWorkList = IMG_FALSE;
-	IMG_HANDLE	 hGlobalEvent;
+	IMG_BOOL     bUseHWTimeout = IMG_FALSE;
 	IMG_HANDLE	 hOSEvent;
 	PVRSRV_ERROR eRc;
-	IMG_BOOL bUseGlobalEO = IMG_FALSE;
 	IMG_UINT32 uiUnloadRetry = 0;
+	DLLIST_NODE *psNodeIter, *psNodeLast;
 
 	/* Store the process id (pid) of the clean-up thread */
 	psPVRSRVData->cleanupThreadPid = OSGetCurrentProcessID();
@@ -546,16 +570,12 @@ static void CleanupThread(void *pvData)
 	eRc = OSEventObjectOpen(psPVRSRVData->hCleanupEventObject, &hOSEvent);
 	PVR_ASSERT(eRc == PVRSRV_OK);
 
-	eRc = OSEventObjectOpen(psPVRSRVData->hGlobalEventObject, &hGlobalEvent);
-	PVR_ASSERT(eRc == PVRSRV_OK);
-
 	/* While the driver is in a good state and is not being unloaded
 	 * try to free any deferred items when signalled
 	 */
 	while (psPVRSRVData->eServicesState == PVRSRV_SERVICES_STATE_OK)
 	{
-		IMG_HANDLE hEvent;
-
+		IMG_UINT64 ui64Timeoutus;
 		if (psPVRSRVData->bUnload)
 		{
 			if (dllist_is_empty(&psPVRSRVData->psHostMemDeviceNode->sCleanupThreadWorkList) ||
@@ -572,18 +592,26 @@ static void CleanupThread(void *pvData)
 		 * Bridge lock re-acquired on our behalf before the wait call returns.
 		 */
 
-		if (bRetryWorkList && bUseGlobalEO)
+		if (bRetryWorkList && bUseHWTimeout)
 		{
-			hEvent = hGlobalEvent;
+			/* If item depends on HW we are
+			 * waiting for GPU work to finish, so
+			 * use MAX_HW_TIME_US as timeout (this
+			 * will be set appropriately when
+			 * running on systems with emulated
+			 * hardware, etc).
+			 */
+			ui64Timeoutus = MAX_HW_TIME_US;
 		}
 		else
 		{
-			hEvent = hOSEvent;
+			/* Use the default retry timeout. */
+			ui64Timeoutus = CLEANUP_THREAD_WAIT_RETRY_TIMEOUT;
 		}
 
-		eRc = OSEventObjectWaitKernel(hEvent,
+		eRc = OSEventObjectWaitKernel(hOSEvent,
 				(bRetryWorkList || psPVRSRVData->bUnload)?
-				CLEANUP_THREAD_WAIT_RETRY_TIMEOUT :
+				ui64Timeoutus :
 				CLEANUP_THREAD_WAIT_SLEEP_TIMEOUT);
 		if (eRc == PVRSRV_ERROR_TIMEOUT)
 		{
@@ -598,7 +626,29 @@ static void CleanupThread(void *pvData)
 			PVR_LOG_ERROR(eRc, "OSEventObjectWaitKernel");
 		}
 
-		bRetryWorkList = _CleanupThreadProcessWorkList(psPVRSRVData, &bUseGlobalEO);
+		bRetryWorkList = _CleanupThreadProcessWorkList(psPVRSRVData,
+		                                               &bUseHWTimeout);
+	}
+
+	psNodeLast = _CleanupThreadWorkListLast(psPVRSRVData);
+	if (psNodeLast != NULL)
+	{
+		do
+		{
+			PVRSRV_DEVICE_NODE *psDeviceNode = NULL;
+			PVRSRV_CLEANUP_THREAD_WORK *psData;
+			psNodeIter = _CleanupThreadWorkListPop(psPVRSRVData, &psDeviceNode);
+			if (psNodeIter == NULL)
+			{
+				break;
+			}
+
+			psData = IMG_CONTAINER_OF(psNodeIter, PVRSRV_CLEANUP_THREAD_WORK, sNode);
+			OSAtomicIncrement(&psPVRSRVData->i32NumCleanupItemsNotCompleted);
+		}
+		while(psNodeIter != NULL && psNodeIter != psNodeLast);
+
+		PVR_DPF((PVR_DBG_ERROR, "Cleanup Thread Failed to free %d resources", OSAtomicRead(&psPVRSRVData->i32NumCleanupItemsNotCompleted)));
 	}
 
 	OSSpinLockDestroy(psPVRSRVData->hCleanupThreadWorkListLock);
@@ -606,10 +656,13 @@ static void CleanupThread(void *pvData)
 	eRc = OSEventObjectClose(hOSEvent);
 	PVR_LOG_IF_ERROR(eRc, "OSEventObjectClose");
 
-	eRc = OSEventObjectClose(hGlobalEvent);
-	PVR_LOG_IF_ERROR(eRc, "OSEventObjectClose");
-
 	PVR_DPF((CLEANUP_DPFL, "CleanupThread: thread ending... "));
+}
+
+IMG_BOOL PVRSRVIsCurrentThreadCleanupThread(void)
+{
+	return OSGetCurrentProcessID() == gpsPVRSRVData->cleanupThreadPid &&
+	       OSGetCurrentThreadID() == gpsPVRSRVData->cleanupThreadTid;
 }
 
 static void DevicesWatchdogThread_ForEachVaCb(PVRSRV_DEVICE_NODE *psDeviceNode,
