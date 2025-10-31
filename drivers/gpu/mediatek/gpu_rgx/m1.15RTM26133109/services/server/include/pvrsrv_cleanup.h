@@ -141,8 +141,9 @@ typedef struct _PVRSRV_CLEANUP_THREAD_WORK_
 	                                    error logged when this is reached. */
 	IMG_UINT32 ui32RetryCount;     /*!< Number of times the callback should be
 	                                    re-tried when it returns error. */
-	IMG_BOOL bDependsOnHW;         /*!< Retry again after the RGX interrupt signals
-	                                    the global event object */
+	IMG_BOOL bDependsOnHW;           /*!< Dont drop the cleanup task if retry limit
+	                                      is reached, we could depend on event from
+	                                      device to continue. */
 	PVRSRV_DEVICE_NODE *psDevNode;
 } PVRSRV_CLEANUP_THREAD_WORK;
 
@@ -171,5 +172,14 @@ void PVRSRVCleanupThreadAddWork(PVRSRV_DEVICE_NODE *psDevNode,
 @Return         None
 */ /***************************************************************************/
 void PVRSRVCleanupThreadWaitForDevice(PVRSRV_DEVICE_NODE *psDevNode);
+
+/**************************************************************************/ /*!
+@Function       PVRSRVIsCurrentThreadCleanupThread
+
+@Description    Tells if current thread of execution is the CleanupThread.
+
+@Return         IMG_TRUE if current thread is the CleanupThread
+*/ /***************************************************************************/
+IMG_BOOL PVRSRVIsCurrentThreadCleanupThread(void);
 
 #endif /* PVRSRV_CLEANUP_H */

@@ -57,11 +57,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /* PID associated with Connection currently being purged by Cleanup thread */
 static IMG_PID gCurrentPurgeConnectionPid;
 
-static inline IMG_BOOL IsRetryError(PVRSRV_ERROR eError)
-{
-	return eError == PVRSRV_ERROR_RETRY || eError == PVRSRV_ERROR_KERNEL_CCB_FULL;
-}
-
 static PVRSRV_ERROR ConnectionDataDestroy(CONNECTION_DATA *psConnection)
 {
 	PVRSRV_ERROR eError;
@@ -99,9 +94,23 @@ static PVRSRV_ERROR ConnectionDataDestroy(CONNECTION_DATA *psConnection)
 
 	if (psProcessHandleBase != NULL)
 	{
+		/* PVRSRVReleaseProcessHandleBase() calls PVRSRVFreeKernelHendles()
+		 * and PVRSRVFreeHandleBase() for the process handle base.
+		 * Releasing kernel handles can never return RETRY error because
+		 * release function for those handles are NOPs and PVRSRVFreeKernelHendles()
+		 * doesn't even call pfnReleaseData() callback.
+		 * Process handles can potentially return RETRY hence additional check
+		 * below. */
 		eError = PVRSRVReleaseProcessHandleBase(psProcessHandleBase,
-	                                            ui64MaxBridgeTime);
-		PVR_LOG_RETURN_IF_ERROR(eError, "PVRSRVReleaseProcessHandleBase");
+		                                        ui64MaxBridgeTime);
+		if (PVRSRVIsRetryError(eError))
+		{
+			return eError;
+		}
+		else
+		{
+			PVR_LOG_RETURN_IF_ERROR(eError, "PVRSRVReleaseProcessHandleBase");
+		}
 
 		psConnection->psProcessHandleBase = NULL;
 	}
@@ -119,13 +128,13 @@ static PVRSRV_ERROR ConnectionDataDestroy(CONNECTION_DATA *psConnection)
 		 * Retrying will allow the in-flight work to be completed and the
 		 * tear-down request can be completed when the FW is no longer busy.
 		 */
-		if (PVRSRV_ERROR_RETRY == eError)
+		if (PVRSRVIsRetryError(eError))
 		{
 			return eError;
 		}
 		else
 		{
-			PVR_LOG_RETURN_IF_ERROR(eError, "PVRSRVFreeHandleBase:2");
+			PVR_LOG_RETURN_IF_ERROR(eError, "PVRSRVFreeHandleBase");
 		}
 
 		psConnection->psHandleBase = NULL;
@@ -274,7 +283,7 @@ static PVRSRV_ERROR _CleanupThreadPurgeConnectionData(void *pvConnectionData)
 	eErrorConnection = ConnectionDataDestroy(psConnectionData);
 	if (eErrorConnection != PVRSRV_OK)
 	{
-		if (IsRetryError(eErrorConnection))
+		if (PVRSRVIsRetryError(eErrorConnection))
 		{
 			PVR_DPF((PVR_DBG_MESSAGE, "%s: Failed to purge connection data %p "
 			        "(deferring destruction)", __func__, psConnectionData));
@@ -282,10 +291,8 @@ static PVRSRV_ERROR _CleanupThreadPurgeConnectionData(void *pvConnectionData)
 	}
 	else
 	{
-		PVR_DPF((PVR_DBG_MESSAGE,
-			 "%s: Connection data %p deferred destruction finished",
-			 __func__,
-			 psConnectionData));
+		PVR_DPF((PVR_DBG_MESSAGE, "%s: Connection data %p deferred destruction "
+		        "finished", __func__, psConnectionData));
 	}
 
 	/* Check if possible resize the global handle base */
@@ -379,7 +386,10 @@ void PVRSRVCommonConnectionDisconnect(void *pvDataPtr)
 		/* Defer the release of the connection data */
 		psConnectionData->sCleanupThreadFn.pfnFree = _CleanupThreadPurgeConnectionData;
 		psConnectionData->sCleanupThreadFn.pvData = psConnectionData;
-		psConnectionData->sCleanupThreadFn.bDependsOnHW = IMG_FALSE;
+		/* Some resources in HANDLE_BASE may need FW idle confirmation
+		 * hence setting to TRUE to use the global EO for retries which is
+		 * signalled by the device MISR */
+		psConnectionData->sCleanupThreadFn.bDependsOnHW = IMG_TRUE;
 		psConnectionData->sCleanupThreadFn.psDevNode = psDevNode;
 		CLEANUP_THREAD_SET_RETRY_TIMEOUT(&psConnectionData->sCleanupThreadFn,
 		                                 IMG_UINT32_C(300000)); /* 5 min. */
