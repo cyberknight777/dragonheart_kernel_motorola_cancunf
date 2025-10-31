@@ -772,6 +772,16 @@ ErrorAllocHost:
 
 }
 
+/**************************************************************************/ /*!
+@Function     RGXShrinkFreeList
+@Description  Unwrites physical memory associated with the freelist.
+              Note: The lock to psFreeList->psDevInfo->hLockFreeList
+                    MUST be held by the caller.
+@Input        pListHeader   Pointer to the double linked list embedded
+                            in the RGX_PMR_NODE object.
+@Input        psFreeList    A freelist RGX_PMR_NODE object above comes from.
+@Return       PVRSRV_ERROR  PVRSRV_OK on success and an error otherwise
+*/ /***************************************************************************/
 static PVRSRV_ERROR RGXShrinkFreeList(PDLLIST_NODE pListHeader,
 		RGX_FREELIST *psFreeList)
 {
@@ -789,8 +799,7 @@ static PVRSRV_ERROR RGXShrinkFreeList(PDLLIST_NODE pListHeader,
 	PVR_ASSERT(psFreeList);
 	PVR_ASSERT(psFreeList->psDevInfo);
 	PVR_ASSERT(psFreeList->psDevInfo->hLockFreeList);
-
-	OSLockAcquire(psFreeList->psDevInfo->hLockFreeList);
+	PVR_ASSERT(OSLockIsLocked(psFreeList->psDevInfo->hLockFreeList));
 
 	/* Get node from head of list and remove it */
 	psNode = dllist_get_next_node(pListHeader);
@@ -876,8 +885,6 @@ static PVRSRV_ERROR RGXShrinkFreeList(PDLLIST_NODE pListHeader,
 				psFreeList->ui32InitFLPages));
 		eError = PVRSRV_ERROR_PBSIZE_ALREADY_MIN;
 	}
-
-	OSLockRelease(psFreeList->psDevInfo->hLockFreeList);
 
 	return eError;
 }
@@ -1573,6 +1580,24 @@ static void RGXDestroyHWRTData_aux(RGX_KM_HW_RT_DATASET *psKMHWRTDataSet)
 	OSFreeMem(psKMHWRTDataSet);
 }
 
+#if defined(FIX_HW_BRN_63142_BIT_MASK)
+static PVRSRV_ERROR
+_ValidatePMAddrs_BRN63142(IMG_DEV_VIRTADDR* psDevVAddr, IMG_UINT32 ui32NumAddr)
+{
+	IMG_UINT32 i;
+
+	for (i=0; i<ui32NumAddr; i++)
+	{
+		if (psDevVAddr[i].uiAddr >= (RGX_RGNHDR_BRN_63142_HEAP_BASE + RGX_RGNHDR_BRN_63142_HEAP_SIZE))
+		{
+			return PVRSRV_ERROR_INVALID_PARAMS;
+		}
+	}
+
+	return PVRSRV_OK;
+}
+#endif
+
 /* Create set of HWRTData(s) and bind it with a shared FW HWRTDataCommon */
 PVRSRV_ERROR RGXCreateHWRTDataSet2(CONNECTION_DATA      *psConnection,
 		PVRSRV_DEVICE_NODE	*psDeviceNode,
@@ -1638,6 +1663,49 @@ PVRSRV_ERROR RGXCreateHWRTDataSet2(CONNECTION_DATA      *psConnection,
 	                                          &sMListsDevVAddr);
 	PVR_LOG_RETURN_IF_ERROR(eError, "Failed to obtain or validate MLIST buffer");
 
+	eError = ValidatePMAddrs(&sTailPtrsDevVAddr, 1);
+	PVR_LOG_GOTO_IF_ERROR(eError,
+	    "Validation failed for tail ptr address", err_ValidationDevPtr);
+
+	eError = ValidatePMAddrs(&sMacrotileArrayDevVAddr_0, 1);
+	PVR_LOG_GOTO_IF_ERROR(eError,
+	    "Validation failed for macrotile array address", err_ValidationDevPtr);
+
+	eError = ValidatePMAddrs(&sMacrotileArrayDevVAddr_1, 1);
+	PVR_LOG_GOTO_IF_ERROR(eError,
+	    "Validation failed for macrotile array address", err_ValidationDevPtr);
+
+	eError = ValidatePMAddrs(&psVHeapTableDevVAddr, 1);
+	PVR_LOG_GOTO_IF_ERROR(eError,
+	    "Validation failed for vheap table address", err_ValidationDevPtr);
+
+#if defined(FIX_HW_BRN_63142_BIT_MASK)
+	/* With BRN_63142 permit region headers to be allocated of a different heap */
+	if (RGX_IS_BRN_SUPPORTED(psDevInfo, 63142))
+	{
+		eError = _ValidatePMAddrs_BRN63142(&sRgnHeaderDevVAddr_0, 1);
+		PVR_LOG_GOTO_IF_ERROR(eError,
+		    "Validation failed for rgn header address", err_ValidationDevPtr);
+
+		eError = _ValidatePMAddrs_BRN63142(&sRgnHeaderDevVAddr_1, 1);
+		PVR_LOG_GOTO_IF_ERROR(eError,
+		    "Validation failed for rgn header address", err_ValidationDevPtr);
+	}
+	else
+#endif
+	{
+		eError = ValidatePMAddrs(&sRgnHeaderDevVAddr_0, 1);
+		PVR_LOG_GOTO_IF_ERROR(eError,
+		    "Validation failed for rgn header address", err_ValidationDevPtr);
+
+		eError = ValidatePMAddrs(&sRgnHeaderDevVAddr_1, 1);
+		PVR_LOG_GOTO_IF_ERROR(eError,
+		    "Validation failed for rgn header address", err_ValidationDevPtr);
+	}
+
+	eError = ValidatePMAddrs(&sRTCDevVAddr, 1);
+	PVR_LOG_GOTO_IF_ERROR(eError,
+	    "Validation failed for RTC address", err_ValidationDevPtr);
 
 	/* Prepare KM cleanup object for HWRTDataCommon FW object */
 	psHWRTDataCommonCookie = OSAllocZMem(sizeof(*psHWRTDataCommonCookie));
@@ -1786,6 +1854,7 @@ err_HWRTDataCommonFwAddr:
 err_HWRTDataCommonAlloc:
 	OSFreeMem(psHWRTDataCommonCookie);
 err_HWRTDataCommonCookieAlloc:
+err_ValidationDevPtr:
 	UnrefAndReleaseCriticalBuffer(psPMMListsReservation);
 
 	return eError;
@@ -2239,18 +2308,37 @@ ErrorAllocHost:
 PVRSRV_ERROR RGXDestroyFreeList(RGX_FREELIST *psFreeList)
 {
 	PVRSRV_ERROR eError;
-	IMG_UINT32 ui32RefCount;
 
 	PVR_ASSERT(psFreeList);
 
 	OSLockAcquire(psFreeList->psDevInfo->hLockFreeList);
-	ui32RefCount = psFreeList->ui32RefCount;
-	OSLockRelease(psFreeList->psDevInfo->hLockFreeList);
 
-	if (ui32RefCount != 0)
+#if defined(RGX_FORCE_FREELIST_CLEANUP)
+	if (PVRSRVIsCurrentThreadCleanupThread())
 	{
-		/* Freelist still busy */
-		return PVRSRV_ERROR_RETRY;
+		psFreeList->uiStillReferencedRetryCountCT++;
+
+		if (psFreeList->uiStillReferencedRetryCountCT < (CLEANUP_THREAD_RETRY_COUNT_DEFAULT >> 2))
+		{
+			OSLockRelease(psFreeList->psDevInfo->hLockFreeList);
+			return PVRSRV_ERROR_RETRY;
+		}
+	}
+	else
+#endif /* defined(RGX_FORCE_FREELIST_CLEANUP) */
+	{
+		IMG_UINT32 ui32RefCount = psFreeList->ui32RefCount;
+
+		if (ui32RefCount != 0)
+		{
+			/* Freelist still busy */
+#if defined(RGX_FORCE_FREELIST_CLEANUP)
+			psFreeList->uiStillReferencedRetryCount++;
+#endif /* defined(RGX_FORCE_FREELIST_CLEANUP) */
+
+			OSLockRelease(psFreeList->psDevInfo->hLockFreeList);
+			return PVRSRV_ERROR_RETRY;
+		}
 	}
 
 	/* Freelist is not in use => start firmware cleanup */
@@ -2258,19 +2346,30 @@ PVRSRV_ERROR RGXDestroyFreeList(RGX_FREELIST *psFreeList)
 			psFreeList->sFreeListFWDevVAddr);
 	if (eError != PVRSRV_OK)
 	{
-		/* Can happen if the firmware took too long to handle the cleanup request,
-		 * or if SLC-flushes didn't went through (due to some GPU lockup) */
-		return eError;
+		if (RGXIsErrorAndDeviceRecoverable(psFreeList->psDevInfo->psDeviceNode, &eError))
+		{
+#if defined(RGX_FORCE_FREELIST_CLEANUP)
+			psFreeList->uiFWRequestCleanupRetryCount++;
+#endif /* defined(RGX_FORCE_FREELIST_CLEANUP) */
+
+			OSLockRelease(psFreeList->psDevInfo->hLockFreeList);
+			return eError;
+		}
+		PVR_LOG(("%s: Unexpected error from RGXFWRequestFreeListCleanUp(%s)",
+				 __func__, PVRSRVGetErrorString(eError)));
+		/* Device is dead. We let it go as if nothing happened.
+		 * Device becomes unrecoverable if the firmware took too long to
+		 * handle the cleanup request, or if SLC-flushes didn't go through
+		 * (due to some GPU lockup) */
+		eError = PVRSRV_OK;
 	}
 
 	/* Remove FreeList from linked list before we destroy it... */
-	OSLockAcquire(psFreeList->psDevInfo->hLockFreeList);
 	dllist_remove_node(&psFreeList->sNode);
 #if !defined(SUPPORT_SHADOW_FREELISTS)
 	/* Confirm all HWRTData nodes are freed before releasing freelist */
 	PVR_ASSERT(dllist_is_empty(&psFreeList->sNodeHWRTDataHead));
 #endif
-	OSLockRelease(psFreeList->psDevInfo->hLockFreeList);
 
 	if (psFreeList->bCheckFreelist)
 	{
@@ -2303,16 +2402,18 @@ PVRSRV_ERROR RGXDestroyFreeList(RGX_FREELIST *psFreeList)
 	while (!dllist_is_empty(&psFreeList->sMemoryBlockHead))
 	{
 		eError = RGXShrinkFreeList(&psFreeList->sMemoryBlockHead, psFreeList);
-		PVR_ASSERT(eError == PVRSRV_OK);
+		PVR_LOG_IF_ERROR(eError, "RGXShrinkFreeList - grow shrink blocks");
 	}
 
 	/* Remove initial PB block */
 	eError = RGXShrinkFreeList(&psFreeList->sMemoryBlockInitHead, psFreeList);
-	PVR_ASSERT(eError == PVRSRV_OK);
+	PVR_LOG_IF_ERROR(eError, "RGXShrinkFreeList - initial PB block");
 
 	/* consistency checks */
-	PVR_ASSERT(dllist_is_empty(&psFreeList->sMemoryBlockInitHead));
-	PVR_ASSERT(psFreeList->ui32CurrentFLPages == 0);
+	PVR_LOG_IF_FALSE(dllist_is_empty(&psFreeList->sMemoryBlockInitHead), "BlockInitHead not empty");
+	PVR_LOG_IF_FALSE(psFreeList->ui32CurrentFLPages == 0, "CurrentFLPages != 0");
+
+	OSLockRelease(psFreeList->psDevInfo->hLockFreeList);
 
 	UnrefAndReleaseCriticalBuffer(psFreeList->psFreeListReservation);
 

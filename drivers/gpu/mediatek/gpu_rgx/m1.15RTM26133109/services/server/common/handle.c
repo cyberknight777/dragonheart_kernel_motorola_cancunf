@@ -1512,16 +1512,19 @@ static PVRSRV_ERROR HandleFreePrivData(PVRSRV_HANDLE_BASE *psBase,
 	if (psHandleData->pfnReleaseData != NULL)
 	{
 		eError = psHandleData->pfnReleaseData(psHandleData->pvData);
-		if (eError == PVRSRV_ERROR_RETRY)
+		if (eError != PVRSRV_OK)
 		{
-			PVR_DPF((PVR_DBG_MESSAGE, "%s: Got retry while calling release "
-			        "data callback for handle %p of type = %s", __func__,
-			        hHandle, HandleTypeToString(psHandleData->eType)));
+			if (PVRSRVIsRetryError(eError))
+			{
+				PVR_DPF((PVR_DBG_MESSAGE, "%s: Got retry while calling release "
+						"data callback for handle %p of type = %s", __func__,
+						hHandle, HandleTypeToString(psHandleData->eType)));
+			}
+			else
+			{
+				PVR_LOG_ERROR(eError, "pfnReleaseData");
+			}
 
-			return eError;
-		}
-		else if (eError != PVRSRV_OK)
-		{
 			return eError;
 		}
 
@@ -1622,9 +1625,9 @@ static PVRSRV_ERROR DestroyHandle(PVRSRV_HANDLE_BASE *psBase,
 			LockHandle(psBase);
 		}
 
-		/* If the data could not be freed due to RETRY error the handle needs
-		 * to be kept alive so that the next destroy call could try again */
-		if (eError == PVRSRV_ERROR_RETRY)
+		/* If the data could not be freed due to a temporary condition the
+		 * handle must be kept alive so that the next destroy call can try again */
+		if (PVRSRVIsRetryError(eError))
 		{
 			psHandleData->bCanLookup = IMG_TRUE;
 		}

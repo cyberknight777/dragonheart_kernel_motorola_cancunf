@@ -152,7 +152,6 @@ PVRSRVBridgeRGXCreateHWRTDataSet(IMG_UINT32 ui32DispatchTableEntry,
 	{
 		psapsFreeListsInt =
 		    (RGX_FREELIST **) IMG_OFFSET_ADDR(pArrayArgsBuffer, ui32NextOffset);
-		OSCachedMemSet(psapsFreeListsInt, 0, RGXFW_MAX_FREELISTS * sizeof(RGX_FREELIST *));
 		ui32NextOffset += RGXFW_MAX_FREELISTS * sizeof(RGX_FREELIST *);
 		hapsFreeListsInt2 =
 		    (IMG_HANDLE *) IMG_OFFSET_ADDR(pArrayArgsBuffer, ui32NextOffset);
@@ -305,12 +304,22 @@ RGXCreateHWRTDataSet_exit:
 		PVR_ASSERT(ui32BufferSize == ui32NextOffset);
 #endif /* PVRSRV_NEED_PVR_ASSERT */
 
-#if defined(INTEGRITY_OS)
-	if (pArrayArgsBuffer)
-#else
-	if (!bHaveEnoughSpace && pArrayArgsBuffer)
+	if (pArrayArgsBuffer != NULL)
+	{
+#if !defined(INTEGRITY_OS)
+		if (bHaveEnoughSpace)
+		{
+			/* Clear buffer to prevent next bridge call from using stale data.
+			 * This could for example happen if the call errors before initialising
+			 * all of the data. */
+			OSCachedMemSet(pArrayArgsBuffer, 0, ui32BufferSize);
+		}
+		else
 #endif
-		OSFreeMemNoStats(pArrayArgsBuffer);
+		{
+			OSFreeMemNoStats(pArrayArgsBuffer);
+		}
+	}
 
 	return offsetof(PVRSRV_BRIDGE_OUT_RGXCREATEHWRTDATASET, eError);
 }
@@ -1079,12 +1088,22 @@ RGXCreateRenderContext_exit:
 		PVR_ASSERT(ui32BufferSize == ui32NextOffset);
 #endif /* PVRSRV_NEED_PVR_ASSERT */
 
-#if defined(INTEGRITY_OS)
-	if (pArrayArgsBuffer)
-#else
-	if (!bHaveEnoughSpace && pArrayArgsBuffer)
+	if (pArrayArgsBuffer != NULL)
+	{
+#if !defined(INTEGRITY_OS)
+		if (bHaveEnoughSpace)
+		{
+			/* Clear buffer to prevent next bridge call from using stale data.
+			 * This could for example happen if the call errors before initialising
+			 * all of the data. */
+			OSCachedMemSet(pArrayArgsBuffer, 0, ui32BufferSize);
+		}
+		else
 #endif
-		OSFreeMemNoStats(pArrayArgsBuffer);
+		{
+			OSFreeMemNoStats(pArrayArgsBuffer);
+		}
+	}
 
 	return offsetof(PVRSRV_BRIDGE_OUT_RGXCREATERENDERCONTEXT, eError);
 }
@@ -1415,9 +1434,6 @@ PVRSRVBridgeRGXKickTA3D2(IMG_UINT32 ui32DispatchTableEntry,
 	{
 		psClientTAFenceSyncPrimBlockInt =
 		    (SYNC_PRIMITIVE_BLOCK **) IMG_OFFSET_ADDR(pArrayArgsBuffer, ui32NextOffset);
-		OSCachedMemSet(psClientTAFenceSyncPrimBlockInt, 0,
-			       psRGXKickTA3D2IN->ui32ClientTAFenceCount *
-			       sizeof(SYNC_PRIMITIVE_BLOCK *));
 		ui32NextOffset +=
 		    psRGXKickTA3D2IN->ui32ClientTAFenceCount * sizeof(SYNC_PRIMITIVE_BLOCK *);
 		hClientTAFenceSyncPrimBlockInt2 =
@@ -1482,9 +1498,6 @@ PVRSRVBridgeRGXKickTA3D2(IMG_UINT32 ui32DispatchTableEntry,
 	{
 		psClientTAUpdateSyncPrimBlockInt =
 		    (SYNC_PRIMITIVE_BLOCK **) IMG_OFFSET_ADDR(pArrayArgsBuffer, ui32NextOffset);
-		OSCachedMemSet(psClientTAUpdateSyncPrimBlockInt, 0,
-			       psRGXKickTA3D2IN->ui32ClientTAUpdateCount *
-			       sizeof(SYNC_PRIMITIVE_BLOCK *));
 		ui32NextOffset +=
 		    psRGXKickTA3D2IN->ui32ClientTAUpdateCount * sizeof(SYNC_PRIMITIVE_BLOCK *);
 		hClientTAUpdateSyncPrimBlockInt2 =
@@ -1549,9 +1562,6 @@ PVRSRVBridgeRGXKickTA3D2(IMG_UINT32 ui32DispatchTableEntry,
 	{
 		psClient3DUpdateSyncPrimBlockInt =
 		    (SYNC_PRIMITIVE_BLOCK **) IMG_OFFSET_ADDR(pArrayArgsBuffer, ui32NextOffset);
-		OSCachedMemSet(psClient3DUpdateSyncPrimBlockInt, 0,
-			       psRGXKickTA3D2IN->ui32Client3DUpdateCount *
-			       sizeof(SYNC_PRIMITIVE_BLOCK *));
 		ui32NextOffset +=
 		    psRGXKickTA3D2IN->ui32Client3DUpdateCount * sizeof(SYNC_PRIMITIVE_BLOCK *);
 		hClient3DUpdateSyncPrimBlockInt2 =
@@ -1733,8 +1743,6 @@ PVRSRVBridgeRGXKickTA3D2(IMG_UINT32 ui32DispatchTableEntry,
 	if (psRGXKickTA3D2IN->ui32SyncPMRCount != 0)
 	{
 		psSyncPMRsInt = (PMR **) IMG_OFFSET_ADDR(pArrayArgsBuffer, ui32NextOffset);
-		OSCachedMemSet(psSyncPMRsInt, 0,
-			       psRGXKickTA3D2IN->ui32SyncPMRCount * sizeof(PMR *));
 		ui32NextOffset += psRGXKickTA3D2IN->ui32SyncPMRCount * sizeof(PMR *);
 		hSyncPMRsInt2 = (IMG_HANDLE *) IMG_OFFSET_ADDR(pArrayArgsBuffer, ui32NextOffset);
 		ui32NextOffset += psRGXKickTA3D2IN->ui32SyncPMRCount * sizeof(IMG_HANDLE);
@@ -2090,12 +2098,22 @@ RGXKickTA3D2_exit:
 		PVR_ASSERT(ui32BufferSize == ui32NextOffset);
 #endif /* PVRSRV_NEED_PVR_ASSERT */
 
-#if defined(INTEGRITY_OS)
-	if (pArrayArgsBuffer)
-#else
-	if (!bHaveEnoughSpace && pArrayArgsBuffer)
+	if (pArrayArgsBuffer != NULL)
+	{
+#if !defined(INTEGRITY_OS)
+		if (bHaveEnoughSpace)
+		{
+			/* Clear buffer to prevent next bridge call from using stale data.
+			 * This could for example happen if the call errors before initialising
+			 * all of the data. */
+			OSCachedMemSet(pArrayArgsBuffer, 0, ui32BufferSize);
+		}
+		else
 #endif
-		OSFreeMemNoStats(pArrayArgsBuffer);
+		{
+			OSFreeMemNoStats(pArrayArgsBuffer);
+		}
+	}
 
 	return offsetof(PVRSRV_BRIDGE_OUT_RGXKICKTA3D2, eError);
 }
@@ -2523,7 +2541,6 @@ PVRSRVBridgeRGXCreateHWRTDataSet2(IMG_UINT32 ui32DispatchTableEntry,
 	{
 		psapsFreeListsInt =
 		    (RGX_FREELIST **) IMG_OFFSET_ADDR(pArrayArgsBuffer, ui32NextOffset);
-		OSCachedMemSet(psapsFreeListsInt, 0, RGXFW_MAX_FREELISTS * sizeof(RGX_FREELIST *));
 		ui32NextOffset += RGXFW_MAX_FREELISTS * sizeof(RGX_FREELIST *);
 		hapsFreeListsInt2 =
 		    (IMG_HANDLE *) IMG_OFFSET_ADDR(pArrayArgsBuffer, ui32NextOffset);
@@ -2735,12 +2752,22 @@ RGXCreateHWRTDataSet2_exit:
 		PVR_ASSERT(ui32BufferSize == ui32NextOffset);
 #endif /* PVRSRV_NEED_PVR_ASSERT */
 
-#if defined(INTEGRITY_OS)
-	if (pArrayArgsBuffer)
-#else
-	if (!bHaveEnoughSpace && pArrayArgsBuffer)
+	if (pArrayArgsBuffer != NULL)
+	{
+#if !defined(INTEGRITY_OS)
+		if (bHaveEnoughSpace)
+		{
+			/* Clear buffer to prevent next bridge call from using stale data.
+			 * This could for example happen if the call errors before initialising
+			 * all of the data. */
+			OSCachedMemSet(pArrayArgsBuffer, 0, ui32BufferSize);
+		}
+		else
 #endif
-		OSFreeMemNoStats(pArrayArgsBuffer);
+		{
+			OSFreeMemNoStats(pArrayArgsBuffer);
+		}
+	}
 
 	return offsetof(PVRSRV_BRIDGE_OUT_RGXCREATEHWRTDATASET2, eError);
 }
