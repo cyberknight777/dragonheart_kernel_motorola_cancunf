@@ -875,7 +875,7 @@ static void RGX_MISRHandler_Main (void *pvData)
 	RGXSafetyEventHandler(psDeviceNode->pvDevice);
 
 	/* Signal the global event object */
-	PVRSRVSignalGlobalEO();
+	PVRSRVSignalDriverWideEO();
 
 	/* Process the Firmware CCB for pending commands */
 	RGXCheckFirmwareCCB(psDeviceNode->pvDevice);
