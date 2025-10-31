@@ -3803,6 +3803,38 @@ void RGXDebugRequestProcess(DUMPDEBUG_PRINTF_FUNC *pfnDumpDebugPrintf,
 		}
 	}
 
+#if defined(RGX_FORCE_FREELIST_CLEANUP)
+	/* Dump the FW OS config flags */
+	OSLockAcquire(psDevInfo->hLockFreeList);
+
+	if (DD_VERB_LVL_ENABLED(ui32VerbLevel, DEBUG_REQUEST_VERBOSITY_HIGH) &&
+	    !dllist_is_empty(&psDevInfo->sFreeListHead))
+	{
+		DLLIST_NODE *pNext, *pNode;
+
+		PVR_DUMPDEBUG_LOG("------[ FreeList State Data ]------");
+
+		dllist_foreach_node(&psDevInfo->sFreeListHead, pNode, pNext)
+		{
+			RGX_FREELIST *psFreeList = IMG_CONTAINER_OF(pNode, RGX_FREELIST, sNode);
+
+			if (psFreeList->uiStillReferencedRetryCount ||
+			    psFreeList->uiStillReferencedRetryCountCT ||
+			    psFreeList->uiFWRequestCleanupRetryCount)
+			{
+				PVR_DUMPDEBUG_LOG("%p - Refs: %u, RefRetry: %u, RefRetryCT: %u, FWCleanupRetry %u",
+				                  psFreeList,
+				                  psFreeList->ui32RefCount,
+				                  psFreeList->uiStillReferencedRetryCount,
+				                  psFreeList->uiStillReferencedRetryCountCT,
+				                  psFreeList->uiFWRequestCleanupRetryCount);
+			}
+		}
+	}
+
+	OSLockRelease(psDevInfo->hLockFreeList);
+#endif /* defined(RGX_FORCE_FREELIST_CLEANUP) */
+
 	PVR_DUMPDEBUG_LOG("------[ RGX Device ID:%d End ]------", psDevInfo->psDeviceNode->sDevId.ui32InternalID);
 
 Exit:

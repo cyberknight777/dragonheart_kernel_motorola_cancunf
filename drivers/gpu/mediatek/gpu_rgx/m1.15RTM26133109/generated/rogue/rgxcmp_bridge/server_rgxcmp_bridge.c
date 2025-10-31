@@ -307,12 +307,22 @@ RGXCreateComputeContext_exit:
 		PVR_ASSERT(ui32BufferSize == ui32NextOffset);
 #endif /* PVRSRV_NEED_PVR_ASSERT */
 
-#if defined(INTEGRITY_OS)
-	if (pArrayArgsBuffer)
-#else
-	if (!bHaveEnoughSpace && pArrayArgsBuffer)
+	if (pArrayArgsBuffer != NULL)
+	{
+#if !defined(INTEGRITY_OS)
+		if (bHaveEnoughSpace)
+		{
+			/* Clear buffer to prevent next bridge call from using stale data.
+			 * This could for example happen if the call errors before initialising
+			 * all of the data. */
+			OSCachedMemSet(pArrayArgsBuffer, 0, ui32BufferSize);
+		}
+		else
 #endif
-		OSFreeMemNoStats(pArrayArgsBuffer);
+		{
+			OSFreeMemNoStats(pArrayArgsBuffer);
+		}
+	}
 
 	return offsetof(PVRSRV_BRIDGE_OUT_RGXCREATECOMPUTECONTEXT, eError);
 }
@@ -702,9 +712,6 @@ PVRSRVBridgeRGXKickCDM2(IMG_UINT32 ui32DispatchTableEntry,
 	{
 		psClientUpdateUFOSyncPrimBlockInt =
 		    (SYNC_PRIMITIVE_BLOCK **) IMG_OFFSET_ADDR(pArrayArgsBuffer, ui32NextOffset);
-		OSCachedMemSet(psClientUpdateUFOSyncPrimBlockInt, 0,
-			       psRGXKickCDM2IN->ui32ClientUpdateCount *
-			       sizeof(SYNC_PRIMITIVE_BLOCK *));
 		ui32NextOffset +=
 		    psRGXKickCDM2IN->ui32ClientUpdateCount * sizeof(SYNC_PRIMITIVE_BLOCK *);
 		hClientUpdateUFOSyncPrimBlockInt2 =
@@ -828,7 +835,6 @@ PVRSRVBridgeRGXKickCDM2(IMG_UINT32 ui32DispatchTableEntry,
 	if (psRGXKickCDM2IN->ui32SyncPMRCount != 0)
 	{
 		psSyncPMRsInt = (PMR **) IMG_OFFSET_ADDR(pArrayArgsBuffer, ui32NextOffset);
-		OSCachedMemSet(psSyncPMRsInt, 0, psRGXKickCDM2IN->ui32SyncPMRCount * sizeof(PMR *));
 		ui32NextOffset += psRGXKickCDM2IN->ui32SyncPMRCount * sizeof(PMR *);
 		hSyncPMRsInt2 = (IMG_HANDLE *) IMG_OFFSET_ADDR(pArrayArgsBuffer, ui32NextOffset);
 		ui32NextOffset += psRGXKickCDM2IN->ui32SyncPMRCount * sizeof(IMG_HANDLE);
@@ -981,12 +987,22 @@ RGXKickCDM2_exit:
 		PVR_ASSERT(ui32BufferSize == ui32NextOffset);
 #endif /* PVRSRV_NEED_PVR_ASSERT */
 
-#if defined(INTEGRITY_OS)
-	if (pArrayArgsBuffer)
-#else
-	if (!bHaveEnoughSpace && pArrayArgsBuffer)
+	if (pArrayArgsBuffer != NULL)
+	{
+#if !defined(INTEGRITY_OS)
+		if (bHaveEnoughSpace)
+		{
+			/* Clear buffer to prevent next bridge call from using stale data.
+			 * This could for example happen if the call errors before initialising
+			 * all of the data. */
+			OSCachedMemSet(pArrayArgsBuffer, 0, ui32BufferSize);
+		}
+		else
 #endif
-		OSFreeMemNoStats(pArrayArgsBuffer);
+		{
+			OSFreeMemNoStats(pArrayArgsBuffer);
+		}
+	}
 
 	return offsetof(PVRSRV_BRIDGE_OUT_RGXKICKCDM2, eError);
 }

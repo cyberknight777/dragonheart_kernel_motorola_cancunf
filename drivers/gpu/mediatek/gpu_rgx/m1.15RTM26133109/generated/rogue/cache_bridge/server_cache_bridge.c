@@ -147,7 +147,6 @@ PVRSRVBridgeCacheOpQueue(IMG_UINT32 ui32DispatchTableEntry,
 	if (psCacheOpQueueIN->ui32NumCacheOps != 0)
 	{
 		psPMRInt = (PMR **) IMG_OFFSET_ADDR(pArrayArgsBuffer, ui32NextOffset);
-		OSCachedMemSet(psPMRInt, 0, psCacheOpQueueIN->ui32NumCacheOps * sizeof(PMR *));
 		ui32NextOffset += psCacheOpQueueIN->ui32NumCacheOps * sizeof(PMR *);
 		hPMRInt2 = (IMG_HANDLE *) IMG_OFFSET_ADDR(pArrayArgsBuffer, ui32NextOffset);
 		ui32NextOffset += psCacheOpQueueIN->ui32NumCacheOps * sizeof(IMG_HANDLE);
@@ -306,12 +305,22 @@ CacheOpQueue_exit:
 		PVR_ASSERT(ui32BufferSize == ui32NextOffset);
 #endif /* PVRSRV_NEED_PVR_ASSERT */
 
-#if defined(INTEGRITY_OS)
-	if (pArrayArgsBuffer)
-#else
-	if (!bHaveEnoughSpace && pArrayArgsBuffer)
+	if (pArrayArgsBuffer != NULL)
+	{
+#if !defined(INTEGRITY_OS)
+		if (bHaveEnoughSpace)
+		{
+			/* Clear buffer to prevent next bridge call from using stale data.
+			 * This could for example happen if the call errors before initialising
+			 * all of the data. */
+			OSCachedMemSet(pArrayArgsBuffer, 0, ui32BufferSize);
+		}
+		else
 #endif
-		OSFreeMemNoStats(pArrayArgsBuffer);
+		{
+			OSFreeMemNoStats(pArrayArgsBuffer);
+		}
+	}
 
 	return offsetof(PVRSRV_BRIDGE_OUT_CACHEOPQUEUE, eError);
 }
