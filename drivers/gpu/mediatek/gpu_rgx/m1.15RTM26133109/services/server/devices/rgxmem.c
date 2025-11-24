@@ -491,9 +491,7 @@ IMG_BOOL RGXValidateAddressPermissions(PVRSRV_DEVICE_NODE *psDeviceNode,
 	{
 		/* Virtual allocations with the PMMETA_PROTECT flag must only made in
 		 * specific virtual heaps. */
-		if (sVDevAddr.uiAddr != RGX_PMMETA_PROTECT_HEAP_BASE &&
-		    sVDevAddr.uiAddr != RGX_FIRMWARE_HOST_MAIN_HEAP_BASE &&
-		    sVDevAddr.uiAddr != RGX_FIRMWARE_HOST_CONFIG_HEAP_BASE)
+		if (sVDevAddr.uiAddr != RGX_PMMETA_PROTECT_HEAP_BASE)
 		{
 			PVR_DPF((PVR_DBG_ERROR,
 			         "%s: PMMETA_PROTECT flag set but valid heap was not used.",
