@@ -139,7 +139,7 @@ PVRSRVBridgeRGXCreateHWRTDataSet(IMG_UINT32 ui32DispatchTableEntry,
 		else
 #endif
 		{
-			pArrayArgsBuffer = OSAllocMemNoStats(ui32BufferSize);
+			pArrayArgsBuffer = OSAllocZMemNoStats(ui32BufferSize);
 
 			if (!pArrayArgsBuffer)
 			{
@@ -940,7 +940,7 @@ PVRSRVBridgeRGXCreateRenderContext(IMG_UINT32 ui32DispatchTableEntry,
 		else
 #endif
 		{
-			pArrayArgsBuffer = OSAllocMemNoStats(ui32BufferSize);
+			pArrayArgsBuffer = OSAllocZMemNoStats(ui32BufferSize);
 
 			if (!pArrayArgsBuffer)
 			{
@@ -1401,7 +1401,7 @@ PVRSRVBridgeRGXKickTA3D2(IMG_UINT32 ui32DispatchTableEntry,
 		else
 #endif
 		{
-			pArrayArgsBuffer = OSAllocMemNoStats(ui32BufferSize);
+			pArrayArgsBuffer = OSAllocZMemNoStats(ui32BufferSize);
 
 			if (!pArrayArgsBuffer)
 			{
@@ -2510,7 +2510,7 @@ PVRSRVBridgeRGXCreateHWRTDataSet2(IMG_UINT32 ui32DispatchTableEntry,
 		else
 #endif
 		{
-			pArrayArgsBuffer = OSAllocMemNoStats(ui32BufferSize);
+			pArrayArgsBuffer = OSAllocZMemNoStats(ui32BufferSize);
 
 			if (!pArrayArgsBuffer)
 			{
