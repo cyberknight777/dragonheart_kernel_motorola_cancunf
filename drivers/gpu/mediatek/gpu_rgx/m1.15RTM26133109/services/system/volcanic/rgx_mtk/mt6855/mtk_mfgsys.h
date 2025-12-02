@@ -21,7 +21,7 @@
  **************************************************/
 #define SYS_RGX_OF_COMPATIBLE               "mediatek,rgx"
 #define RGX_HW_CORE_CLOCK_SPEED             (480000000)
-#define SYS_RGX_ACTIVE_POWER_LATENCY_MS     (3)
+#define SYS_RGX_ACTIVE_POWER_LATENCY_MS     (32)
 
 /**************************************************
  * Function Declaration
