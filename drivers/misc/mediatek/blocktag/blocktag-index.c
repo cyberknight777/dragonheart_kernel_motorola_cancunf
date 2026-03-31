@@ -85,6 +85,8 @@ void (*rsi_switch_collect_fp)(__s32 cmd);
 static void wq_func(struct work_struct *data);
 static DECLARE_WORK(rs_work, (void *) wq_func);
 
+static struct proc_dir_entry *eara_io_entry;
+
 static void rsi_switch_collect(int cmd);
 
 static void rs_lockprove(const char *tag)
@@ -441,10 +443,13 @@ void rs_index_init(struct mtk_blocktag *btag,
 	rsi_getindex_fp = rsi_trans_index;
 	rsi_switch_collect_fp = rsi_switch_collect;
 
-	btag->dentry.dindex = proc_create("eara_io",
+	if (eara_io_entry)
+		return;
+
+	eara_io_entry = proc_create("eara_io",
 		0664, parent, &earasys_fops);
 
-	if (IS_ERR(btag->dentry.dindex)) {
+	if (!eara_io_entry) {
 		pr_debug(TAG"%s failed with %d\n",
 				"Creating file node ",
 				ret);
