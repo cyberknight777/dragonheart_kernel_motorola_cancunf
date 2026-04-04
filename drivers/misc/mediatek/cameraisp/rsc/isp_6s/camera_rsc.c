@@ -1503,7 +1503,9 @@ static signed int RSC_DumpReg(void)
 	LOG_INF("[0x%08X %08X]\n", (unsigned int)(RSC_DCM_STAUS_HW),
 		(unsigned int)RSC_RD32(RSC_DCM_STAUS_REG));
 
+#if IS_ENABLED(CONFIG_MTK_IRQ_DBG)
 	mt_irq_dump_status(RSCInfo.IrqNum);
+#endif
 
 	LOG_INF("- X.");
 	return Ret;
