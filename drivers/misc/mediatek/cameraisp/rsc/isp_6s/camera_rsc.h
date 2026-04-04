@@ -13,7 +13,9 @@
 #include <linux/fs.h>
 #include <linux/compat.h>
 #endif
+#if IS_ENABLED(CONFIG_MTK_IRQ_DBG)
 extern void mt_irq_dump_status(unsigned int irq);
+#endif
 /*
  *   enforce kernel log enable
  */
