@@ -52,25 +52,39 @@ int mt_usb_set_vbus(struct otg_switch_mtk *otg_sx, int is_on)
 		container_of(otg_sx, struct mt_usb_glue, otg_sx);
 	struct musb *musb = glue->mtk_musb;
 	struct regulator *vbus = otg_sx->vbus;
-	int ret;
+	int ret = 0;
 
 	/* vbus is optional */
 	if (!vbus)
-		return 0;
+		goto exit;
 
 	dev_dbg(musb->controller, "%s: turn %s\n", __func__, is_on ? "on" : "off");
 
 	if (is_on) {
+		/* return early if vbus enabled to prevent double enables */
+		if (otg_sx->vbus_enabled)
+			goto exit;
+
 		ret = regulator_enable(vbus);
 		if (ret) {
 			dev_info(musb->controller, "vbus regulator enable failed\n");
-			return ret;
+			goto exit;
 		}
-	} else {
-		regulator_disable(vbus);
+
+		otg_sx->vbus_enabled = true;
+		goto exit;
 	}
 
-	return 0;
+	/* return early if vbus disabled to prevent double disables */
+	if (!otg_sx->vbus_enabled)
+		goto exit;
+
+	ret = regulator_disable(vbus);
+	if (!ret)
+		otg_sx->vbus_enabled = false;
+
+exit:
+	return ret;
 }
 EXPORT_SYMBOL(mt_usb_set_vbus);
 
@@ -452,6 +466,9 @@ int mt_usb_otg_switch_init(struct mt_usb_glue *glue)
 	/* default as host, update state */
 	otg_sx->sw_state = mtk_musb->is_host ?
 				MUSB_ID_GROUND : MUSB_VBUS_VALID;
+
+	/* initial vbus mode */
+	otg_sx->vbus_enabled = false;
 
 	/* initial operation mode */
 	otg_sx->op_mode = MUSB_DR_OPERATION_NORMAL;
