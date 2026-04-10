@@ -449,8 +449,9 @@ int mt_usb_otg_switch_init(struct mt_usb_glue *glue)
 	INIT_WORK(&otg_sx->id_work, mt_usb_id_work);
 	INIT_WORK(&otg_sx->vbus_work, mt_usb_vbus_work);
 
-	/* default as invalid state */
-	otg_sx->sw_state = 0;
+	/* default as host, update state */
+	otg_sx->sw_state = mtk_musb->is_host ?
+				MUSB_ID_GROUND : MUSB_VBUS_VALID;
 
 	/* initial operation mode */
 	otg_sx->op_mode = MUSB_DR_OPERATION_NORMAL;
