@@ -257,7 +257,7 @@ static inline int __init gf_init(void) {
 	netlink_init();
 	return 0;
 }
-module_init(gf_init);
+late_initcall(gf_init);
 
 static inline void __exit gf_exit(void) {
 	netlink_exit();
