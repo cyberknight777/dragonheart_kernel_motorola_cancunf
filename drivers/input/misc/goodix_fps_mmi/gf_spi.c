@@ -148,11 +148,13 @@ static inline void gpio_reset(struct gf_dev *gf_dev) {
 #define GF_IOC_DISABLE_IRQ _IO(GF_IOC_MAGIC, 4)
 #define GF_IOC_ENABLE_SPI_CLK _IOW(GF_IOC_MAGIC, 5, uint32_t)
 #define GF_IOC_DISABLE_SPI_CLK _IO(GF_IOC_MAGIC, 6)
+#define GF_IOC_GET_FW_INFO _IOR(GF_IOC_MAGIC, 11, u8)
 #define GF_IOC_SPIDEVICE_EN _IO(GF_IOC_MAGIC, 18)
 static inline long gf_ioctl(struct file *filp, unsigned int cmd,
 							unsigned long arg) {
 	struct gf_dev *gf_dev = &gf;
 	u8 netlink_route = NETLINK_TEST;
+	u8 val = 0;
 	switch (cmd) {
 	case GF_IOC_INIT:
 		if (copy_to_user((void __user *)arg, (void *)&netlink_route, sizeof(u8)))
@@ -172,6 +174,10 @@ static inline long gf_ioctl(struct file *filp, unsigned int cmd,
 		break;
 	case GF_IOC_DISABLE_SPI_CLK:
 		mt_spi_disable_master_clk(gf_dev->spidev);
+		break;
+	case GF_IOC_GET_FW_INFO:
+		if (copy_to_user((void __user *)arg, (void *)&val, sizeof(u8)))
+			break;
 		break;
 	case GF_IOC_SPIDEVICE_EN:
 		spi_register_driver(&gf_spi_driver);
