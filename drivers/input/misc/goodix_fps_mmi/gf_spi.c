@@ -218,7 +218,8 @@ static const struct file_operations gf_fops = {
 };
 
 static const struct of_device_id gx_match_table[] = {
-	{.compatible = "mediatek,fingerprint-goodix"},
+	{.compatible = "mediatek,finger-goodix",},
+	{.compatible = "mediatek,fingerprint-goodix",},
 	{},
 };
 MODULE_DEVICE_TABLE(of, gx_match_table);
