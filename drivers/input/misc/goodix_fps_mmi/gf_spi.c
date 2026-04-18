@@ -22,6 +22,8 @@
 #include <linux/platform_device.h>
 #include <linux/regulator/consumer.h>
 #include <linux/slab.h>
+#include <linux/spi/spi.h>
+#include <linux/spi/spidev.h>
 #include <linux/uaccess.h>
 #include <net/netlink.h>
 #include <net/sock.h>
@@ -30,11 +32,16 @@ static struct gf_dev {
 	dev_t devt;
 	struct list_head device_entry;
 	struct platform_device *spi;
+	struct spi_device *spidev;
 	struct input_dev *input;
 	struct regulator *vreg;
 	signed irq_gpio, rst_gpio;
 	int irq, irq_enabled;
 } gf;
+
+extern void mt_spi_enable_master_clk(struct spi_device *spidev);
+extern void mt_spi_disable_master_clk(struct spi_device *spidev);
+static struct spi_driver gf_spi_driver;
 
 #define MAX_MSGSIZE 2
 static struct sock *nl_sk = NULL;
@@ -139,6 +146,9 @@ static inline void gpio_reset(struct gf_dev *gf_dev) {
 #define GF_IOC_RESET _IO(GF_IOC_MAGIC, 2)
 #define GF_IOC_ENABLE_IRQ _IO(GF_IOC_MAGIC, 3)
 #define GF_IOC_DISABLE_IRQ _IO(GF_IOC_MAGIC, 4)
+#define GF_IOC_ENABLE_SPI_CLK _IOW(GF_IOC_MAGIC, 5, uint32_t)
+#define GF_IOC_DISABLE_SPI_CLK _IO(GF_IOC_MAGIC, 6)
+#define GF_IOC_SPIDEVICE_EN _IO(GF_IOC_MAGIC, 18)
 static inline long gf_ioctl(struct file *filp, unsigned int cmd,
 							unsigned long arg) {
 	struct gf_dev *gf_dev = &gf;
@@ -156,6 +166,15 @@ static inline long gf_ioctl(struct file *filp, unsigned int cmd,
 		break;
 	case GF_IOC_RESET:
 		gpio_reset(gf_dev);
+		break;
+	case GF_IOC_ENABLE_SPI_CLK:
+		mt_spi_enable_master_clk(gf_dev->spidev);
+		break;
+	case GF_IOC_DISABLE_SPI_CLK:
+		mt_spi_disable_master_clk(gf_dev->spidev);
+		break;
+	case GF_IOC_SPIDEVICE_EN:
+		spi_register_driver(&gf_spi_driver);
 		break;
 	default:
 		break;
@@ -245,6 +264,29 @@ static struct platform_driver gf_driver = {
 	},
 	.probe = gf_probe,
 	.remove = gf_remove,
+};
+
+static inline int gf_spi_probe(struct spi_device *spi) {
+	struct gf_dev *gf_dev = &gf;
+	gf_dev->spidev = spi;
+	return 0;
+}
+
+static inline int gf_spi_remove(struct spi_device *spi) {
+	struct gf_dev *gf_dev = &gf;
+	gf_dev->spidev = NULL;
+	return 0;
+}
+
+static struct spi_driver gf_spi_driver = {
+	.driver = {
+		.name = GF_DEV_NAME,
+		.bus = &spi_bus_type,
+		.owner = THIS_MODULE,
+		.of_match_table = gx_match_table,
+	},
+	.probe = gf_spi_probe,
+	.remove = gf_spi_remove,
 };
 
 #define CHRD_DRIVER_NAME "goodix_fp"
