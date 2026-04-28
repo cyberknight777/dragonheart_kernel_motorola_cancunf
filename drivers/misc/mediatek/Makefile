@@ -119,7 +119,6 @@ obj-$(CONFIG_MTK_USB_META) += usb_meta/
 obj-$(CONFIG_USB_MTK_HDRC) += usb20/
 obj-$(CONFIG_MTK_GATE_IC) += gate_ic/
 obj-$(CONFIG_MTK_WIDEVINE_DRM) += widevine_drm/
-obj-$(CONFIG_INTERCONNECT_MTK_MMQOS_COMMON) += mmqos/
 obj-$(CONFIG_MTK_TIMER_ACCURACY_TEST) += timer/
 obj-$(CONFIG_MTK_PPM_V3) += ppm_v3/
 obj-$(CONFIG_MTK_SPM) += spm/
