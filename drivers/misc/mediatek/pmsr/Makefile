@@ -5,4 +5,3 @@ ccflags-y += -I$(srctree)/drivers/misc/mediatek/tinysys_scmi/
 endif
 
 obj-$(CONFIG_MTK_PMSR) += pmsr.o
-obj-$(CONFIG_MTK_PMSR) += twam/
