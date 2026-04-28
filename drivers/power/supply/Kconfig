@@ -188,7 +188,6 @@ config BATTERY_MT6358
 
 config BATTERY_MT6359P
 	tristate "MT6359P fuel gauge support"
-	depends on MFD_MT6397
 	default m
 	help
 	  Say Y to enable support for MT6359P battery driver.
