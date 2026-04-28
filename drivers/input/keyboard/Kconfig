@@ -790,7 +790,6 @@ config KEYBOARD_MTK_KPD
 
 config KEYBOARD_MTK_PMIC
 	tristate "MediaTek PMIC keys support"
-	depends on MFD_MT6397
 	help
 	  Say Y here if you want to use the pmic keys (powerkey/homekey).
 
