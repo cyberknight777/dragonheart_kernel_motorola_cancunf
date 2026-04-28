@@ -102,7 +102,3 @@ ccci_dpmaif-y := hif/ccci_hif_dpmaif.o hif/dpmaif_drv.o \
 	hif/net_pool.o hif/md_spd_dvfs_fn.o hif/md_spd_dvfs_method.o
 
 obj-$(CONFIG_MTK_ECCCI_DRIVER) += ccci_dpmaif.o
-
-# ccci_cldma.ko
-ccci_cldma-y := hif/ccci_cldma_plat.o hif/ccci_hif_cldma.o
-obj-$(CONFIG_MTK_ECCCI_DRIVER) += ccci_cldma.o
