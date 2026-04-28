@@ -145,10 +145,6 @@ ccci_dpmaif-y := hif/ccci_hif_dpmaif.o hif/dpmaif_drv.o \
 
 obj-$(CCCI_OBJ) += ccci_dpmaif.o
 
-# ccci_cldma.ko
-ccci_cldma-y := hif/ccci_cldma_plat.o hif/ccci_hif_cldma.o
-obj-$(CCCI_OBJ) += ccci_cldma.o
-
 else
 
 obj-$(CCCI_OBJ) += ccci_all.o
