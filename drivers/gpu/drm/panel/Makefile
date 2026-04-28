@@ -145,25 +145,6 @@ obj-$(CONFIG_DRM_PANEL_BOE_NT37701A_655_FHDP_CMD_144HZ) += dsi-panel-mot-boe-nt3
 obj-$(CONFIG_GATEIC_OCP2138) += ocp2138.o
 obj-$(CONFIG_GATEIC_SM5109) += sm5109.o
 
-mediatek-drm-gateic-y := mtk_drm_panel_i2c.o \
-		  mtk_drm_gateic_rt4801h.o \
-		  mtk_drm_gateic_rt4831a.o \
-		  mtk_drm_gateic.o
-
-mediatek-drm-panel-drv-y :=  \
-		  mtk_round_corner/mtk_drm_rc.o \
-		  mtk_drm_panel_helper.o \
-		  mtk_drm_panel_helper_dbi.o \
-		  mtk_drm_panel_helper_dpi.o \
-		  mtk_drm_panel_helper_dsi.o \
-		  mtk_drm_panel_drv_dbi.o \
-		  mtk_drm_panel_drv_dpi.o \
-		  mtk_drm_panel_drv_dsi.o \
-		  mtk_drm_panel_drv.o
-
-obj-$(CONFIG_DRM_MEDIATEK_PANEL) += mediatek-drm-gateic.o
-obj-$(CONFIG_DRM_MEDIATEK_PANEL) += mediatek-drm-panel-drv.o
-
 ccflags-$(CONFIG_DRM_MEDIATEK_PANEL) += -I$(srctree)/drivers/leds/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/mtk-interconnect/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/slbc/
