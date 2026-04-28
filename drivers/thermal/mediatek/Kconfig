@@ -45,7 +45,6 @@ config MTK_BOARD_THERMAL
 config MTK_PMIC_THERMAL
 	tristate "PMIC thermal sensor driver for Mediatek SoCs"
 	depends on MT635X_EFUSE
-	depends on MEDIATEK_MT635X_AUXADC
 	help
 	  Enable this option if you want to get PMIC temperature
 	  for Mediatek platforms.
