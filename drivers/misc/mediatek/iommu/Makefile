@@ -30,11 +30,6 @@ obj-$(CONFIG_MTK_IOMMU_MISC_SECURE) += iommu_secure.o
 obj-$(CONFIG_MTK_IOMMU_MISC_TEST)   += iommu_test.o
 obj-$(CONFIG_MTK_IOMMU_MISC)        += iommu_gz.o
 
-ifneq ($(filter y m, $(CONFIG_TRUSTONIC_TEE_SUPPORT)),)
-obj-$(CONFIG_TRUSTONIC_TEE_SUPPORT) += iommu_tz_sec.o
-obj-$(CONFIG_TRUSTONIC_TEE_SUPPORT) += iommu_tz_debug.o
-endif
-
 ifneq ($(filter y m, $(CONFIG_MTK_ENABLE_GENIEZONE)),)
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/geniezone/public
 
