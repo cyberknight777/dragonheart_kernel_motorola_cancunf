@@ -2455,9 +2455,11 @@ static int __init mt_scp_dts_init_pmic_data(void)
 static int __init mt_scp_dts_regmap_init(struct platform_device *pdev,
 		struct device_node *node)
 {
+#if IS_ENABLED(CONFIG_MFD_MT6397)
 	struct platform_device *pmic_pdev;
 	struct device_node *pmic_node;
 	struct pmic_main_chip *chip;
+#endif
 	struct regmap *regmap;
 
 	/* get GPIO regmap */
@@ -2475,6 +2477,7 @@ static int __init mt_scp_dts_regmap_init(struct platform_device *pdev,
 	if (dvfs.vlp_support)
 		goto BYPASS_PMIC;
 
+#if IS_ENABLED(CONFIG_MFD_MT6397)
 	dvfs.bypass_pmic_rg_access = of_property_read_bool(node, "no-pmic-rg-access");
 	pr_notice("bypass_pmic_rg_access: %s\n", dvfs.bypass_pmic_rg_access?"Yes":"No");
 	if (dvfs.bypass_pmic_rg_access)
@@ -2506,6 +2509,7 @@ static int __init mt_scp_dts_regmap_init(struct platform_device *pdev,
 	}
 
 	dvfs.pmic_regmap = regmap;
+#endif
 
 BYPASS_PMIC:
 	return 0;
