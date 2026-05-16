@@ -113,7 +113,7 @@ static inline void gf_setup(struct gf_dev *gf_dev) {
 	gpio_request(gf_dev->irq_gpio, "goodix_fp_irq");
 	gpio_direction_input(gf_dev->irq_gpio);
 	gf_dev->irq = gpio_to_irq(gf_dev->irq_gpio);
-	if (request_threaded_irq(gf_dev->irq, NULL, gf_irq,
+	if (!request_threaded_irq(gf_dev->irq, NULL, gf_irq,
 			IRQF_TRIGGER_RISING | IRQF_ONESHOT, "goodix_fp_irq", gf_dev))
 		irq_switch(gf_dev, 1);
 	gf_dev->vreg = regulator_get(&gf_dev->spi->dev, "fp_vdd");
