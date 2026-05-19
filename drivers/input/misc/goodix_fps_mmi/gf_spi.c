@@ -158,6 +158,7 @@ static inline void gpio_reset(struct gf_dev *gf_dev) {
 #define GF_IOC_DISABLE_SPI_CLK _IO(GF_IOC_MAGIC, 6)
 #define GF_IOC_GET_FW_INFO _IOR(GF_IOC_MAGIC, 11, u8)
 #define GF_IOC_SPIDEVICE_EN _IO(GF_IOC_MAGIC, 18)
+#define GF_IOC_SPIDEVICE_DIS _IO(GF_IOC_MAGIC, 19)
 static inline long gf_ioctl(struct file *filp, unsigned int cmd,
 							unsigned long arg) {
 	struct gf_dev *gf_dev = &gf;
@@ -189,6 +190,9 @@ static inline long gf_ioctl(struct file *filp, unsigned int cmd,
 		break;
 	case GF_IOC_SPIDEVICE_EN:
 		spi_register_driver(&gf_spi_driver);
+		break;
+	case GF_IOC_SPIDEVICE_DIS:
+		spi_unregister_driver(&gf_spi_driver);
 		break;
 	default:
 		break;
