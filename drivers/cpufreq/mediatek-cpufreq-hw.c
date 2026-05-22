@@ -14,6 +14,8 @@
 #include <linux/of_platform.h>
 #include <linux/pm_qos.h>
 #include <linux/slab.h>
+#include <trace/hooks/sched.h>
+#include "../../kernel/sched/sched.h"
 
 #define LUT_MAX_ENTRIES			32U
 #define LUT_FREQ			GENMASK(11, 0)
@@ -284,6 +286,88 @@ static int mtk_get_related_cpus(int index, struct cpufreq_mtk *c)
 	return 0;
 }
 
+#define EAS_NODE_NAME "eas_info"
+#define EAS_PROP_CSRAM "csram-base"
+#define EAS_PROP_OFFS_CAP "offs-cap"
+#define EAS_PROP_OFFS_THERMAL_S "offs-thermal-limit"
+
+#define THERMAL_INFO_SIZE 200
+
+struct eas_info {
+        unsigned int csram_base;
+        unsigned int offs_cap;
+        unsigned int offs_thermal_limit_s;
+        bool available;
+};
+
+static void __iomem *sram_base_addr;
+static struct eas_info eas_node;
+
+static int init_sram_info(void)
+{
+	struct device_node *dn = NULL;
+	u32 opp;
+
+	dn = of_find_node_by_name(NULL, EAS_NODE_NAME);
+
+//	pr_info("cyber: IM IN\n");
+
+	of_property_read_u32(dn, EAS_PROP_CSRAM, &eas_node.csram_base);
+	of_property_read_u32(dn, EAS_PROP_OFFS_CAP, &eas_node.offs_cap);
+	of_property_read_u32_index(dn, EAS_PROP_OFFS_THERMAL_S, 0,
+				   &eas_node.offs_thermal_limit_s);
+
+	pr_info("csram_base: 0x%x\n", eas_node.csram_base);
+	pr_info("offs_thermal_limit_s: 0x%x\n", eas_node.offs_thermal_limit_s);
+
+	sram_base_addr = ioremap(eas_node.csram_base + eas_node.offs_thermal_limit_s,
+				 THERMAL_INFO_SIZE);
+
+	opp = ioread32(sram_base_addr);
+	pr_info("cyber: opp gear 0: %lu\n", opp);
+	opp = ioread32(sram_base_addr + 4);
+	pr_info("cyber: opp gear 4: %lu\n", opp);
+
+	if (!sram_base_addr) {
+		pr_info("Remap thermal info failed\n");
+		return -EIO;
+	}
+
+	return 0;
+}
+
+static void mtk_cpufreq_tick_entry(void *data, struct rq *rq)
+{
+	void __iomem *base = sram_base_addr;
+	struct em_perf_domain *pd;
+	int this_cpu, gear_id, opp_idx, offset;
+	unsigned int freq_thermal;
+	unsigned long max_capacity, capacity, old_capacity;
+	u32 opp_ceiling;
+
+	this_cpu = cpu_of(rq);
+
+	pd = em_cpu_get(this_cpu);
+	if (!pd)
+		return;
+
+	if (this_cpu != cpumask_first(to_cpumask(pd->cpus)))
+		return;
+
+	gear_id = topology_physical_package_id(this_cpu);
+	offset = gear_id << 2;
+	opp_ceiling = ioread32(base + offset);
+//	pr_info("cyber: gear_id=%d, offset=%d, opp_ceiling=%u\n", gear_id, offset, opp_ceiling);
+	opp_idx = pd->nr_perf_states - opp_ceiling - 1;
+	freq_thermal = pd->table[opp_idx].frequency;
+	max_capacity = arch_scale_cpu_capacity(this_cpu);
+	capacity = freq_thermal * max_capacity;
+	old_capacity = capacity;
+	capacity /= pd->table[pd->nr_perf_states-1].frequency;
+//        pr_info("cyber: freq_thermal=%u, max_capacity=%lu, capacity=%lu, new capacity=%lu, nr_perf_states=%d, freq=%lu\n", freq_thermal, max_capacity, old_capacity, capacity, pd->nr_perf_states, pd->table[pd->nr_perf_states-1].frequency);
+	arch_set_thermal_pressure(to_cpumask(pd->cpus), max_capacity - capacity);
+}
+
 static int mtk_cpu_resources_init(struct platform_device *pdev,
 				  unsigned int cpu, int index,
 				  const u16 *offsets)
@@ -361,6 +445,17 @@ static int mtk_cpufreq_hw_driver_probe(struct platform_device *pdev)
 		dev_info(&pdev->dev, "CPUFreq HW driver failed to register\n");
 		return ret;
 	}
+
+        ret = init_sram_info();
+        if (ret)
+                return ret;
+
+        ret = register_trace_android_rvh_tick_entry(
+                                                    mtk_cpufreq_tick_entry, NULL);
+        if (ret) {
+                dev_info(&pdev->dev, "register android_rvh_tick_entry failed\n");
+                return ret;
+        }
 
 	return 0;
 }
