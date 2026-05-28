@@ -141,9 +141,8 @@ typedef struct _PVRSRV_CLEANUP_THREAD_WORK_
 	                                    error logged when this is reached. */
 	IMG_UINT32 ui32RetryCount;     /*!< Number of times the callback should be
 	                                    re-tried when it returns error. */
-	IMG_BOOL bDependsOnHW;           /*!< Dont drop the cleanup task if retry limit
-	                                      is reached, we could depend on event from
-	                                      device to continue. */
+	IMG_BOOL bDependsOnHW;         /*!< Retry again after the RGX interrupt signals
+	                                    the global event object */
 	PVRSRV_DEVICE_NODE *psDevNode;
 } PVRSRV_CLEANUP_THREAD_WORK;
 
