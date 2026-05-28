@@ -2239,35 +2239,18 @@ ErrorAllocHost:
 PVRSRV_ERROR RGXDestroyFreeList(RGX_FREELIST *psFreeList)
 {
 	PVRSRV_ERROR eError;
-	PVRSRV_DATA *psSrvData = PVRSRVGetPVRSRVData();
+	IMG_UINT32 ui32RefCount;
 
 	PVR_ASSERT(psFreeList);
 
-	if (OSGetCurrentProcessID() != psSrvData->cleanupThreadPid ||
-	    OSGetCurrentThreadID() != psSrvData->cleanupThreadTid)
+	OSLockAcquire(psFreeList->psDevInfo->hLockFreeList);
+	ui32RefCount = psFreeList->ui32RefCount;
+	OSLockRelease(psFreeList->psDevInfo->hLockFreeList);
+
+	if (ui32RefCount != 0)
 	{
-		IMG_UINT32 ui32RefCount;
-
-		OSLockAcquire(psFreeList->psDevInfo->hLockFreeList);
-		ui32RefCount = psFreeList->ui32RefCount;
-		OSLockRelease(psFreeList->psDevInfo->hLockFreeList);
-
-		if (ui32RefCount != 0)
-		{
-			/* Freelist still busy */
-			psFreeList->uiStillReferencedRetryCount++;
-
-			return PVRSRV_ERROR_RETRY;
-		}
-	}
-	else
-	{
-		psFreeList->uiStillReferencedRetryCountCT++;
-
-		if (psFreeList->uiStillReferencedRetryCountCT < (CLEANUP_THREAD_RETRY_COUNT_DEFAULT >> 2))
-		{
-			return PVRSRV_ERROR_RETRY;
-		}
+		/* Freelist still busy */
+		return PVRSRV_ERROR_RETRY;
 	}
 
 	/* Freelist is not in use => start firmware cleanup */
@@ -2277,8 +2260,6 @@ PVRSRV_ERROR RGXDestroyFreeList(RGX_FREELIST *psFreeList)
 	{
 		/* Can happen if the firmware took too long to handle the cleanup request,
 		 * or if SLC-flushes didn't went through (due to some GPU lockup) */
-		psFreeList->uiFWRequestCleanupRetryCount++;
-
 		return eError;
 	}
 
@@ -2322,16 +2303,16 @@ PVRSRV_ERROR RGXDestroyFreeList(RGX_FREELIST *psFreeList)
 	while (!dllist_is_empty(&psFreeList->sMemoryBlockHead))
 	{
 		eError = RGXShrinkFreeList(&psFreeList->sMemoryBlockHead, psFreeList);
-		PVR_LOG_IF_ERROR(eError, "RGXShrinkFreeList - grow shrink blocks");
+		PVR_ASSERT(eError == PVRSRV_OK);
 	}
 
 	/* Remove initial PB block */
 	eError = RGXShrinkFreeList(&psFreeList->sMemoryBlockInitHead, psFreeList);
-	PVR_LOG_IF_ERROR(eError, "RGXShrinkFreeList - initial PB block");
+	PVR_ASSERT(eError == PVRSRV_OK);
 
 	/* consistency checks */
-	PVR_LOG_IF_FALSE(dllist_is_empty(&psFreeList->sMemoryBlockInitHead), "BlockInitHead not empty");
-	PVR_LOG_IF_FALSE(psFreeList->ui32CurrentFLPages == 0, "CurrentFLPages != 0");
+	PVR_ASSERT(dllist_is_empty(&psFreeList->sMemoryBlockInitHead));
+	PVR_ASSERT(psFreeList->ui32CurrentFLPages == 0);
 
 	UnrefAndReleaseCriticalBuffer(psFreeList->psFreeListReservation);
 
