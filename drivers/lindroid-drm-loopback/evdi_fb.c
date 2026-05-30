@@ -47,7 +47,7 @@ static struct evdi_framebuffer *evdi_fb_alloc(gfp_t gfp)
 
 static inline void evdi_gem_object_put_local(struct drm_gem_object *obj)
 {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
 	drm_gem_object_put(obj);
 #else
 	drm_gem_object_put_unlocked(obj);
