@@ -162,6 +162,8 @@ ifndef KBUILD_MIXED_TREE
 all:	Image.gz
 endif
 
+KBUILD_DTBO_IMG := dtbo.img
+
 
 Image: vmlinux
 	$(Q)$(MAKE) $(build)=$(boot) $(boot)/$@
@@ -171,6 +173,9 @@ Image.%: Image
 
 zinstall install:
 	$(Q)$(MAKE) $(build)=$(boot) $@
+
+$(KBUILD_DTBO_IMG):
+	$(Q)$(MAKE) $(build)=$(boot) $(boot)/$@
 
 PHONY += vdso_install
 vdso_install:
