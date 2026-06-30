@@ -16,7 +16,20 @@
 
 OBJCOPYFLAGS_Image :=-O binary -R .note -R .note.gnu.build-id -R .comment -S
 
-targets := Image Image.bz2 Image.gz Image.lz4 Image.lzma Image.lzo
+targets := Image Image.bz2 Image.gz Image.lz4 Image.lzma Image.lzo dtbo.img
+
+DTBO_OBJS := \
+$(obj)/dts/mediatek/mt6855-cancunf-evb-overlay.dtbo \
+$(obj)/dts/mediatek/mt6855-cancunf-evb-india-overlay.dtbo \
+$(obj)/dts/mediatek/mt6855-cancunf-evb-japan-overlay.dtbo \
+$(obj)/dts/mediatek/mt6855-cancunf-evb-europe-overlay.dtbo \
+$(obj)/dts/mediatek/mt6855-cancunf-evb-india2-overlay.dtbo \
+$(obj)/dts/mediatek/mt6855-cancunf-evb-japan2-overlay.dtbo \
+$(obj)/dts/mediatek/mt6855-cancunf-evb-europe2-overlay.dtbo \
+$(obj)/dts/mediatek/mt6855-cancunf-evb-india3-overlay.dtbo \
+$(obj)/dts/mediatek/mt6855-cancunf-evb-jpsb-overlay.dtbo \
+$(obj)/dts/mediatek/mt6855-cancunf-evb-prc3-overlay.dtbo \
+$(obj)/dts/mediatek/mt6855-cancunf-evb-jpret-overlay.dtbo
 
 $(obj)/Image: vmlinux FORCE
 	$(call if_changed,objcopy)
@@ -35,6 +48,9 @@ $(obj)/Image.lzma: $(obj)/Image FORCE
 
 $(obj)/Image.lzo: $(obj)/Image FORCE
 	$(call if_changed,lzo)
+
+$(obj)/dtbo.img: $(DTBO_OBJS) FORCE
+	$(call if_changed,mkdtboimg)
 
 install:
 	$(CONFIG_SHELL) $(srctree)/$(src)/install.sh $(KERNELRELEASE) \
