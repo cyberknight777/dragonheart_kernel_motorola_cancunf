@@ -6,7 +6,7 @@ EXTRAVERSION =
 NAME = Dare mighty things
 
 ifeq ($(MAKECMDGOALS),)
-MAKECMDGOALS := Image.gz mediatek/mt6855.dtb
+MAKECMDGOALS := Image.gz mediatek/mt6855.dtb dtbo.img
 endif
 
 # *DOCUMENTATION*
