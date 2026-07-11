@@ -543,7 +543,7 @@
 			    swiotlb=noforce allow_file_spec_access \
 			    firmware_class.path=/vendor/firmware pelt=8 \
 			    rcupdate.rcu_expedited=1 rcu_nocbs=0-7 \
-			    loop.max_part=7";
+			    loop.max_part=7 fenrir=true";
 		kaslr-seed = <0 0>;
 	};
 	cpus {
