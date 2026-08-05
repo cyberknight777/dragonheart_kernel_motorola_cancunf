@@ -174,7 +174,7 @@ Image.%: Image
 zinstall install:
 	$(Q)$(MAKE) $(build)=$(boot) $@
 
-$(KBUILD_DTBO_IMG):
+$(KBUILD_DTBO_IMG): include/config/kernel.release scripts_dtc
 	$(Q)$(MAKE) $(build)=$(boot) $(boot)/$@
 
 PHONY += vdso_install
