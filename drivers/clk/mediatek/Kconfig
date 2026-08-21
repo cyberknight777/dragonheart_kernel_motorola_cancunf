@@ -3,19 +3,18 @@
 # MediaTek Clock Drivers
 #
 menu "Clock driver for MediaTek SoC"
-	depends on ARCH_MEDIATEK || COMPILE_TEST
+	depends on ARM || ARM64 || COMPILE_TEST
 
 config COMMON_CLK_MEDIATEK
-	bool
+	tristate
 	select RESET_CONTROLLER
 	help
 	  MediaTek SoCs' clock support.
 
 config COMMON_CLK_MT2701
 	bool "Clock driver for MediaTek MT2701"
-	depends on (ARCH_MEDIATEK && ARM) || COMPILE_TEST
+	depends on ARM || COMPILE_TEST
 	select COMMON_CLK_MEDIATEK
-	default ARCH_MEDIATEK && ARM
 	help
 	  This driver supports MediaTek MT2701 basic clocks.
 
@@ -69,9 +68,8 @@ config COMMON_CLK_MT2701_G3DSYS
 
 config COMMON_CLK_MT2712
 	bool "Clock driver for MediaTek MT2712"
-	depends on (ARCH_MEDIATEK && ARM64) || COMPILE_TEST
+	depends on ARM64 || COMPILE_TEST
 	select COMMON_CLK_MEDIATEK
-	default ARCH_MEDIATEK && ARM64
 	help
 	  This driver supports MediaTek MT2712 basic clocks.
 
@@ -118,12 +116,15 @@ config COMMON_CLK_MT2712_VENCSYS
 	  This driver supports MediaTek MT2712 vencsys clocks.
 
 config COMMON_CLK_MT6765
-       bool "Clock driver for MediaTek MT6765"
-       depends on (ARCH_MEDIATEK && ARM64) || COMPILE_TEST
-       select COMMON_CLK_MEDIATEK
-       default ARCH_MEDIATEK && ARM64
-       help
-         This driver supports MediaTek MT6765 basic clocks.
+	tristate "Clock driver for MediaTek MT6765"
+	depends on ARM || ARM64 || COMPILE_TEST
+	select COMMON_CLK_MEDIATEK
+	default MACH_MT6765
+	help
+	  This driver supports MediaTek MT6765 basic clocks,
+	  which is used to control basic clock output.
+	  If you wish to use clock resources from the MT6765 SOC,
+	  say Y. Otherwise, say N.
 
 config COMMON_CLK_MT6765_AUDIOSYS
        bool "Clock driver for MediaTek MT6765 audiosys"
@@ -205,9 +206,8 @@ config COMMON_CLK_MT6765_MIPI2BSYS
 
 config COMMON_CLK_MT6779
 	bool "Clock driver for MediaTek MT6779"
-	depends on (ARCH_MEDIATEK && ARM64) || COMPILE_TEST
+	depends on ARM64 || COMPILE_TEST
 	select COMMON_CLK_MEDIATEK
-	default ARCH_MEDIATEK && ARM64
 	help
 	  This driver supports MediaTek MT6779 basic clocks.
 
@@ -260,12 +260,11 @@ config COMMON_CLK_MT6779_AUDSYS
 	  This driver supports Mediatek MT6779 audsys clocks.
 
 config COMMON_CLK_MT6797
-	bool "Clock driver for MediaTek MT6797"
-	depends on (ARCH_MEDIATEK && ARM64) || COMPILE_TEST
-	select COMMON_CLK_MEDIATEK
-	default ARCH_MEDIATEK && ARM64
-	help
-	  This driver supports MediaTek MT6797 basic clocks.
+       bool "Clock driver for MediaTek MT6797"
+       depends on ARM64 || COMPILE_TEST
+       select COMMON_CLK_MEDIATEK
+       help
+         This driver supports MediaTek MT6797 basic clocks.
 
 config COMMON_CLK_MT6797_MMSYS
 	bool "Clock driver for MediaTek MT6797 mmsys"
@@ -291,11 +290,129 @@ config COMMON_CLK_MT6797_VENCSYS
 	help
 	  This driver supports MediaTek MT6797 vencsys clocks.
 
+config COMMON_CLK_MT6855
+	tristate "Clock driver for MediaTek MT6855"
+	depends on ARM64 || COMPILE_TEST
+	select COMMON_CLK_MEDIATEK
+	default MACH_MT6855
+	help
+	  This driver supports MediaTek MT6855 basic clocks,
+	  which is used to control basic clock output.
+	  If you wish to use clock resources from the MT6855 SOC,
+	  say Y. Otherwise, say N.
+
+config COMMON_CLK_MT6855_ADSP
+	tristate "Clock driver for MediaTek MT6855 adsp"
+	depends on COMMON_CLK_MT6855
+	help
+	  This driver supports MediaTek MT6855 adsp clocks,
+	  which is used to control adsp clock output.
+	  If you wish to use clock resources from the adsp device,
+	  say Y. Otherwise, say N.
+
+config COMMON_CLK_MT6855_CAMSYS_MAIN
+	tristate "Clock driver for MediaTek MT6855 camsys_main"
+	depends on COMMON_CLK_MT6855
+	help
+	  This driver supports MediaTek MT6855 camsys_main clocks,
+	  which is used to control camsys_main clock output.
+	  If you wish to use clock resources from the camsys_main device,
+	  say Y. Otherwise, say N.
+
+config COMMON_CLK_MT6855_CAM
+	tristate "Clock driver for MediaTek MT6855 cam"
+	depends on COMMON_CLK_MT6855
+	help
+	  This driver supports MediaTek MT6855 cam clocks,
+	  which is used to control cam clock output.
+	  If you wish to use clock resources from the cam device,
+	  say Y. Otherwise, say N.
+
+config COMMON_CLK_MT6855_MMSYS
+	tristate "Clock driver for MediaTek MT6855 mmsys"
+	depends on COMMON_CLK_MT6855
+	help
+	  This driver supports MediaTek MT6855 mmsys clocks,
+	  which is used to control mmsys clock output.
+	  If you wish to use clock resources from the mmsys device,
+	  say Y. Otherwise, say N.
+
+config COMMON_CLK_MT6855_IMGSYS1
+	tristate "Clock driver for MediaTek MT6855 imgsys1"
+	depends on COMMON_CLK_MT6855
+	help
+	  This driver supports MediaTek MT6855 imgsys1 clocks,
+	  which is used to control imgsys1 clock output.
+	  If you wish to use clock resources from the imgsys1 device,
+	  say Y. Otherwise, say N.
+
+config COMMON_CLK_MT6855_IMGSYS2
+	tristate "Clock driver for MediaTek MT6855 imgsys2"
+	depends on COMMON_CLK_MT6855
+	help
+	  This driver supports MediaTek MT6855 imgsys2 clocks,
+	  which is used to control imgsys2 clock output.
+	  If you wish to use clock resources from the imgsys2 device,
+	  say Y. Otherwise, say N.
+
+config COMMON_CLK_MT6855_PERI
+	tristate "Clock driver for MediaTek MT6855 peri"
+	depends on COMMON_CLK_MT6855
+	help
+	  This driver supports MediaTek MT6855 peri clocks,
+	  which is used to control peri clock output.
+	  If you wish to use clock resources from the peri device,
+	  say Y. Otherwise, say N.
+
+config COMMON_CLK_MT6855_BUS
+	tristate "Clock driver for MediaTek MT6855 bus"
+	depends on COMMON_CLK_MT6855
+	help
+	  This driver supports MediaTek MT6855 bus clocks,
+	  which is used to control bus clock output.
+	  If you wish to use clock resources from the bus device,
+	  say Y. Otherwise, say N.
+
+config COMMON_CLK_MT6855_IMG
+	tristate "Clock driver for MediaTek MT6855 img"
+	depends on COMMON_CLK_MT6855
+	help
+	  This driver supports MediaTek MT6855 img clocks,
+	  which is used to control img clock output.
+	  If you wish to use clock resources from the img device,
+	  say Y. Otherwise, say N.
+
+config COMMON_CLK_MT6855_MDPSYS1_CONFIG
+	tristate "Clock driver for MediaTek MT6855 mdpsys1_config"
+	depends on COMMON_CLK_MT6855
+	help
+	  This driver supports MediaTek MT6855 mdpsys1_config clocks,
+	  which is used to control mdpsys1_config clock output.
+	  If you wish to use clock resources from the mdpsys1_config device,
+	  say Y. Otherwise, say N.
+
+config COMMON_CLK_MT6855_MDPSYS
+	tristate "Clock driver for MediaTek MT6855 mdpsys"
+	depends on COMMON_CLK_MT6855
+	help
+	  This driver supports MediaTek MT6855 mdpsys clocks,
+	  which is used to control mdpsys clock output.
+	  If you wish to use clock resources from the mdpsys device,
+	  say Y. Otherwise, say N.
+
+config COMMON_CLK_MT6855_VCODEC
+	tristate "Clock driver for MediaTek MT6855 vcodec"
+	depends on COMMON_CLK_MT6855
+	help
+	  This driver supports MediaTek MT6855 vcodec clocks,
+	  which is used to control vcodec clock output.
+	  If you wish to use clock resources from the vcodec device,
+	  say Y. Otherwise, say N.
+
 config COMMON_CLK_MT7622
 	bool "Clock driver for MediaTek MT7622"
-	depends on ARCH_MEDIATEK || COMPILE_TEST
+	depends on ARM || ARM64 || COMPILE_TEST
 	select COMMON_CLK_MEDIATEK
-	default ARCH_MEDIATEK
 	help
 	  This driver supports MediaTek MT7622 basic clocks and clocks
 	  required for various periperals found on MediaTek.
@@ -323,9 +440,8 @@ config COMMON_CLK_MT7622_AUDSYS
 
 config COMMON_CLK_MT7629
 	bool "Clock driver for MediaTek MT7629"
-	depends on (ARCH_MEDIATEK && ARM) || COMPILE_TEST
+	depends on ARM || COMPILE_TEST
 	select COMMON_CLK_MEDIATEK
-	default ARCH_MEDIATEK && ARM
 	help
 	  This driver supports MediaTek MT7629 basic clocks and clocks
 	  required for various periperals found on MediaTek.
@@ -346,9 +462,8 @@ config COMMON_CLK_MT7629_HIFSYS
 
 config COMMON_CLK_MT8135
 	bool "Clock driver for MediaTek MT8135"
-	depends on (ARCH_MEDIATEK && ARM) || COMPILE_TEST
+	depends on ARM || COMPILE_TEST
 	select COMMON_CLK_MEDIATEK
-	default ARCH_MEDIATEK && ARM
 	help
 	  This driver supports MediaTek MT8135 clocks.
 
@@ -356,7 +471,6 @@ config COMMON_CLK_MT8167
 	bool "Clock driver for MediaTek MT8167"
 	depends on (ARCH_MEDIATEK && ARM64) || COMPILE_TEST
 	select COMMON_CLK_MEDIATEK
-	default ARCH_MEDIATEK
 	help
 	  This driver supports MediaTek MT8167 basic clocks.
 
@@ -364,7 +478,6 @@ config COMMON_CLK_MT8167_AUDSYS
 	bool "Clock driver for MediaTek MT8167 audsys"
 	depends on (ARCH_MEDIATEK && ARM64) || COMPILE_TEST
 	select COMMON_CLK_MEDIATEK
-	default ARCH_MEDIATEK
 	help
 	  This driver supports MediaTek MT8167 audsys clocks.
 
@@ -372,7 +485,6 @@ config COMMON_CLK_MT8167_IMGSYS
 	bool "Clock driver for MediaTek MT8167 imgsys"
 	depends on (ARCH_MEDIATEK && ARM64) || COMPILE_TEST
 	select COMMON_CLK_MEDIATEK
-	default ARCH_MEDIATEK
 	help
 	  This driver supports MediaTek MT8167 imgsys clocks.
 
@@ -380,7 +492,6 @@ config COMMON_CLK_MT8167_MFGCFG
 	bool "Clock driver for MediaTek MT8167 mfgcfg"
 	depends on (ARCH_MEDIATEK && ARM64) || COMPILE_TEST
 	select COMMON_CLK_MEDIATEK
-	default ARCH_MEDIATEK
 	help
 	  This driver supports MediaTek MT8167 mfgcfg clocks.
 
@@ -388,7 +499,6 @@ config COMMON_CLK_MT8167_MMSYS
 	bool "Clock driver for MediaTek MT8167 mmsys"
 	depends on (ARCH_MEDIATEK && ARM64) || COMPILE_TEST
 	select COMMON_CLK_MEDIATEK
-	default ARCH_MEDIATEK
 	help
 	  This driver supports MediaTek MT8167 mmsys clocks.
 
@@ -396,15 +506,13 @@ config COMMON_CLK_MT8167_VDECSYS
 	bool "Clock driver for MediaTek MT8167 vdecsys"
 	depends on (ARCH_MEDIATEK && ARM64) || COMPILE_TEST
 	select COMMON_CLK_MEDIATEK
-	default ARCH_MEDIATEK
 	help
 	  This driver supports MediaTek MT8167 vdecsys clocks.
 
 config COMMON_CLK_MT8173
 	bool "Clock driver for MediaTek MT8173"
-	depends on ARCH_MEDIATEK || COMPILE_TEST
+	depends on ARM || ARM64 || COMPILE_TEST
 	select COMMON_CLK_MEDIATEK
-	default ARCH_MEDIATEK
 	help
 	  This driver supports MediaTek MT8173 clocks.
 
@@ -417,9 +525,8 @@ config COMMON_CLK_MT8173_MMSYS
 
 config COMMON_CLK_MT8183
 	bool "Clock driver for MediaTek MT8183"
-	depends on (ARCH_MEDIATEK && ARM64) || COMPILE_TEST
+	depends on ARM64 || COMPILE_TEST
 	select COMMON_CLK_MEDIATEK
-	default ARCH_MEDIATEK && ARM64
 	help
 	  This driver supports MediaTek MT8183 basic clocks.
 
@@ -491,9 +598,8 @@ config COMMON_CLK_MT8183_VENCSYS
 
 config COMMON_CLK_MT8516
 	bool "Clock driver for MediaTek MT8516"
-	depends on ARCH_MEDIATEK || COMPILE_TEST
+	depends on ARM || ARM64 || COMPILE_TEST
 	select COMMON_CLK_MEDIATEK
-	default ARCH_MEDIATEK
 	help
 	  This driver supports MediaTek MT8516 clocks.
 
@@ -502,5 +608,52 @@ config COMMON_CLK_MT8516_AUDSYS
 	depends on COMMON_CLK_MT8516
 	help
 	  This driver supports MediaTek MT8516 audsys clocks.
+
+config COMMON_CLK_MTK_FREQ_HOPPING
+	tristate "Mediatek Frequency Hopping driver"
+	help
+	  FREQHOPPING driver support for MediaTek SOC
+	  If you want to use MediaTek FREQHOPPING driver,
+	  say Y or M here.
+	  If unsure, say N.
+
+config COMMON_CLK_MTK_FREQ_HOPPING_DEBUG
+	bool "Mediatek Frequency Hopping debug fs"
+	default y
+	depends on DEBUG_FS && COMMON_CLK_MTK_FREQ_HOPPING
+	help
+	  This option is for debugging purpose
+	  say Y to use debugfs interface to control
+	  Freqhopping.
+	  Otherwise, say N
+
+config COMMON_CLK_MTK_FREQ_HOPPING_SUBSYS
+	bool "Mediatek Frequency Hopping controlled by subsys"
+	help
+	  If FREQHOPPING HW is controlled by other processor,
+	  such as SSPM, this should be set.
+	  This option is selected when subsys configure is enabled.
+	  When this option is not enabled, FREQHOPPING HW is controlled
+	  by kernel driver directly.
+
+config COMMON_CLK_MTK_FREQ_HOPPING_MCUPM
+	bool "Mediatek Frequency Hopping controlled by MCUPM"
+	depends on COMMON_CLK_MTK_FREQ_HOPPING && MTK_TINYSYS_MCUPM_SUPPORT
+	select COMMON_CLK_MTK_FREQ_HOPPING_SUBSYS
+	help
+	  If FREQHOPPING HW is controlled by MCUPM,
+	  say Y here.
+	  Otherwise, say N.
+	  Enabling this config will auto set COMMON_CLK_MTK_FREQ_HOPPING_SUBSYS
+
+config COMMON_CLK_MTK_FREQ_HOPPING_GPUEB
+	bool "Mediatek Frequency Hopping controlled by GPUEB"
+	depends on COMMON_CLK_MTK_FREQ_HOPPING
+	select COMMON_CLK_MTK_FREQ_HOPPING_SUBSYS
+	help
+	  If FREQHOPPING HW is controlled by GPUEB,
+	  say Y here.
+	  Otherwise, say N.
+	  Enabling this config will auto set COMMON_CLK_MTK_FREQ_HOPPING_SUBSYS
 
 endmenu

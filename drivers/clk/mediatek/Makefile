@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0
-obj-$(CONFIG_COMMON_CLK_MEDIATEK) += clk-mtk.o clk-pll.o clk-gate.o clk-apmixed.o clk-cpumux.o reset.o clk-mux.o
+obj-$(CONFIG_COMMON_CLK_MEDIATEK) += clk-common.o
+clk-common-$(CONFIG_COMMON_CLK_MEDIATEK) += clk-mtk.o clk-pll.o clk-gate.o clk-apmixed.o clk-cpumux.o reset.o clk-mux.o clkchk.o clk-fmeter.o mtk-pd-chk.o clkdbg.o
+obj-$(CONFIG_COMMON_CLK_MEDIATEK) += clk-disable-unused.o
 
 obj-$(CONFIG_COMMON_CLK_MT6765) += clk-mt6765.o
 obj-$(CONFIG_COMMON_CLK_MT6765_AUDIOSYS) += clk-mt6765-audio.o
@@ -39,6 +41,21 @@ obj-$(CONFIG_COMMON_CLK_MT2712_MFGCFG) += clk-mt2712-mfg.o
 obj-$(CONFIG_COMMON_CLK_MT2712_MMSYS) += clk-mt2712-mm.o
 obj-$(CONFIG_COMMON_CLK_MT2712_VDECSYS) += clk-mt2712-vdec.o
 obj-$(CONFIG_COMMON_CLK_MT2712_VENCSYS) += clk-mt2712-venc.o
+ifneq ($(wildcard $(srctree)/$(src)/clk-mt6855.c),)
+obj-$(CONFIG_COMMON_CLK_MT6855) += clk-mt6855.o clk-bringup.o
+obj-$(CONFIG_COMMON_CLK_MT6855_ADSP) += clk-mt6855-adsp.o
+obj-$(CONFIG_COMMON_CLK_MT6855_CAMSYS_MAIN) += clk-mt6855-cam_m.o
+obj-$(CONFIG_COMMON_CLK_MT6855_CAM) += clk-mt6855-cam.o
+obj-$(CONFIG_COMMON_CLK_MT6855_MMSYS) += clk-mt6855-mmsys.o
+obj-$(CONFIG_COMMON_CLK_MT6855_IMGSYS1) += clk-mt6855-imgsys1.o
+obj-$(CONFIG_COMMON_CLK_MT6855_IMGSYS2) += clk-mt6855-imgsys2.o
+obj-$(CONFIG_COMMON_CLK_MT6855_PERI) += clk-mt6855-peri.o
+obj-$(CONFIG_COMMON_CLK_MT6855_BUS) += clk-mt6855-bus.o
+obj-$(CONFIG_COMMON_CLK_MT6855_IMG) += clk-mt6855-img.o
+obj-$(CONFIG_COMMON_CLK_MT6855_MDPSYS1_CONFIG) += clk-mt6855-mdp1.o
+obj-$(CONFIG_COMMON_CLK_MT6855_MDPSYS) += clk-mt6855-mdp.o
+obj-$(CONFIG_COMMON_CLK_MT6855_VCODEC) += clk-mt6855-vcodec.o
+endif
 obj-$(CONFIG_COMMON_CLK_MT7622) += clk-mt7622.o
 obj-$(CONFIG_COMMON_CLK_MT7622_ETHSYS) += clk-mt7622-eth.o
 obj-$(CONFIG_COMMON_CLK_MT7622_HIFSYS) += clk-mt7622-hif.o
@@ -69,3 +86,35 @@ obj-$(CONFIG_COMMON_CLK_MT8183_VDECSYS) += clk-mt8183-vdec.o
 obj-$(CONFIG_COMMON_CLK_MT8183_VENCSYS) += clk-mt8183-venc.o
 obj-$(CONFIG_COMMON_CLK_MT8516) += clk-mt8516.o
 obj-$(CONFIG_COMMON_CLK_MT8516_AUDSYS) += clk-mt8516-aud.o
+obj-$(CONFIG_COMMON_CLK_MTK_FREQ_HOPPING) += fhctl.o
+fhctl-y += clk-fhctl.o
+fhctl-y += clk-fhctl-ap.o
+fhctl-y += clk-fhctl-pll.o
+ifeq ($(CONFIG_COMMON_CLK_MTK_FREQ_HOPPING_MCUPM),y)
+fhctl-y += clk-fhctl-mcupm.o
+ccflags-y += -DUSE_FHCTL_MCUPM
+endif
+ifeq ($(CONFIG_COMMON_CLK_MTK_FREQ_HOPPING_GPUEB),y)
+fhctl-y += clk-fhctl-gpueb.o
+ccflags-y += -DUSE_FHCTL_GPUEB
+endif
+fhctl-$(CONFIG_DEBUG_FS) += clk-fhctl-debug.o
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/include/
+ccflags-y += -I$(srctree)/include/linux/soc/mediatek/
+
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/mcupm/
+ccflags-y += -I$(srctree)/drivers/gpu/mediatek/gpueb/
+ccflags-y += -I$(srctree)/drivers/clk/mediatek/
+
+ifneq ($(wildcard $(srctree)/$(src)/clk-mt6855.c),)
+obj-$(CONFIG_COMMON_CLK_MT6855) += clk-chk-mt6855.o
+clk-chk-mt6855-$(CONFIG_COMMON_CLK_MT6855) += clkchk-mt6855.o
+obj-$(CONFIG_COMMON_CLK_MT6855) += clk-fmeter-mt6855.o
+clk-fmeter-mt6855-$(CONFIG_COMMON_CLK_MT6855) += clk-fmeter-mt6855.o
+obj-$(CONFIG_COMMON_CLK_MT6855) += pd-chk-mt6855.o
+pd-chk-mt6855-$(CONFIG_COMMON_CLK_MT6855) += mtk-pd-chk-mt6855.o
+ifeq ($(CONFIG_DEBUG_FS), y)
+obj-$(CONFIG_COMMON_CLK_MT6855) += clk-dbg-mt6855.o
+clk-dbg-mt6855-$(CONFIG_COMMON_CLK_MT6855) += clkdbg-mt6855.o
+endif
+endif
