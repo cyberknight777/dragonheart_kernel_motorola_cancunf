@@ -1,0 +1,46 @@
+config MTK_GPU_SUPPORT
+	tristate "Support MTK GPU"
+	help
+	  config supports MTK GPU driver
+	  CONFIG_MTK_GPU_SUPPORT defines
+	  The gpu driver would be built-in, as kernel module or not supported
+	  MTK_GPU_VERSION would define the target HW IP
+
+config MTK_GPU_VERSION
+	string "Support MTK GPU Driver Version"
+	default ""
+	help
+	  CONFIG_MTK_GPU_VERSION define which gpu ddk version will be used
+	  It has three parts
+	  1.vendor name 2.GPU architecture name 3. driver version
+
+config MTK_GPU_COMMON_DVFS_SUPPORT
+	bool "Support GPU VSync-Based DVFS Policy"
+	default n
+	help
+	  config supports to enable GPU DVFS policy.
+	  It is nice method to save power.
+	  It is recommended to enable it when MTK_GPU_SUPPORT is enabled.
+
+config MTK_GPU_SWPM_SUPPORT
+	bool "Enable GPU SPM DVFS"
+	default n
+	help
+	   config supports to make SWPM enable/disable GPU power model
+
+config MTK_GPUFREQ_V2
+	bool "MTK GPUFREQ Version 2"
+	default n
+	help
+	  Support for gpufreq version 2.
+	  CONFIG_MTK_GPUFREQ_V2 defines
+	  if the gpufreq driver should go to version 2
+
+config MTK_GPU_MT6855_SUPPORT
+	tristate "Specify Mediatek GPU Platform is mt6855"
+	depends on MTK_GPU_SUPPORT
+	help
+	  Select MediaTek GPU Platform is mt6855.
+	  Set Y or M to select this feature for specific platform-mt6855,
+	  and set N to disable.
+	  It is additional config to separate platforms.
