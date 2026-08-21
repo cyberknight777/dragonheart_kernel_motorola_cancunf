@@ -1,0 +1,7 @@
+config VIDEO_MEDIATEK_VCODEC_V1
+	bool "Specify Mediatek Video Vcodec Platform V1"
+	help
+	  Select MediaTek Video Vcodec Platform V1
+	  v1 folder is dvfs setting for policy 1
+	  Set Y to select this feature for specific platform-V1.
+	  If unsure, set N to disable.
