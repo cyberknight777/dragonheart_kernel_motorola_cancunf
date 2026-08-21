@@ -93,6 +93,13 @@ obj-$(CONFIG_LEDS_TURRIS_OMNIA)		+= leds-turris-omnia.o
 obj-$(CONFIG_LEDS_WM831X_STATUS)	+= leds-wm831x-status.o
 obj-$(CONFIG_LEDS_WM8350)		+= leds-wm8350.o
 obj-$(CONFIG_LEDS_WRAP)			+= leds-wrap.o
+obj-$(CONFIG_LEDS_REGULATOR_VIBRATOR)	+= regulator-vibrator.o
+obj-$(CONFIG_LEDS_MTK)			+= leds-mtk.o
+obj-$(CONFIG_LEDS_MTK_PWM)		+= leds-mtk-pwm.o
+obj-$(CONFIG_LEDS_MTK_DISP)		+= leds-mtk-disp.o
+
+subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/flashlight
+subdir-ccflags-y += -I$(srctree)/drivers/power/supply
 
 # LED SPI Drivers
 obj-$(CONFIG_LEDS_CR0014114)		+= leds-cr0014114.o
