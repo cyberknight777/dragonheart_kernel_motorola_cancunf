@@ -1,0 +1,7 @@
+config MTK_SLBC
+	tristate "MTK SLBC"
+	help
+	  This kernel config can be used to enable SLBC. When enable
+	  this option, we will use system buffer to improve performance
+	  and power.
+	  If unsure, say N.
