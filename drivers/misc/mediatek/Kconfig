@@ -1,0 +1,100 @@
+# SPDX-License-Identifier: GPL-2.0
+
+menu "Power, PMIC, Battery & Low Power"
+source "drivers/misc/mediatek/clkbuf/Kconfig"
+source "drivers/misc/mediatek/slbc/Kconfig"
+source "drivers/misc/mediatek/cm_mgr/Kconfig"
+source "drivers/misc/mediatek/mcupm/Kconfig"
+source "drivers/misc/mediatek/dvfsrc/Kconfig"
+source "drivers/misc/mediatek/dcm/Kconfig"
+source "drivers/misc/mediatek/qos/Kconfig"
+source "drivers/misc/mediatek/lpm/Kconfig"
+source "drivers/misc/mediatek/ssc/Kconfig"
+source "drivers/misc/mediatek/swpm/Kconfig"
+source "drivers/misc/mediatek/power_throttling/Kconfig"
+source "drivers/misc/mediatek/cpufreq_lite/Kconfig"
+source "drivers/misc/mediatek/pbm/Kconfig"
+source "drivers/misc/mediatek/mdpm/Kconfig"
+source "drivers/misc/mediatek/pmsr/Kconfig"
+endmenu # Power
+
+menu "MultiMedia, Display, Camera"
+source "drivers/misc/mediatek/iommu/Kconfig"
+source "drivers/misc/mediatek/cameraisp/Kconfig"
+source "drivers/misc/mediatek/cmdq/Kconfig"
+source "drivers/misc/mediatek/mtk-interconnect/Kconfig"
+source "drivers/misc/mediatek/mdp/Kconfig"
+source "drivers/misc/mediatek/mmp/Kconfig"
+source "drivers/misc/mediatek/lens/Kconfig"
+source "drivers/misc/mediatek/flashlight/Kconfig"
+source "drivers/misc/mediatek/imgsensor/Kconfig"
+source "drivers/misc/mediatek/cam_cal/Kconfig"
+source "drivers/misc/mediatek/cam_timesync/Kconfig"
+source "drivers/misc/mediatek/camera_mem/Kconfig"
+source "drivers/misc/mediatek/vow/Kconfig"
+source "drivers/misc/mediatek/vdec_fmt/Kconfig"
+source "drivers/misc/mediatek/widevine_drm/Kconfig"
+source "drivers/misc/mediatek/mminfra/Kconfig"
+endmenu # MultiMedia, Display, Camera
+
+menu "Security"
+source "drivers/misc/mediatek/trusted_mem/Kconfig"
+source "drivers/misc/mediatek/geniezone/Kconfig"
+source "drivers/misc/mediatek/masp/Kconfig"
+endmenu # Security
+
+menu "Tinysys"
+source "drivers/misc/mediatek/sspm/Kconfig"
+source "drivers/misc/mediatek/tinysys_scmi/Kconfig"
+source "drivers/misc/mediatek/scp/Kconfig"
+source "drivers/misc/mediatek/vcp/Kconfig"
+endmenu # Tinysys
+
+menu "Debug, log, trace"
+source "drivers/misc/mediatek/mtprof/Kconfig"
+source "drivers/misc/mediatek/sda/Kconfig"
+source "drivers/misc/mediatek/subpmic/Kconfig"
+source "drivers/misc/mediatek/log_store/Kconfig"
+endmenu # Debug
+
+menu "Modem & Connectivity"
+source "drivers/misc/mediatek/ccci_util/Kconfig"
+source "drivers/misc/mediatek/ccmni/Kconfig"
+source "drivers/misc/mediatek/eccci/Kconfig"
+source "drivers/misc/mediatek/btif/Kconfig"
+source "drivers/misc/mediatek/connectivity/Kconfig"
+source "drivers/misc/mediatek/mddp/Kconfig"
+endmenu # Modem
+
+menu "Other Peripherals"
+source "drivers/misc/mediatek/typec/Kconfig"
+source "drivers/misc/mediatek/extcon/Kconfig"
+source "drivers/misc/mediatek/adsp/Kconfig"
+source "drivers/misc/mediatek/audio_ipi/Kconfig"
+source "drivers/misc/mediatek/usb_rndis/Kconfig"
+source "drivers/misc/mediatek/usb20/Kconfig"
+source "drivers/misc/mediatek/irtx/Kconfig"
+source "drivers/misc/mediatek/pwm/Kconfig"
+endmenu # Other Peripheral
+
+menu "Config File"
+config MOTO_DRDI_SUPPORT
+	bool "moto drdi support"
+	help
+	  Used to enable moto drdi support,
+	  which transfers product name/radio id etc to modem side.
+	  Say Y here if you are need moto drdi support.
+	  If unsure, say N
+
+config MOTO_CCCI_SEC_SUPPORT
+	bool "moto ccci sec support"
+	help
+	  Used to enable moto ccci security support,
+	  which transfers moto security data, cid data etc to modem side.
+	  Say Y here if you are need moto ccci security support.
+	  If unsure, say N
+endmenu # Config
+
+menu "Sensors"
+source "drivers/misc/mediatek/sensor/Kconfig"
+endmenu # Sensors
