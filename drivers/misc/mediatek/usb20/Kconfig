@@ -1,0 +1,60 @@
+config USB_MTK_HDRC
+	tristate "MediaTek MUSB support"
+	select USB_GADGET_SELECTED
+	select USB_GADGET_DUALSPEED
+	help
+	  Say Y here if your system has a high speed USB
+	  controller based on the MTK MUSB IP.  Then
+	  configure options to match your silicon and the board
+	  it's being used with, including the USB peripheral role,
+	  or the USB host role, or both.
+
+config MTK_MUSB_QMU_SUPPORT
+	bool "QMU Transfer mode of MediaTek MUSB"
+	depends on USB_MTK_HDRC
+	help
+	  Say Y here if your system has a QMU capability for USB
+	  controller based on the MTK MUSB IP.
+	  QMU is some kind of enhanced DMA mode by HW queeu rather
+	  than SW queue to reduce SW effort.
+
+config MTK_MUSB_QMU_PURE_ZLP_SUPPORT
+	bool "Transfer ZLP by GDP of MediaTek MUSB"
+	depends on MTK_MUSB_QMU_SUPPORT
+	help
+	  Say Y here if QMU IP supports sending zero
+	  length packet(ZLP) by setting ZLP flag in GDP
+	  and the driver can enable by internal register.
+	  After MT6763 should support this feature.
+
+config MTK_MUSB_DRV_36BIT
+	bool "MediaTek MUSB 36bits addressing support"
+	default n
+	help
+	  This selects the MediaTek MUSB support 36-bits
+	  address accessing.
+	  Say Y here if you want to enable 36-bits addressing support.
+	  If unsure, say N.
+
+config USB_MTK_OTG
+	bool "MediaTek MUSB OTG support"
+	help
+	  Enable Mediatek USB Host OTG detection mechanism
+	  and USB-IF Compliance Test Program.
+	  1. IDDIG - OTG cable attachment detection.
+	  2. DRVVBUS - provides the VBUS for the attached devices
+
+config MTK_MUSB_CARPLAY_SUPPORT
+	bool "MediaTek MUSB Carplay support"
+	help
+	  Say Y here if your want to use carplay.
+
+config MTK_MUSB_DUAL_ROLE
+	bool "Mediatek MUSB Dual Role mode support"
+	select USB_ROLE_SWITCH
+	help
+	  This is the default mode of working of MTK MUSB controller
+	  where both host and gadget
+	  features are enabled.
+	  It is better to be used with Mediatek extcon and tphy support.
+	  Say Y here if your want to use usb role switch.
