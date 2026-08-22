@@ -1,0 +1,4 @@
+config  MOT_CANCUNF_CAMERA_PROJECT
+        tristate "set cancun camera driver"
+        help
+          Used to distinguish project-driver code from other projects.
