@@ -1,0 +1,7 @@
+config MTK_SUBPMIC_MISC
+	tristate "Mediatek Subpmic Miscellaneous"
+	help
+	  Enable to support Mediatek subpmic miscellaneous functions.
+	  For example, customized debugfs for different chips.
+	  Other platform dependent operations,
+	  e.g., communication between modem and AP.
