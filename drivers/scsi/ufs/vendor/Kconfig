@@ -1,0 +1,54 @@
+config UFSFEATURE
+	bool "UFS feature activate"
+	depends on SCSI_UFSHCD
+	help
+	  UFS feature activate such as hpb, tw and etc.
+
+config UFSHID
+	bool "UFS Host Initiated Defrag support"
+	depends on SCSI_UFSHCD && UFSFEATURE
+	help
+	  UFS HID Feature Enable
+
+config MICRON_UFSHID
+	bool "Micron UFS Host Initiated Defrag support"
+	depends on SCSI_UFSHCD && UFSFEATURE
+	help
+	  Micron UFS HID Feature Enable
+
+config SCSI_SKHID
+	bool "UFS Host Initiated Defrag supportr"
+	depends on (SCSI_UFSHCD || SCSI_UFSHCD_QTI)
+	help
+	  Activate or deactive SKHID driver
+
+config UFSHID_POC
+	bool "UFSHID_POC test"
+	depends on SCSI_UFSHCD && UFSFEATURE && UFSHID
+	help
+	  UFS HID POC test
+	  1. block to enter suspend state
+	  2. auto_hibern8 enable/disable (HCI)
+	  3. set flag bDefragOperation
+	  4. debug msg enable (default : disable)
+
+config UFSHID_DEBUG
+	bool "HID Debug Enable"
+	depends on SCSI_UFSHCD && UFSFEATURE && UFSHID
+	default n
+	help
+	UFS HID Debug Enable (for check io stat during trigger)
+
+config UFSRINGBUF
+	bool "UFS RingBuffer support"
+	depends on SCSI_UFSHCD && UFSFEATURE
+	help
+	  UFS RingBuffer Feature Enable
+
+config UFSRINGBUF_POC
+	bool "UFS RingBuffer POC test"
+	depends on SCSI_UFSHCD && UFSFEATURE && UFSRINGBUF
+	help
+	  UFS RingBuffer POC test
+	  1. set default vendor_signature & vendor_parameter for test
+	  2. Set custom vender_parameter
