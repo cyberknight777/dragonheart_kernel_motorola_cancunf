@@ -1,0 +1,7 @@
+config MTK_SECURITY_SW_SUPPORT
+	tristate "Mediatek Security SW Support"
+	help
+	  This is the driver for MediaTek kernel security.
+	  This module contains the random id and dm-verity handle functions
+	  To compile this driver as a module, choose M here: the
+	  module will be called masp.
