@@ -1,5 +1,9 @@
 # SPDX-License-Identifier: GPL-2.0
 subdir-ccflags-$(CONFIG_POWER_SUPPLY_DEBUG) := -DDEBUG
+subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/usb20
+subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/typec/tcpc/inc
+subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/power_throttling
+subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/include
 
 power_supply-y				:= power_supply_core.o
 power_supply-$(CONFIG_SYSFS)		+= power_supply_sysfs.o
@@ -98,3 +102,20 @@ obj-$(CONFIG_CHARGER_BD70528)	+= bd70528-charger.o
 obj-$(CONFIG_CHARGER_BD99954)	+= bd99954-charger.o
 obj-$(CONFIG_CHARGER_WILCO)	+= wilco-charger.o
 obj-$(CONFIG_RN5T618_POWER)	+= rn5t618_power.o
+obj-$(CONFIG_CHARGER_MT6375)	+= mt6375-charger.o
+obj-$(CONFIG_WT6670F_QC3P)	+= wt6670f_qc3p.o
+obj-$(CONFIG_GAUGE_MT6375)	+= mt6375-battery.o
+mt6375-battery-objs := mtk_battery_coulomb_service.o mtk_battery.o mtk_battery_algo.o mt6375-gauge.o mtk_battery_daemon.o
+obj-$(CONFIG_MTK_CHARGER_TYPE_DETECT)	+= mtk_chg_type_det.o
+obj-$(CONFIG_MTK_CHARGER) += mtk_charger_framework.o mtk_pd_charging.o charger_class.o adapter_class.o mtk_charger_algorithm_class.o mtk_pd_adapter.o
+mtk_charger_framework-objs := mtk_charger.o mtk_charger_intf.o mtk_basic_charger.o mtk_pulse_charger.o
+mtk_pd_charging-objs := mtk_pd.o mtk_pd_hal.o
+obj-$(CONFIG_MTK_PUMP_EXPRESS_PLUS_20_SUPPORT) += mtk_pep20.o
+mtk_pep20-objs := mtk_pe2.o mtk_pe2_hal.o
+obj-$(CONFIG_MTK_PUMP_EXPRESS_PLUS_SUPPORT) += mtk_pep.o
+mtk_pep-objs := mtk_pe.o mtk_pe_hal.o
+obj-$(CONFIG_MTK_PUMP_EXPRESS_40_SUPPORT) += mtk_pep40.o
+mtk_pep40-objs := mtk_pe4.o mtk_pe4_hal.o
+obj-$(CONFIG_MTK_PUMP_EXPRESS_50_SUPPORT) += mtk_pep50.o
+mtk_pep50-objs := mtk_pe5.o mtk_pe5_hal.o
+obj-$(CONFIG_MOTO_CHG_TCMD_SUPPORT) += moto_chg_tcmd.o

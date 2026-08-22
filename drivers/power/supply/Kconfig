@@ -707,6 +707,72 @@ config CHARGER_RT9455
 	help
 	  Say Y to enable support for Richtek RT9455 battery charger.
 
+config MOTO_CHG_WT6670F_SUPPORT
+        bool "Enable WT6670F charger protocol IC for Moto"
+        default n
+        help
+          This is to enable MOTO supports of IC WT6670F.
+
+config WT6670F_QC3P
+        tristate "QC3+ protocal chipset"
+        depends on I2C
+        help
+          Say Y to enable support for QC3 plus protocal chipset.
+
+config MOTO_DISCRETE_CHARGE_PUMP_SUPPORT
+        bool "Enable discrete charger pumpfor Moto"
+        default n
+        help
+          This is to enable MOTO supports of charger pump.
+
+config MOTO_CHARGER_PUMP_MEASURE_AVG_VOL
+        bool "Enable charger pump measure AVG voltage for Moto"
+        default n
+        help
+          This is to enable charger pump measure AVG voltage.
+
+config MOTO_CHARGER_MT6375_SUPPORT
+        bool "MT6375 sw charger support"
+        default n
+        help
+          This is to enable MOTO supports of MT6375 control.
+
+config MOTO_WT6670F_SHUTDOWN_ONLY_DO_SW_RESET
+        bool "WT6670F shutdown only do software reset"
+        default n
+        help
+          This is to enable shutdown Wt6670F only do software reset.
+
+config MOTO_CHARGE_PUMP_OVP_CONTROL_SUPPORT
+        bool "CHARGER PUMP ovp control support"
+        default n
+        help
+          This is to enable MOTO supports of charger vac control ovp.
+
+config MOTO_CHG_FFC_5V10W_SUPPORT
+	bool "Enable 5V10W charger FFC feature"
+	default n
+	help
+		This is to enable MOTO 5V10W Charger FFC feature.
+
+config MOTO_CHG_FFC_THRESHOLD_1900
+	bool "Set 5V10W Charger FFC THRESHOLD 1900"
+	default n
+	help
+		This is to enable MOTO 5V10W Charger FFC THRESHOLD 1900mA.
+
+config MOTO_SELECT_LOW_TMP_BATVOL
+	bool "Select low temperature battery voltage low bound"
+	default n
+	help
+		This is to select low temperature battery voltage low bound.
+
+config MOTO_SELECT_ENABLE_VBAT_MON
+	bool "Select enable vbat mon"
+	default n
+	help
+		This is to select enable vbat mon.
+
 config CHARGER_CROS_USBPD
 	tristate "ChromeOS EC based USBPD charger"
 	depends on CROS_USBPD_NOTIFY
@@ -768,6 +834,81 @@ config CHARGER_WILCO
 	  information can be found in
 	  Documentation/ABI/testing/sysfs-class-power-wilco
 
+config CHARGER_MT6375
+	tristate "MT6375 charger driver"
+	depends on MFD_MT6375
+	help
+	  Say Y to enable support for the MT6375 charger.
+	  The driver supports controlling switching charger and OTG
+	  with high-accuracy current and voltage regulation.
+	  The device is compliant with the USB Battery Charging Specification
+	  Revision 1.2.
+
+config GAUGE_MT6375
+	tristate "MT6375 fuel gauge driver"
+	depends on MFD_MT6375
+	help
+	  This adds support for battery fuel gauge in Mediatek MT6375 PMIC.
+	  The fuelgauge calculates and determines the battery state of charge
+	  according to battery open circuit voltage.
+
+config MTK_CHARGER_TYPE_DETECT
+	tristate "Mediatek Charger Type Detect Driver"
+	depends on TCPC_CLASS
+	help
+	  Say Y here to enable Mediatek Charger Type Detect.
+	  Support enable charger type detect when receiving
+	  typec attach notify.
+	  Say N to disable.
+
+config MTK_CHARGER
+	tristate "MediaTek Charging Driver"
+	help
+	  Say yes here to enable MediaTek charging driver.
+	  This driver contains charging control flow and
+	  maintains charging status.
+	  Say no if not using MediaTek charging driver.
+
+config MTK_PUMP_EXPRESS_PLUS_SUPPORT
+	tristate "MediaTek PUMP EXPRESS PLUS"
+	depends on MTK_CHARGER
+	help
+	  Fast charging technology using switch charger and current pattern
+	  to achive better charging ability.
+	  Set Yes to enable PE+
+	  Set No to disable PE+
+
+config MTK_PUMP_EXPRESS_PLUS_20_SUPPORT
+	tristate "MediaTek PUMP EXPRESS PLUS 2.0"
+	depends on MTK_CHARGER
+	help
+	  Fast charging technology using switch charger and current pattern
+	  to achive better charging ability. It has higher charging efficiency
+	  and has better thermal performance than PE+.
+	  Set Yes to enable PE+2.0
+	  Set No to disable PE+2.0
+
+config MTK_PUMP_EXPRESS_40_SUPPORT
+	tristate "MediaTek PUMP EXPRESS 4.0"
+	depends on MTK_CHARGER
+	help
+	  Fast charging technology supports request adjustments of source output
+	  voltage in increments as small as 50 mV to achive better charging ability.
+	  It has higher charging efficiency and has better thermal performance than
+	  PE+/PE+2.0.
+	  Set Yes to enable PE 4.0
+	  Set No to disable PE 4.0
+
+config MTK_PUMP_EXPRESS_50_SUPPORT
+	tristate "MediaTek PUMP EXPRESS 5.0"
+	depends on MTK_CHARGER
+	help
+	  Fast charging technology using divider charger
+	  to achive better charging ability. It has higher charging efficiency
+	  and has better thermal performance than PE+.
+	  Set Yes to enable PE 5.0
+	  Set No to disable PE 5.0
+
 config RN5T618_POWER
 	tristate "RN5T618 charger/fuel gauge support"
 	depends on MFD_RN5T618
@@ -775,5 +916,28 @@ config RN5T618_POWER
 	  Say Y here to have support for RN5T618 PMIC family fuel gauge and charger.
 	  This driver can also be built as a module. If so, the module will be
 	  called rn5t618_power.
+
+config MOTO_CHG_TCMD_SUPPORT
+	tristate "MOTO TCMD interface driver for charger"
+	help
+	  This is to enable MOTO supports of charger TCMD INTERFACE.
+
+config MOTO_PE50_CV_LOWER_BOUND_GAP_OFF
+	bool "This is config charger pe5 cv lower bound gap"
+	default n
+	help
+	  This is config charger pe5 cv lower bound gap
+
+config CANCUNF_BATTERY_NTC
+	bool "This is config cancunf battery ntc table"
+	default n
+	help
+	  This is config cancunf battery ntc table
+
+config CANCUNF_FACTORY_MODE_SET_ICL_SUPPORT
+	bool "This is config cancunf factorymode set icl support"
+	default n
+	help
+	  This is config cancunf factorymode set icl support
 
 endif # POWER_SUPPLY
