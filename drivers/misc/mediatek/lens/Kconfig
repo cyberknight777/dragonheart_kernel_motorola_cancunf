@@ -1,0 +1,7 @@
+config MTK_LENS
+	tristate "Mediatek lens driver"
+	help
+	  This is lens driver for camera
+	  Say Y here if you want to enable lens driver.
+	  If you have any questions about this, say Y here,
+	  only say N if you know exactly what you are doing.
