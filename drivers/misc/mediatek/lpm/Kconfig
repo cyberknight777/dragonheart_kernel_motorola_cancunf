@@ -1,0 +1,41 @@
+config MTK_LOW_POWER_MODULE
+	tristate "Meditaek Low Power Module"
+	help
+	  For MediaTek Low Power Module, such as CPU idle,
+	  CPU suspend low power enhencement.
+	  Select "y" if you want to enable low power features.
+	  Select "n" if unsure.
+
+config MTK_LPM_DBG_COMMON
+	bool "Meditaek Low Power common debug Module"
+	help
+	  Select MTK_LPM_DBG_COMMON then Mediatek low module
+	  common debug feature will be enabled. The common debug
+	  feature will support basic debug control and show the
+	  information to console.
+
+
+config MTK_LPM_GS_DUMP_SUPPORT
+	bool "Meditaek Low Power golden setting checker"
+	help
+	  Select MTK_LPM_GS_DUMP_SUPPORT then Mediatek low module
+	  golden setting dump mechanism enable.
+	  Select "y" if you want to enable gs dump features.
+	  Select "n" if unsure.
+
+config MTK_LPM_GS_DUMP_VERSION
+	string "Meditaek Low Power golden setting checker version"
+	default "v1"
+	help
+	  Set MTK_LPM_GS_DUMP_VERSION for Mediatek low module
+	  golden setting dump mechanism version.
+
+config MTK_LPM_MT6855
+	tristate "Specify Mediatek LPM Platform is MT6855"
+	depends on MTK_LOW_POWER_MODULE
+	select MTK_LPM_DBG_COMMON
+	help
+	  Select MediaTek Low Power Module Platform is MT6855
+	  for power management.
+	  Set Y to select this feature for specific platform-mt6855.
+	  If unsure, set N to disable.
