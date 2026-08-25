@@ -19,13 +19,33 @@
 #include <media/v4l2-device.h>
 #include <media/v4l2-ioctl.h>
 #include <media/videobuf2-core.h>
+#include <media/videobuf2-memops.h>
 #include "mtk_vcodec_util.h"
 #include "vcodec_ipi_msg.h"
 #include "mtk_vcodec_pm.h"
 #include "vcodec_dvfs.h"
 #include "vcodec_bw.h"
-#include "mtk_dma_contig.h"
 #include "slbc_ops.h"
+
+struct vb2_dc_buf {
+	struct device			*dev;
+	void				*vaddr;
+	unsigned long			size;
+	void				*cookie;
+	dma_addr_t			dma_addr;
+	unsigned long			attrs;
+	enum dma_data_direction		dma_dir;
+	struct sg_table			*dma_sgt;
+	struct frame_vector		*vec;
+
+	/* MMAP related */
+	struct vb2_vmarea_handler	handler;
+	atomic_t			refcount;
+	struct sg_table			*sgt_base;
+
+	/* DMABUF related */
+	struct dma_buf_attachment	*db_attach;
+};
 
 #define MTK_VCODEC_DRV_NAME     "mtk_vcodec_drv"
 #define MTK_VCODEC_DEC_NAME     "mtk-vcodec-dec"
