@@ -34,12 +34,6 @@ typedef enum  {
 	EXTLDO_REGULATOR_VOLTAGE_2900=2900,
 }EXTLDO_REGULATOR_VOLTAGE;
 
-struct WL2868_LDOMAP{
-	enum IMGSENSOR_SENSOR_IDX idx;
-	enum IMGSENSOR_HW_PIN hwpin;
-	CAMERA_LDO_SELECT wl2868ldo;
-};
-/*
 typedef enum {
 	CAMERA_LDO_DVDD1=0,
 	CAMERA_LDO_DVDD2,
@@ -50,9 +44,14 @@ typedef enum {
 	CAMERA_LDO_VDDIO,//CAMERA_LDO_VDDIO
 	CAMERA_LDO_MAX
 } CAMERA_LDO_SELECT;
-*/
-/*
 
+struct WL2868_LDOMAP{
+	enum IMGSENSOR_SENSOR_IDX idx;
+	enum IMGSENSOR_HW_PIN hwpin;
+	CAMERA_LDO_SELECT wl2868ldo;
+};
+
+/*
 enum IMGSENSOR_RETURN imgsensor_hw_wl2868_open(
 	struct IMGSENSOR_HW_DEVICE **pdevice);
 */
@@ -91,6 +90,15 @@ static const int extldo_regulator_voltage[] = {
 	EXTLDO_REGULATOR_VOLTAGE_2900,
 };
 
+void camera_ldo_set_en_ldo(CAMERA_LDO_SELECT ldonum,unsigned int en)
+{
+	return;
+}
+
+void camera_ldo_set_ldo_value(CAMERA_LDO_SELECT ldonum,unsigned int value)
+{
+	return;
+}
 
 static enum IMGSENSOR_RETURN wl2868_init(void *instance,struct IMGSENSOR_HW_DEVICE_COMMON *pcommon)
 {
