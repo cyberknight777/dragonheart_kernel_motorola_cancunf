@@ -16,7 +16,6 @@
 
 #include "imgsensor_hw.h"
 #include "imgsensor_common.h"
-#include "../../../../../../camera_ldo/camera_ldo.h"
 
 //extern void camera_ldo_set_ldo_value(CAMERA_LDO_SELECT ldonum,unsigned int value);
 //extern void camera_ldo_set_en_ldo(CAMERA_LDO_SELECT ldonum,unsigned int en);
