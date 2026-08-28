@@ -17,7 +17,6 @@
 #include <linux/of_irq.h>
 #include <linux/gpio/consumer.h>
 #include <linux/soc/mediatek/mtk-cmdq.h>
-#include "cmdq-bdg.h"
 #include <linux/kthread.h>
 #include <linux/sched.h>
 #include <uapi/linux/sched/types.h>
