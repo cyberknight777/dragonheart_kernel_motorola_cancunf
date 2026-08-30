@@ -6,7 +6,6 @@
 #ifndef _DDP_DISP_BDG_H_
 #define _DDP_DISP_BDG_H_
 
-#include "spi_slave.h"
 #include "mtk_dsi.h"
 #include <linux/interrupt.h>
 
