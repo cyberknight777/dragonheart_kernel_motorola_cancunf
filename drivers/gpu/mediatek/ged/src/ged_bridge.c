@@ -6,7 +6,9 @@
 #include <linux/kernel.h>
 #include <mt-plat/mtk_gpu_utility.h>
 
+#if defined(CONFIG_MTK_FPSGO_V3) && IS_MODULE(CONFIG_MTK_GPU_SUPPORT)
 #include <mt-plat/fpsgo_common.h>
+#endif
 
 #include "ged_base.h"
 #include "ged_bridge.h"
