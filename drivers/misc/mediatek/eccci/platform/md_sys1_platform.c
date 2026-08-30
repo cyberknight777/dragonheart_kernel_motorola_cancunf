@@ -33,7 +33,9 @@
 #endif
 
 #include <linux/regulator/consumer.h> /* for MD PMIC */
+#if IS_ENABLED(CONFIG_MTK_VCOREFS_LEGACY)
 #include <vcorefs_v3/mtk_vcorefs_manager.h>
+#endif
 
 #include "ccci_core.h"
 #include "ccci_platform.h"
@@ -1321,8 +1323,9 @@ void md1_pll_init(struct ccci_modem *md)
 	CCCI_BOOTUP_LOG(0, TAG, "pll init: end\n");
 }
 
-
+#if IS_ENABLED(CONFIG_MTK_VCOREFS_LEGACY)
 static int (*vcorefs_request_dvfs_callback)(enum dvfs_kicker, enum dvfs_opp);
+
 void ccci_set_svcorefs_request_dvfs_cb(int (*vcorefs_request_dvfs_opp)(enum dvfs_kicker, enum dvfs_opp))
 {
 	vcorefs_request_dvfs_callback = vcorefs_request_dvfs_opp;
@@ -1352,7 +1355,7 @@ static int md_cd_vcore_config_old (unsigned int hold_req)
 		CCCI_ERROR_LOG(0, TAG, "md_cd_vcore_config fail: ret=%d, hold_req=%d\n", ret, hold_req);
 	return ret;
 }
-
+#endif
 
 int md_cd_vcore_config(unsigned int md_id, unsigned int hold_req)
 {
@@ -1366,12 +1369,13 @@ int md_cd_vcore_config(unsigned int md_id, unsigned int hold_req)
 		return -1;
 	if (md_cd_plat_val_ptr.md_gen >= 6295)
 		return 0;
+#if IS_ENABLED(CONFIG_MTK_VCOREFS_LEGACY)
 	/* mt6739 used vcore old fun to set value */
 	if (ap_plat_info == 6739) {
 		ret = md_cd_vcore_config_old(hold_req);
 		return ret;
 	}
-
+#endif
 	CCCI_BOOTUP_LOG(0, TAG,
 		"[POWER ON]%s: is_hold=%d, hold_req=%d\n", __func__, is_hold, hold_req);
 	if (hold_req && is_hold == 0) {
