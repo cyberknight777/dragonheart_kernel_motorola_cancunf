@@ -22,7 +22,9 @@
 #include <linux/regmap.h>
 #include <linux/mfd/syscon.h>
 #include <linux/dma-map-ops.h>
+#if IS_ENABLED(CONFIG_MTK_SPM)
 #include "mtk_spm_resource_req.h"
+#endif
 #if IS_ENABLED(CONFIG_USBIF_COMPLIANCE)
 #include <linux/kthread.h>
 #include <linux/err.h>
@@ -2980,7 +2982,9 @@ module_param(dpidle_status, int, 0644);
 static int dpidle_debug;
 module_param(dpidle_debug, int, 0644);
 
+#if IS_ENABLED(CONFIG_MTK_SPM)
 static DEFINE_SPINLOCK(usb_hal_dpidle_lock);
+#endif
 
 #define DPIDLE_TIMER_INTERVAL_MS 30
 
@@ -3010,6 +3014,7 @@ static void issue_dpidle_timer(void)
 	add_timer(timer);
 }
 
+#if IS_ENABLED(CONFIG_MTK_SPM)
 static bool (*spm_resource_req_fptr)(unsigned int user, unsigned int req_mask);
 
 static void spm_resource_req_usb(unsigned int user, unsigned int req_mask)
@@ -3100,6 +3105,7 @@ static void usb_spm_dpidle_request(int mode)
 
 	spin_unlock_irqrestore(&usb_hal_dpidle_lock, flags);
 }
+#endif
 
 /* default value 0 */
 static int usb_rdy;
@@ -4641,12 +4647,14 @@ static int musb_probe(struct platform_device *pdev)
 	mtk_host_qmu_force_isoc_restart = 0;
 #endif
 #ifndef FPGA_PLATFORM
+#if IS_ENABLED(CONFIG_MTK_SPM)
 	if (of_find_compatible_node(NULL, NULL, "mediatek,mt6768-usb20") ||
 		of_find_compatible_node(NULL, NULL, "mediatek,mt6765-usb20") ||
 		of_find_compatible_node(NULL, NULL, "mediatek,mt6761-usb20") ||
 		of_find_compatible_node(NULL, NULL, "mediatek,mt6739-usb20"))
 		register_usb_hal_dpidle_request(usb_spm_dpidle_request);
 	else
+#endif
 		register_usb_hal_dpidle_request(usb_dpidle_request);
 #endif
 	register_usb_hal_disconnect_check(trigger_disconnect_check_work);
