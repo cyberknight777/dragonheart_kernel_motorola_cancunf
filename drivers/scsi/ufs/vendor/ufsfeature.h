@@ -43,8 +43,12 @@
 
 #include "ufs.h"
 
+#if defined(CONFIG_UFSSHPB)
 #include "ufsshpb.h"
+#endif
+#if defined(CONFIG_UFSTW)
 #include "ufstw.h"
+#endif
 #include "ufshid.h"
 #include "ufsringbuf.h"
 
