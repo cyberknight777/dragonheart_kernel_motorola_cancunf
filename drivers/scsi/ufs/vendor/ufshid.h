@@ -45,6 +45,7 @@
 #include <linux/blkdev.h>
 #include <linux/bitfield.h>
 #include <scsi/scsi_cmnd.h>
+#include "ufshcd.h"
 
 #include "../../../block/blk.h"
 
